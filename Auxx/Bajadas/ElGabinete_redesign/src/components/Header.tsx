@@ -5,9 +5,9 @@ import { useSelection } from "../context/SelectionContext";
 const navItems = [
   { to: "/como-funciona", label: "Cómo funciona" },
   { to: "/catalogo", label: "Catálogo" },
-  { to: "/colecciones", label: "Colecciones" },
-  { to: "/inspiracion", label: "Inspiración" },
-  { to: "/sobre-nosotros", label: "Sobre nosotros" },
+  { to: "/catalogo", label: "Colecciones" },
+  { to: "/catalogo", label: "Inspiración" },
+  { to: "/como-funciona", label: "Sobre nosotros" },
   { to: "/contacto", label: "Contacto" },
 ];
 
@@ -18,8 +18,9 @@ function CabinetLogo() {
         <i />
         <b />
       </span>
-      <span className="brand-wordmark brand-wordmark-single">
+      <span className="brand-wordmark">
         <strong>EL GABINETE</strong>
+        <em>DE LOS CURIOSOS</em>
       </span>
     </span>
   );
@@ -30,14 +31,14 @@ export function Header() {
 
   return (
     <header className="site-header">
-      <Link to="/" className="site-logo" aria-label="Ir al inicio de El Gabinete">
+      <Link to="/" className="site-logo" aria-label="Ir al inicio de El Gabinete de los Curiosos">
         <CabinetLogo />
       </Link>
 
       <nav className="site-nav" aria-label="Navegación principal">
-        {navItems.map((item) => (
+        {navItems.map((item, index) => (
           <NavLink
-            key={item.to}
+            key={`${item.label}-${index}`}
             to={item.to}
             className={({ isActive }) => `site-nav-link ${isActive ? "is-active" : ""}`}
           >
@@ -48,16 +49,16 @@ export function Header() {
 
       <div className="site-actions" aria-label="Acciones rápidas">
         <Link to="/catalogo" aria-label="Buscar">
-          <Search size={24} strokeWidth={1.9} />
+          <Search size={25} strokeWidth={1.9} />
         </Link>
-        <Link to="/contacto" aria-label="Mi cuenta">
-          <UserRound size={23} strokeWidth={1.9} />
+        <Link to="/contacto" aria-label="Cuenta">
+          <UserRound size={24} strokeWidth={1.9} />
         </Link>
-        <Link to="/colecciones" aria-label="Favoritos y colecciones">
-          <Heart size={24} strokeWidth={1.9} />
+        <Link to="/catalogo" aria-label="Favoritos">
+          <Heart size={25} strokeWidth={1.9} />
         </Link>
         <Link to="/contacto" className="cart-action" aria-label="Ver selección">
-          <ShoppingCart size={24} strokeWidth={1.9} />
+          <ShoppingCart size={25} strokeWidth={1.9} />
           <span>{totalItems}</span>
         </Link>
       </div>
