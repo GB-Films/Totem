@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  background: #090909;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(154, 84, 55, 0.18), transparent 28rem),
+    radial-gradient(circle at 82% 18%, rgba(24, 61, 53, 0.22), transparent 30rem),
+    #090909;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: rgba(180, 134, 66, 0.45);
+  color: #e8dbc0;
+}
+
+.hero-scene {
+  background:
+    linear-gradient(90deg, rgba(9, 9, 9, 0.9), rgba(9, 9, 9, 0.45) 48%, rgba(9, 9, 9, 0.82)),
+    radial-gradient(circle at 72% 35%, rgba(180, 134, 66, 0.18), transparent 18rem),
+    linear-gradient(135deg, #111111, #1b1713 42%, #101312 100%);
+}
+
+.hero-scene::before {
+  content: "";
+  position: absolute;
+  inset: 8% 4% auto auto;
+  width: min(46rem, 72vw);
+  height: min(46rem, 72vw);
+  border: 1px solid rgba(180, 134, 66, 0.2);
+  border-radius: 50%;
+  background:
+    linear-gradient(rgba(232, 219, 192, 0.04), rgba(232, 219, 192, 0)),
+    repeating-linear-gradient(
+      90deg,
+      rgba(232, 219, 192, 0.08) 0 1px,
+      transparent 1px 64px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(232, 219, 192, 0.06) 0 1px,
+      transparent 1px 64px
+    );
+  mask-image: radial-gradient(circle, #000 35%, transparent 71%);
+}
+
+.hero-scene::after {
+  content: "";
+  position: absolute;
+  right: 7%;
+  bottom: 9%;
+  width: min(34rem, 56vw);
+  height: min(24rem, 40vw);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(232, 219, 192, 0.08);
+  background:
+    linear-gradient(110deg, rgba(0, 0, 0, 0.25), transparent),
+    repeating-linear-gradient(
+      0deg,
+      rgba(188, 169, 130, 0.08) 0 1px,
+      transparent 1px 2.4rem
+    ),
+    linear-gradient(135deg, rgba(80, 48, 34, 0.5), rgba(10, 10, 10, 0.35));
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  transform: rotate(-2deg);
+}
+
+.hero-texture,
+.object-plate-texture {
+  background-image:
+    linear-gradient(rgba(232, 219, 192, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232, 219, 192, 0.025) 1px, transparent 1px);
+  background-size: 34px 34px;
+  opacity: 0.65;
+}
+
+.object-plate::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(232, 219, 192, 0.16), transparent 8rem),
+    linear-gradient(to top, rgba(9, 9, 9, 0.9), transparent 42%);
+}
+
+.object-plate::after {
+  content: "";
+  position: absolute;
+  inset: 1rem;
+  border: 1px solid rgba(232, 219, 192, 0.08);
+  border-radius: 0.45rem;
+  pointer-events: none;
+}
+
+.section-band {
+  background:
+    linear-gradient(180deg, rgba(27, 27, 29, 0), rgba(27, 27, 29, 0.82), rgba(27, 27, 29, 0)),
+    radial-gradient(circle at 15% 45%, rgba(109, 31, 39, 0.18), transparent 22rem);
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .hero-scene::after {
+    opacity: 0.35;
+  }
+}
