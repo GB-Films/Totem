@@ -21,7 +21,7 @@ const steps = [
 export function HowItWorks() {
   return (
     <section className="section-band">
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-8 lg:px-12">
+      <div className="mx-auto max-w-none px-4 py-16 sm:px-8 lg:px-12">
         <div className="max-w-2xl">
           <p className="eyebrow">Método</p>
           <h2 className="mt-3 font-display text-4xl text-gabinete-darkBrown sm:text-5xl">

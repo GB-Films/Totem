@@ -1,4 +1,5 @@
 import type { Product, SelectionItem } from "../types";
+import { formatDateRange } from "./dates";
 import { formatCurrency } from "./format";
 import { calculateSelectionPricing } from "./pricing";
 
@@ -24,7 +25,7 @@ export function buildSelectionSummary(products: Product[], selection: SelectionI
       if (!product) {
         return null;
       }
-      return `- ${product.name} (${product.id}) x${item.quantity}, ${item.rentalDays} día(s)`;
+      return `- ${product.name} (${product.id}) x${item.quantity}, ${item.rentalDays} día(s), ${formatDateRange(item.startDate, item.endDate)}`;
     })
     .filter(Boolean)
     .join("\n");
@@ -45,7 +46,7 @@ export function buildContactMessage(
     `Teléfono: ${values.phone || "-"}`,
     `Proyecto: ${values.projectName || "-"}`,
     `Tipo de proyecto: ${values.projectType || "-"}`,
-    `Fechas tentativas: ${values.dates || "-"}`,
+    `Fechas generales: ${values.dates || "-"}`,
     "",
     "Productos seleccionados:",
     buildSelectionSummary(products, selection),

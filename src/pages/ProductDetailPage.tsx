@@ -1,5 +1,6 @@
 import { ArrowLeft, Mail, MessageCircle, Plus, Sparkles } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
+import { AvailabilityCalendar } from "../components/AvailabilityCalendar";
 import { CategoryBadge } from "../components/CategoryBadge";
 import { ObjectImage } from "../components/ObjectImage";
 import { RentalCalculator } from "../components/RentalCalculator";
@@ -51,7 +52,7 @@ export function ProductDetailPage() {
   );
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-8 lg:px-12">
+    <div className="mx-auto max-w-none px-4 py-10 sm:px-8 lg:px-12">
       <Link
         to="/catalogo"
         className="inline-flex items-center gap-2 text-sm text-gabinete-muted hover:text-gabinete-darkBrown"
@@ -69,6 +70,9 @@ export function ProductDetailPage() {
                 <ObjectImage product={product} compact />
               </div>
             ))}
+          </div>
+          <div className="mt-4">
+            <AvailabilityCalendar product={product} />
           </div>
         </section>
 

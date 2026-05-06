@@ -12,7 +12,7 @@ const sampleSelection = [
 export function HowItWorksPage() {
   return (
     <>
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-8 lg:px-12">
+      <section className="mx-auto max-w-none px-4 py-12 sm:px-8 lg:px-12">
         <div className="max-w-3xl">
           <p className="eyebrow">Producción sin humo</p>
           <h1 className="mt-3 font-display text-5xl text-gabinete-darkBrown sm:text-6xl">
@@ -25,7 +25,7 @@ export function HowItWorksPage() {
         </div>
       </section>
       <HowItWorks />
-      <section className="mx-auto grid max-w-7xl gap-8 px-4 py-16 sm:px-8 lg:grid-cols-[1fr_380px] lg:px-12">
+      <section className="mx-auto grid max-w-none gap-8 px-4 py-16 sm:px-8 lg:grid-cols-[1fr_380px] lg:px-12">
         <div className="parchment-panel p-6">
           <h2 className="font-display text-4xl text-gabinete-darkBrown">Garantía reintegrable</h2>
           <div className="mt-5 space-y-4 font-editorial leading-7 text-gabinete-muted">
@@ -49,7 +49,7 @@ export function HowItWorksPage() {
         </div>
         <RentalCalculator products={products} selection={sampleSelection} />
       </section>
-      <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-8 lg:px-12">
+      <section className="mx-auto max-w-none px-4 pb-16 sm:px-8 lg:px-12">
         <SelectedProductsPanel />
       </section>
     </>

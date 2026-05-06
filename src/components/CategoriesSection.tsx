@@ -11,7 +11,7 @@ export function CategoriesSection() {
     .slice(0, 8);
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-8 lg:px-12">
+    <section className="mx-auto max-w-none px-4 py-16 sm:px-8 lg:px-12">
       <div className="max-w-2xl">
         <p className="eyebrow">Categorías</p>
         <h2 className="mt-3 font-display text-4xl text-gabinete-darkBrown sm:text-5xl">

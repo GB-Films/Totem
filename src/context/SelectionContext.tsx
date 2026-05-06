@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import type { Product, SelectionItem } from "../types";
+import { getInclusiveDays, todayIso } from "../utils/dates";
 
 interface SelectionContextValue {
   selection: SelectionItem[];
@@ -16,12 +17,25 @@ interface SelectionContextValue {
   removeProduct: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   updateRentalDays: (productId: string, rentalDays: number) => void;
+  updateRentalDates: (productId: string, startDate: string, endDate: string) => void;
   clearSelection: () => void;
   isSelected: (productId: string) => boolean;
 }
 
 const STORAGE_KEY = "el-gabinete-selection";
 const SelectionContext = createContext<SelectionContextValue | undefined>(undefined);
+
+function normalizeSelectionItem(item: SelectionItem): SelectionItem {
+  const startDate = item.startDate ?? todayIso();
+  const endDate = item.endDate ?? startDate;
+  return {
+    ...item,
+    quantity: Math.max(1, item.quantity || 1),
+    startDate,
+    endDate,
+    rentalDays: getInclusiveDays(startDate, endDate),
+  };
+}
 
 function readInitialSelection(): SelectionItem[] {
   if (typeof window === "undefined") {
@@ -34,7 +48,7 @@ function readInitialSelection(): SelectionItem[] {
       return [];
     }
     const parsed = JSON.parse(stored) as SelectionItem[];
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed) ? parsed.map(normalizeSelectionItem) : [];
   } catch {
     return [];
   }
@@ -58,7 +72,8 @@ export function SelectionProvider({ children }: PropsWithChildren) {
         );
       }
 
-      return [...current, { productId: product.id, quantity: 1, rentalDays: 1 }];
+      const startDate = todayIso();
+      return [...current, { productId: product.id, quantity: 1, rentalDays: 1, startDate, endDate: startDate }];
     });
   }, []);
 
@@ -82,6 +97,16 @@ export function SelectionProvider({ children }: PropsWithChildren) {
     );
   }, []);
 
+  const updateRentalDates = useCallback((productId: string, startDate: string, endDate: string) => {
+    setSelection((current) =>
+      current.map((item) =>
+        item.productId === productId
+          ? { ...item, startDate, endDate, rentalDays: getInclusiveDays(startDate, endDate) }
+          : item,
+      ),
+    );
+  }, []);
+
   const clearSelection = useCallback(() => setSelection([]), []);
 
   const isSelected = useCallback(
@@ -97,10 +122,20 @@ export function SelectionProvider({ children }: PropsWithChildren) {
       removeProduct,
       updateQuantity,
       updateRentalDays,
+      updateRentalDates,
       clearSelection,
       isSelected,
     }),
-    [addProduct, clearSelection, isSelected, removeProduct, selection, updateQuantity, updateRentalDays],
+    [
+      addProduct,
+      clearSelection,
+      isSelected,
+      removeProduct,
+      selection,
+      updateQuantity,
+      updateRentalDates,
+      updateRentalDays,
+    ],
   );
 
   return <SelectionContext.Provider value={value}>{children}</SelectionContext.Provider>;

@@ -49,6 +49,8 @@ export interface SelectionItem {
   productId: string;
   quantity: number;
   rentalDays: number;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface PricingBreakdown {
@@ -58,4 +60,13 @@ export interface PricingBreakdown {
   guaranteeAmount: number;
   reserveDeposit: number;
   totalEstimated: number;
+}
+
+export interface ReservationRange {
+  id: string;
+  productId: string;
+  startDate: string;
+  endDate: string;
+  source: "mock" | "local";
+  note?: string;
 }

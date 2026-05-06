@@ -1,13 +1,23 @@
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAvailability } from "../context/AvailabilityContext";
 import { useSelection } from "../context/SelectionContext";
 import { products } from "../data/products";
 import { formatCurrency } from "../utils/format";
+import { addDaysIso, formatDateRange, getInclusiveDays, todayIso } from "../utils/dates";
 import { calculateProductPricing } from "../utils/pricing";
+import { AvailabilityCalendar } from "./AvailabilityCalendar";
 import { RentalCalculator } from "./RentalCalculator";
 
 export function SelectedProductsPanel() {
-  const { selection, updateQuantity, updateRentalDays, removeProduct, clearSelection } = useSelection();
+  const {
+    selection,
+    updateQuantity,
+    updateRentalDates,
+    removeProduct,
+    clearSelection,
+  } = useSelection();
+  const { hasConflict } = useAvailability();
   const selectedProducts = selection
     .map((item) => ({
       item,
@@ -44,6 +54,9 @@ export function SelectedProductsPanel() {
           <div className="mt-5 space-y-4">
             {selectedProducts.map(({ item, product }) => {
               const pricing = calculateProductPricing(product, item);
+              const startDate = item.startDate ?? todayIso();
+              const endDate = item.endDate ?? addDaysIso(startDate, Math.max(1, item.rentalDays) - 1);
+              const conflict = hasConflict(product.id, startDate, endDate);
               return (
                 <div key={product.id} className="rounded-md border border-gabinete-line/25 bg-gabinete-paperLight/18 p-3">
                   <div className="flex items-start justify-between gap-3">
@@ -96,11 +109,56 @@ export function SelectedProductsPanel() {
                       <input
                         type="number"
                         min={1}
-                        value={item.rentalDays}
-                        onChange={(event) => updateRentalDays(product.id, Number(event.target.value))}
+                        value={getInclusiveDays(startDate, endDate)}
+                        readOnly
                         className="gabinete-input mt-1 p-2 text-center text-sm"
                       />
                     </label>
+                  </div>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <label className="text-xs uppercase tracking-[0.08em] text-gabinete-muted">
+                      Desde
+                      <input
+                        type="date"
+                        min={todayIso()}
+                        value={startDate}
+                        onChange={(event) => {
+                          const nextStart = event.target.value;
+                          const nextEnd = endDate < nextStart ? nextStart : endDate;
+                          updateRentalDates(product.id, nextStart, nextEnd);
+                        }}
+                        className="gabinete-input mt-1 p-2 text-sm"
+                      />
+                    </label>
+                    <label className="text-xs uppercase tracking-[0.08em] text-gabinete-muted">
+                      Hasta
+                      <input
+                        type="date"
+                        min={startDate}
+                        value={endDate}
+                        onChange={(event) => updateRentalDates(product.id, startDate, event.target.value)}
+                        className="gabinete-input mt-1 p-2 text-sm"
+                      />
+                    </label>
+                  </div>
+                  <p
+                    className={`mt-3 rounded-md border px-3 py-2 font-editorial text-xs leading-5 ${
+                      conflict
+                        ? "border-gabinete-error/35 bg-gabinete-error/10 text-gabinete-error"
+                        : "border-gabinete-available/35 bg-gabinete-available/10 text-gabinete-available"
+                    }`}
+                  >
+                    {conflict
+                      ? "Estas fechas se pisan con una solicitud existente."
+                      : `Fechas libres: ${formatDateRange(startDate, endDate)}.`}
+                  </p>
+                  <div className="mt-3">
+                    <AvailabilityCalendar
+                      product={product}
+                      startDate={startDate}
+                      endDate={endDate}
+                      compact
+                    />
                   </div>
                   <p className="mt-3 text-right text-sm text-gabinete-muted">
                     Estimado:{" "}

@@ -6,7 +6,7 @@ export function FeaturedObjects() {
   const featured = [...products].sort((a, b) => b.featuredScore - a.featuredScore).slice(0, 3);
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-8 lg:px-12">
+    <section className="mx-auto max-w-none px-4 py-16 sm:px-8 lg:px-12">
       <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
         <div>
           <p className="eyebrow">Reliquias disponibles</p>

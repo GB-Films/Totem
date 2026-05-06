@@ -64,7 +64,7 @@ export function CatalogPage() {
   }, [filters]);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-8 lg:px-12">
+    <div className="mx-auto max-w-none px-4 py-10 sm:px-8 lg:px-12">
       <div className="max-w-3xl">
         <p className="eyebrow">Catálogo</p>
         <h1 className="mt-3 font-display text-5xl text-gabinete-darkBrown sm:text-6xl">
