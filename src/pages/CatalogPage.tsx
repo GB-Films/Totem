@@ -15,9 +15,10 @@ export function CatalogPage() {
   const maxCatalogPrice = Math.max(...products.map((product) => product.rentalPricePerDay));
   const [filters, setFilters] = useState<CatalogFilters>({
     search: "",
-    category: initialCategory && products.some((product) => product.category === initialCategory)
-      ? (initialCategory as CatalogFilters["category"])
-      : "Todas",
+    category:
+      initialCategory && products.some((product) => product.category === initialCategory)
+        ? (initialCategory as CatalogFilters["category"])
+        : "Todas",
     tags: [],
     maxPrice: maxCatalogPrice,
     availability: "Todas",
@@ -63,17 +64,19 @@ export function CatalogPage() {
   }, [filters]);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-8 lg:px-12">
       <div className="max-w-3xl">
-        <p className="text-xs uppercase tracking-[0.32em] text-brass/80">Catálogo</p>
-        <h1 className="mt-3 font-display text-5xl text-bone sm:text-6xl">Objetos listos para escena</h1>
-        <p className="mt-4 text-lg leading-8 text-bone/65">
+        <p className="eyebrow">Catálogo</p>
+        <h1 className="mt-3 font-display text-5xl text-gabinete-darkBrown sm:text-6xl">
+          Objetos disponibles
+        </h1>
+        <p className="mt-4 font-editorial text-lg leading-8 text-gabinete-muted">
           Buscá, filtrá y armá una selección. No todos los objetos tienen explicación; algunos solo
           tienen buen encuadre.
         </p>
       </div>
 
-      <div className="mt-10 grid gap-8 lg:grid-cols-[300px_1fr]">
+      <div className="mt-10 grid gap-8 lg:grid-cols-[300px_1fr] xl:grid-cols-[280px_1fr_340px]">
         <ProductFilters
           filters={filters}
           maxCatalogPrice={maxCatalogPrice}
@@ -82,14 +85,15 @@ export function CatalogPage() {
         />
         <div className="space-y-8">
           <ProductGrid products={filteredProducts} />
-          <div className="lg:hidden">
+          <div className="xl:hidden">
             <SelectedProductsPanel />
           </div>
         </div>
-      </div>
-
-      <div className="fixed bottom-4 right-4 z-40 hidden w-[360px] max-w-[calc(100vw-2rem)] xl:block">
-        <SelectedProductsPanel />
+        <div className="hidden xl:block">
+          <div className="sticky top-6">
+            <SelectedProductsPanel />
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,92 +1,72 @@
-import { Menu, PackageSearch, X } from "lucide-react";
-import { useState } from "react";
+import { PackageSearch, UserRound } from "lucide-react";
 import { NavLink, Link } from "react-router-dom";
 import { useSelection } from "../context/SelectionContext";
 
 const navItems = [
-  { to: "/", label: "Home" },
-  { to: "/catalogo", label: "Catálogo" },
-  { to: "/como-funciona", label: "Cómo funciona" },
+  { to: "/catalogo", label: "Categorías" },
+  { to: "/como-funciona", label: "Cómo alquilar" },
   { to: "/contacto", label: "Contacto" },
+  { to: "/catalogo", label: "Curiosidades" },
 ];
 
 export function Header() {
-  const [open, setOpen] = useState(false);
   const { totalItems } = useSelection();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-bone/10 bg-coal/85 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        <Link to="/" className="group flex items-center gap-3" onClick={() => setOpen(false)}>
-          <span className="grid h-10 w-10 place-items-center rounded-md border border-brass/40 bg-brass/10 font-display text-2xl text-brass">
-            G
+    <header className="relative z-40 px-4 pt-7 sm:px-8 lg:px-12">
+      <div className="relative flex min-h-24 items-start justify-center">
+        <Link
+          to="/"
+          className="group text-center text-gabinete-darkBrown"
+          aria-label="Ir al inicio de EL GABINETE"
+        >
+          <span className="mx-auto mb-3 block h-px w-44 bg-gradient-to-r from-transparent via-gabinete-brown/60 to-transparent" />
+          <span className="block font-display text-lg leading-none tracking-[0.36em]">EL</span>
+          <span className="block font-display text-4xl font-semibold leading-none tracking-[0.18em] text-gabinete-brown drop-shadow-sm sm:text-5xl">
+            GABINETE
           </span>
-          <span>
-            <span className="block font-display text-xl tracking-[0.18em] text-bone">EL GABINETE</span>
-            <span className="hidden text-xs uppercase tracking-[0.24em] text-bone/45 sm:block">
-              props para escena
-            </span>
+          <span className="mt-2 block font-editorial text-sm italic tracking-wide text-gabinete-muted">
+            Objetos con pasado para historias por venir
           </span>
+          <span className="mx-auto mt-3 block h-px w-56 bg-gradient-to-r from-transparent via-gabinete-brown/60 to-transparent" />
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Navegación principal">
-          {navItems.map((item) => (
+        <div className="absolute right-0 top-1 flex items-center gap-2">
+          <Link to="/contacto" className="gabinete-button px-4 py-2">
+            <UserRound size={15} />
+            Ingresar
+          </Link>
+          <Link to="/contacto" className="gabinete-button-secondary px-3 py-2" aria-label="Ver selección">
+            <PackageSearch size={16} />
+            {totalItems > 0 && (
+              <span className="ml-1 rounded-full bg-gabinete-brown px-2 py-0.5 font-body text-[11px] text-gabinete-paperLight">
+                {totalItems}
+              </span>
+            )}
+          </Link>
+        </div>
+      </div>
+
+      <nav
+        className="archive-rule mt-6 flex items-center justify-center overflow-x-auto whitespace-nowrap py-5"
+        aria-label="Navegación principal"
+      >
+        <div className="flex min-w-max items-center gap-8 px-2 sm:gap-12">
+          {navItems.map((item, index) => (
             <NavLink
-              key={item.to}
+              key={`${item.label}-${index}`}
               to={item.to}
               className={({ isActive }) =>
-                `rounded-md px-3 py-2 text-sm transition ${
-                  isActive ? "bg-bone/10 text-bone" : "text-bone/65 hover:bg-bone/5 hover:text-bone"
+                `relative font-display text-[15px] font-medium uppercase tracking-[0.08em] text-gabinete-darkBrown after:absolute after:-bottom-1 after:left-0 after:h-px after:bg-gabinete-brown after:transition-all ${
+                  isActive ? "after:w-full" : "after:w-0 hover:after:w-full"
                 }`
               }
             >
               {item.label}
             </NavLink>
           ))}
-        </nav>
-
-        <div className="flex items-center gap-2">
-          <Link
-            to="/contacto"
-            className="hidden items-center gap-2 rounded-md border border-brass/50 px-3 py-2 text-sm font-medium text-bone transition hover:bg-brass/10 sm:inline-flex"
-          >
-            <PackageSearch size={17} />
-            Consulta
-            {totalItems > 0 && (
-              <span className="rounded-full bg-brass px-2 py-0.5 text-xs text-coal">{totalItems}</span>
-            )}
-          </Link>
-          <button
-            type="button"
-            className="rounded-md border border-bone/10 p-2 text-bone md:hidden"
-            aria-label="Abrir menú"
-            onClick={() => setOpen((current) => !current)}
-          >
-            {open ? <X size={20} /> : <Menu size={20} />}
-          </button>
         </div>
-      </div>
-
-      {open && (
-        <nav className="border-t border-bone/10 bg-coal px-4 py-4 md:hidden" aria-label="Navegación móvil">
-          <div className="mx-auto flex max-w-7xl flex-col gap-2">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                onClick={() => setOpen(false)}
-                className={({ isActive }) =>
-                  `rounded-md px-3 py-3 text-sm transition ${
-                    isActive ? "bg-bone/10 text-bone" : "text-bone/70 hover:bg-bone/5 hover:text-bone"
-                  }`
-                }
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </div>
-        </nav>
-      )}
+      </nav>
     </header>
   );
 }

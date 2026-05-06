@@ -12,43 +12,46 @@ export function RentalCalculator({ products, selection }: RentalCalculatorProps)
   const selectedCount = selection.reduce((total, item) => total + item.quantity, 0);
 
   return (
-    <section className="rounded-lg border border-brass/20 bg-coal/75 p-5 shadow-cabinet">
-      <p className="text-xs uppercase tracking-[0.32em] text-brass/80">Calculadora</p>
-      <h2 className="mt-2 font-display text-3xl text-bone">Alquiler + garantía</h2>
-      <p className="mt-2 text-sm leading-6 text-bone/65">
-        La garantía es un depósito reintegrable. El monto final puede variar según disponibilidad,
-        cantidad de piezas, logística, estado del objeto y condiciones de producción.
+    <section className="parchment-panel p-5">
+      <p className="eyebrow">Cálculo de alquiler y garantía</p>
+      <h2 className="mt-2 font-display text-3xl text-gabinete-darkBrown">La cuenta del gabinete</h2>
+      <p className="mt-2 font-editorial text-sm leading-6 text-gabinete-muted">
+        La garantía es reintegrable, siempre que el objeto vuelva con su historia intacta. El monto
+        final puede variar según disponibilidad, logística y condiciones de rodaje.
       </p>
 
       <div className="mt-5 space-y-3">
-        <div className="flex justify-between gap-4 border-b border-bone/10 pb-3 text-sm">
-          <span className="text-bone/60">Productos seleccionados</span>
-          <strong className="text-bone">{selectedCount}</strong>
-        </div>
-        <div className="flex justify-between gap-4 border-b border-bone/10 pb-3 text-sm">
-          <span className="text-bone/60">Subtotal alquiler</span>
-          <strong className="text-bone">{formatCurrency(pricing.rentalSubtotal)}</strong>
-        </div>
-        <div className="flex justify-between gap-4 border-b border-bone/10 pb-3 text-sm">
-          <span className="text-bone/60">
-            Descuento por más de {LONG_RENTAL_DAYS} días ({LONG_RENTAL_DISCOUNT * 100}%)
-          </span>
-          <strong className="text-bone">-{formatCurrency(pricing.rentalDiscount)}</strong>
-        </div>
-        <div className="flex justify-between gap-4 border-b border-bone/10 pb-3 text-sm">
-          <span className="text-bone/60">Alquiler estimado</span>
-          <strong className="text-bone">{formatCurrency(pricing.rentalTotal)}</strong>
-        </div>
-        <div className="flex justify-between gap-4 border-b border-bone/10 pb-3 text-sm">
-          <span className="text-bone/60">Garantía reintegrable estimada</span>
-          <strong className="text-bone">{formatCurrency(pricing.guaranteeAmount)}</strong>
-        </div>
-        <div className="rounded-md bg-brass/15 p-4">
-          <div className="flex justify-between gap-4">
-            <span className="font-medium text-bone">Total estimado general</span>
-            <strong className="text-xl text-bone">{formatCurrency(pricing.totalEstimated)}</strong>
+        {[
+          ["Objetos en selección", selectedCount.toString()],
+          ["Subtotal alquiler", formatCurrency(pricing.rentalSubtotal)],
+          [
+            `Descuento por más de ${LONG_RENTAL_DAYS} días (${LONG_RENTAL_DISCOUNT * 100}%)`,
+            `-${formatCurrency(pricing.rentalDiscount)}`,
+          ],
+          ["Alquiler estimado", formatCurrency(pricing.rentalTotal)],
+          ["Garantía reintegrable", formatCurrency(pricing.guaranteeAmount)],
+        ].map(([label, value]) => (
+          <div
+            key={label}
+            className="flex justify-between gap-4 border-b border-gabinete-line/24 pb-3 text-sm"
+          >
+            <span className="text-gabinete-muted">{label}</span>
+            <strong className="text-right font-display text-base font-semibold text-gabinete-darkBrown">
+              {value}
+            </strong>
           </div>
-          <p className="mt-2 text-xs text-bone/60">
+        ))}
+
+        <div className="rounded-md border border-gabinete-line/30 bg-gabinete-paperLight/28 p-4">
+          <div className="flex justify-between gap-4">
+            <span className="font-display text-sm uppercase tracking-[0.12em] text-gabinete-brown">
+              Total estimado
+            </span>
+            <strong className="text-right font-display text-2xl text-gabinete-darkBrown">
+              {formatCurrency(pricing.totalEstimated)}
+            </strong>
+          </div>
+          <p className="mt-2 font-editorial text-xs leading-5 text-gabinete-muted">
             Delicados suman 10% extra sobre garantía. La reserva o depósito se confirma al consultar.
           </p>
         </div>

@@ -20,12 +20,14 @@ export function Layout() {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen bg-coal text-bone">
-      <Header />
-      <main>
-        <Outlet />
-      </main>
-      <Footer />
+    <div className="app-frame">
+      <div className="parchment-shell text-gabinete-text">
+        <Header />
+        <main>
+          <Outlet />
+        </main>
+        <Footer />
+      </div>
     </div>
   );
 }

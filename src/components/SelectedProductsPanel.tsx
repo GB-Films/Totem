@@ -19,17 +19,17 @@ export function SelectedProductsPanel() {
 
   return (
     <aside className="space-y-4">
-      <section className="rounded-lg border border-bone/10 bg-ash/70 p-5 shadow-cabinet">
+      <section className="parchment-panel p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.32em] text-brass/80">Selección</p>
-            <h2 className="mt-2 font-display text-3xl text-bone">Tu consulta</h2>
+            <p className="eyebrow">Selección</p>
+            <h2 className="mt-2 font-display text-3xl text-gabinete-darkBrown">Objetos apartados</h2>
           </div>
           {selection.length > 0 && (
             <button
               type="button"
               onClick={clearSelection}
-              className="rounded-md border border-bone/15 px-3 py-2 text-xs text-bone/65 hover:border-blood hover:text-bone"
+              className="rounded-full border border-gabinete-line/35 px-3 py-2 text-xs text-gabinete-muted hover:border-gabinete-error hover:text-gabinete-error"
             >
               Vaciar
             </button>
@@ -37,7 +37,7 @@ export function SelectedProductsPanel() {
         </div>
 
         {selectedProducts.length === 0 ? (
-          <p className="mt-5 rounded-md border border-bone/10 bg-coal/60 p-4 text-sm leading-6 text-bone/65">
+          <p className="mt-5 rounded-md border border-gabinete-line/25 bg-gabinete-paperLight/24 p-4 font-editorial text-sm leading-6 text-gabinete-muted">
             Todavía no hay objetos seleccionados. El primer hallazgo siempre tarda un poco.
           </p>
         ) : (
@@ -45,11 +45,11 @@ export function SelectedProductsPanel() {
             {selectedProducts.map(({ item, product }) => {
               const pricing = calculateProductPricing(product, item);
               return (
-                <div key={product.id} className="rounded-md border border-bone/10 bg-coal/55 p-3">
+                <div key={product.id} className="rounded-md border border-gabinete-line/25 bg-gabinete-paperLight/18 p-3">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-medium text-bone">{product.name}</p>
-                      <p className="mt-1 text-xs text-bone/55">
+                      <p className="font-display text-lg text-gabinete-darkBrown">{product.name}</p>
+                      <p className="mt-1 text-xs text-gabinete-muted">
                         {product.id} · {formatCurrency(product.rentalPricePerDay)} / día
                       </p>
                     </div>
@@ -57,20 +57,20 @@ export function SelectedProductsPanel() {
                       type="button"
                       aria-label={`Quitar ${product.name}`}
                       onClick={() => removeProduct(product.id)}
-                      className="rounded-md border border-bone/10 p-2 text-bone/55 hover:border-blood hover:text-bone"
+                      className="rounded-full border border-gabinete-line/25 p-2 text-gabinete-muted hover:border-gabinete-error hover:text-gabinete-error"
                     >
                       <Trash2 size={15} />
                     </button>
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-3">
-                    <label className="text-xs text-bone/60">
+                    <label className="text-xs uppercase tracking-[0.08em] text-gabinete-muted">
                       Cantidad
-                      <div className="mt-1 flex items-center rounded-md border border-bone/10 bg-ink">
+                      <div className="gabinete-input mt-1 flex items-center">
                         <button
                           type="button"
                           aria-label="Restar cantidad"
                           onClick={() => updateQuantity(product.id, item.quantity - 1)}
-                          className="p-2 text-bone/60 hover:text-bone"
+                          className="p-2 text-gabinete-muted hover:text-gabinete-darkBrown"
                         >
                           <Minus size={14} />
                         </button>
@@ -79,39 +79,39 @@ export function SelectedProductsPanel() {
                           min={1}
                           value={item.quantity}
                           onChange={(event) => updateQuantity(product.id, Number(event.target.value))}
-                          className="w-full bg-transparent p-2 text-center text-sm text-bone outline-none"
+                          className="w-full bg-transparent p-2 text-center text-sm text-gabinete-text outline-none"
                         />
                         <button
                           type="button"
                           aria-label="Sumar cantidad"
                           onClick={() => updateQuantity(product.id, item.quantity + 1)}
-                          className="p-2 text-bone/60 hover:text-bone"
+                          className="p-2 text-gabinete-muted hover:text-gabinete-darkBrown"
                         >
                           <Plus size={14} />
                         </button>
                       </div>
                     </label>
-                    <label className="text-xs text-bone/60">
+                    <label className="text-xs uppercase tracking-[0.08em] text-gabinete-muted">
                       Días
                       <input
                         type="number"
                         min={1}
                         value={item.rentalDays}
                         onChange={(event) => updateRentalDays(product.id, Number(event.target.value))}
-                        className="mt-1 w-full rounded-md border border-bone/10 bg-ink p-2 text-center text-sm text-bone outline-none focus:border-brass"
+                        className="gabinete-input mt-1 p-2 text-center text-sm"
                       />
                     </label>
                   </div>
-                  <p className="mt-3 text-right text-sm text-bone/75">
-                    Estimado: <strong className="text-bone">{formatCurrency(pricing.totalEstimated)}</strong>
+                  <p className="mt-3 text-right text-sm text-gabinete-muted">
+                    Estimado:{" "}
+                    <strong className="font-display text-gabinete-darkBrown">
+                      {formatCurrency(pricing.totalEstimated)}
+                    </strong>
                   </p>
                 </div>
               );
             })}
-            <Link
-              to="/contacto"
-              className="inline-flex w-full items-center justify-center rounded-md bg-brass px-4 py-3 text-sm font-semibold text-coal transition hover:bg-bone"
-            >
+            <Link to="/contacto" className="gabinete-button w-full px-4 py-3">
               Consultar disponibilidad
             </Link>
           </div>

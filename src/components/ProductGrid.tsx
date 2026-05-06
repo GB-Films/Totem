@@ -8,9 +8,11 @@ interface ProductGridProps {
 export function ProductGrid({ products }: ProductGridProps) {
   if (products.length === 0) {
     return (
-      <div className="rounded-lg border border-bone/10 bg-ash/50 p-8 text-center">
-        <p className="font-display text-3xl text-bone">El gabinete cerró ese cajón.</p>
-        <p className="mt-2 text-bone/65">Probá con menos filtros o una palabra menos específica.</p>
+      <div className="parchment-panel p-8 text-center">
+        <p className="font-display text-3xl text-gabinete-darkBrown">El gabinete cerró ese cajón.</p>
+        <p className="mt-2 font-editorial text-gabinete-muted">
+          Probá con menos filtros o una palabra menos específica.
+        </p>
       </div>
     );
   }

@@ -44,37 +44,37 @@ export function ProductFilters({
   };
 
   return (
-    <aside className="rounded-lg border border-bone/10 bg-coal/60 p-4 shadow-cabinet lg:sticky lg:top-24">
+    <aside className="parchment-panel p-4 lg:sticky lg:top-6">
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-bone">
+        <div className="flex items-center gap-2 text-gabinete-darkBrown">
           <SlidersHorizontal size={18} />
-          <h2 className="font-display text-2xl">Filtros</h2>
+          <h2 className="font-display text-xl uppercase tracking-[0.12em]">Filtros</h2>
         </div>
         <button
           type="button"
           onClick={clearFilters}
-          className="inline-flex items-center gap-1 rounded-md border border-bone/10 px-2 py-1 text-xs text-bone/70 hover:border-brass hover:text-bone"
+          className="inline-flex items-center gap-1 rounded-full border border-gabinete-line/35 px-3 py-1.5 text-xs text-gabinete-muted hover:border-gabinete-brown hover:text-gabinete-darkBrown"
         >
           <X size={14} />
           Limpiar
         </button>
       </div>
 
-      <label className="mt-5 block text-sm font-medium text-bone" htmlFor="catalog-search">
-        Buscar en el archivo
+      <label className="mt-5 block font-display text-xs uppercase tracking-[0.14em] text-gabinete-brown" htmlFor="catalog-search">
+        Buscar en el gabinete
       </label>
-      <div className="mt-2 flex items-center rounded-md border border-bone/15 bg-ink px-3 focus-within:border-brass">
-        <Search size={17} className="text-bone/45" />
+      <div className="gabinete-input mt-2 flex items-center px-3">
+        <Search size={17} className="text-gabinete-brown" />
         <input
           id="catalog-search"
           value={filters.search}
           onChange={(event) => onChange({ ...filters, search: event.target.value })}
-          className="w-full bg-transparent px-3 py-3 text-sm text-bone outline-none placeholder:text-bone/35"
+          className="w-full bg-transparent px-3 py-3 text-sm text-gabinete-text outline-none placeholder:text-gabinete-faint"
           placeholder="teléfono, ritual, policial..."
         />
       </div>
 
-      <label className="mt-5 block text-sm font-medium text-bone" htmlFor="category-filter">
+      <label className="mt-5 block font-display text-xs uppercase tracking-[0.14em] text-gabinete-brown" htmlFor="category-filter">
         Categoría
       </label>
       <select
@@ -83,7 +83,7 @@ export function ProductFilters({
         onChange={(event) =>
           onChange({ ...filters, category: event.target.value as CatalogFilters["category"] })
         }
-        className="mt-2 w-full rounded-md border border-bone/15 bg-ink px-3 py-3 text-sm text-bone outline-none focus:border-brass"
+        className="gabinete-input mt-2 px-3 py-3 text-sm"
       >
         <option>Todas</option>
         {categories.map((category) => (
@@ -91,7 +91,7 @@ export function ProductFilters({
         ))}
       </select>
 
-      <label className="mt-5 block text-sm font-medium text-bone" htmlFor="price-filter">
+      <label className="mt-5 block font-display text-xs uppercase tracking-[0.14em] text-gabinete-brown" htmlFor="price-filter">
         Precio máximo por día
       </label>
       <input
@@ -102,11 +102,13 @@ export function ProductFilters({
         step={500}
         value={filters.maxPrice}
         onChange={(event) => onChange({ ...filters, maxPrice: Number(event.target.value) })}
-        className="mt-3 w-full accent-brass"
+        className="mt-3 w-full"
       />
-      <p className="mt-1 text-sm text-bone/60">Hasta ${filters.maxPrice.toLocaleString("es-AR")}</p>
+      <p className="mt-1 text-sm text-gabinete-muted">
+        Hasta ${filters.maxPrice.toLocaleString("es-AR")}
+      </p>
 
-      <label className="mt-5 block text-sm font-medium text-bone" htmlFor="availability-filter">
+      <label className="mt-5 block font-display text-xs uppercase tracking-[0.14em] text-gabinete-brown" htmlFor="availability-filter">
         Disponibilidad
       </label>
       <select
@@ -118,7 +120,7 @@ export function ProductFilters({
             availability: event.target.value as CatalogFilters["availability"],
           })
         }
-        className="mt-2 w-full rounded-md border border-bone/15 bg-ink px-3 py-3 text-sm text-bone outline-none focus:border-brass"
+        className="gabinete-input mt-2 px-3 py-3 text-sm"
       >
         <option>Todas</option>
         <option>Disponible</option>
@@ -126,7 +128,7 @@ export function ProductFilters({
         <option>Reservado</option>
       </select>
 
-      <label className="mt-5 block text-sm font-medium text-bone" htmlFor="sort-filter">
+      <label className="mt-5 block font-display text-xs uppercase tracking-[0.14em] text-gabinete-brown" htmlFor="sort-filter">
         Ordenar por
       </label>
       <select
@@ -135,7 +137,7 @@ export function ProductFilters({
         onChange={(event) =>
           onChange({ ...filters, sort: event.target.value as CatalogFilters["sort"] })
         }
-        className="mt-2 w-full rounded-md border border-bone/15 bg-ink px-3 py-3 text-sm text-bone outline-none focus:border-brass"
+        className="gabinete-input mt-2 px-3 py-3 text-sm"
       >
         <option value="featured">Más destacados</option>
         <option value="name">Nombre</option>
@@ -144,7 +146,9 @@ export function ProductFilters({
       </select>
 
       <div className="mt-5">
-        <p className="mb-3 text-sm font-medium text-bone">Tags</p>
+        <p className="mb-3 font-display text-xs uppercase tracking-[0.14em] text-gabinete-brown">
+          Etiquetas de archivo
+        </p>
         <div className="flex flex-wrap gap-2">
           {availableTags.map((tag) => (
             <TagPill
@@ -157,7 +161,7 @@ export function ProductFilters({
         </div>
       </div>
 
-      <p className="mt-5 rounded-md border border-brass/20 bg-brass/10 px-3 py-2 text-sm text-bone/75">
+      <p className="mt-5 rounded-md border border-gabinete-line/30 bg-gabinete-paperLight/24 px-3 py-2 font-editorial text-sm text-gabinete-muted">
         {resultCount} objeto{resultCount === 1 ? "" : "s"} listo{resultCount === 1 ? "" : "s"} para escena.
       </p>
     </aside>

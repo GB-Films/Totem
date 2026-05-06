@@ -45,114 +45,116 @@ export function ContactForm({ selectionOverride }: ContactFormProps) {
     window.location.href = buildMailtoUrl(message);
   };
 
+  const labelClass = "font-display text-xs uppercase tracking-[0.12em] text-gabinete-brown";
+
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-bone/10 bg-ash/70 p-5 shadow-cabinet">
-      <p className="text-xs uppercase tracking-[0.32em] text-brass/80">Solicitud</p>
-      <h2 className="mt-2 font-display text-3xl text-bone">Abrir el gabinete</h2>
-      <p className="mt-2 text-sm leading-6 text-bone/65">
-        Contanos qué historia estás por filmar. Nosotros revisamos disponibilidad, garantía y logística.
+    <form onSubmit={handleSubmit} className="parchment-panel p-5">
+      <p className="eyebrow">Ficha de solicitud</p>
+      <h2 className="mt-2 font-display text-3xl text-gabinete-darkBrown">Preparar selección</h2>
+      <p className="mt-2 font-editorial text-sm leading-6 text-gabinete-muted">
+        Contanos qué historia estás por filmar. Revisamos disponibilidad, garantía y logística antes
+        de que el objeto salga del gabinete.
       </p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <label className="text-sm text-bone/75">
+        <label className={labelClass}>
           Nombre
           <input
             required
             value={values.name}
             onChange={(event) => updateField("name", event.target.value)}
-            className="mt-2 w-full rounded-md border border-bone/15 bg-ink px-3 py-3 text-bone outline-none focus:border-brass"
+            className="gabinete-input mt-2 px-3 py-3 normal-case tracking-normal"
           />
         </label>
-        <label className="text-sm text-bone/75">
+        <label className={labelClass}>
           Productora / Empresa
           <input
             value={values.company}
             onChange={(event) => updateField("company", event.target.value)}
-            className="mt-2 w-full rounded-md border border-bone/15 bg-ink px-3 py-3 text-bone outline-none focus:border-brass"
+            className="gabinete-input mt-2 px-3 py-3 normal-case tracking-normal"
           />
         </label>
-        <label className="text-sm text-bone/75">
+        <label className={labelClass}>
           Email
           <input
             required
             type="email"
             value={values.email}
             onChange={(event) => updateField("email", event.target.value)}
-            className="mt-2 w-full rounded-md border border-bone/15 bg-ink px-3 py-3 text-bone outline-none focus:border-brass"
+            className="gabinete-input mt-2 px-3 py-3 normal-case tracking-normal"
           />
         </label>
-        <label className="text-sm text-bone/75">
+        <label className={labelClass}>
           Teléfono
           <input
             value={values.phone}
             onChange={(event) => updateField("phone", event.target.value)}
-            className="mt-2 w-full rounded-md border border-bone/15 bg-ink px-3 py-3 text-bone outline-none focus:border-brass"
+            className="gabinete-input mt-2 px-3 py-3 normal-case tracking-normal"
           />
         </label>
-        <label className="text-sm text-bone/75">
+        <label className={labelClass}>
           Nombre del proyecto
           <input
             value={values.projectName}
             onChange={(event) => updateField("projectName", event.target.value)}
-            className="mt-2 w-full rounded-md border border-bone/15 bg-ink px-3 py-3 text-bone outline-none focus:border-brass"
+            className="gabinete-input mt-2 px-3 py-3 normal-case tracking-normal"
           />
         </label>
-        <label className="text-sm text-bone/75">
+        <label className={labelClass}>
           Tipo de proyecto
           <select
             value={values.projectType}
             onChange={(event) => updateField("projectType", event.target.value)}
-            className="mt-2 w-full rounded-md border border-bone/15 bg-ink px-3 py-3 text-bone outline-none focus:border-brass"
+            className="gabinete-input mt-2 px-3 py-3 normal-case tracking-normal"
           >
             {projectTypes.map((type) => (
               <option key={type}>{type}</option>
             ))}
           </select>
         </label>
-        <label className="text-sm text-bone/75 sm:col-span-2">
+        <label className={`${labelClass} sm:col-span-2`}>
           Fechas tentativas de alquiler
           <input
             value={values.dates}
             onChange={(event) => updateField("dates", event.target.value)}
             placeholder="Ej: 12 al 15 de junio"
-            className="mt-2 w-full rounded-md border border-bone/15 bg-ink px-3 py-3 text-bone outline-none placeholder:text-bone/35 focus:border-brass"
+            className="gabinete-input mt-2 px-3 py-3 normal-case tracking-normal"
           />
         </label>
-        <label className="text-sm text-bone/75 sm:col-span-2">
+        <label className={`${labelClass} sm:col-span-2`}>
           Mensaje
           <textarea
             rows={5}
             value={values.message}
             onChange={(event) => updateField("message", event.target.value)}
-            className="mt-2 w-full rounded-md border border-bone/15 bg-ink px-3 py-3 text-bone outline-none focus:border-brass"
+            className="gabinete-input mt-2 px-3 py-3 normal-case tracking-normal"
             placeholder="Dirección de arte, tono del proyecto, dudas de logística o cualquier objeto que todavía no existe pero debería."
           />
         </label>
       </div>
 
-      <div className="mt-6 rounded-md border border-bone/10 bg-coal/55 p-4">
-        <p className="text-sm font-medium text-bone">Resumen que se enviará</p>
-        <pre className="mt-3 max-h-72 overflow-auto whitespace-pre-wrap text-xs leading-5 text-bone/60">
+      <div className="mt-6 rounded-md border border-gabinete-line/25 bg-gabinete-paperLight/24 p-4">
+        <p className="font-display text-sm uppercase tracking-[0.12em] text-gabinete-brown">
+          Resumen que se enviará
+        </p>
+        <pre className="mt-3 max-h-72 overflow-auto whitespace-pre-wrap font-body text-xs leading-5 text-gabinete-muted">
           {message}
         </pre>
       </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <button
-          type="submit"
-          className="inline-flex items-center justify-center gap-2 rounded-md bg-brass px-4 py-3 text-sm font-semibold text-coal transition hover:bg-bone"
-        >
+        <button type="submit" className="gabinete-button px-4 py-3">
           <Mail size={17} />
-          Enviar por email
+          Enviar consulta
         </button>
         <a
           href={buildWhatsappUrl(message)}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center justify-center gap-2 rounded-md border border-brass/50 px-4 py-3 text-sm font-semibold text-bone transition hover:bg-brass/10"
+          className="gabinete-button-secondary px-4 py-3"
         >
           <MessageCircle size={17} />
-          Consultar por WhatsApp
+          Enviar por WhatsApp
         </a>
       </div>
     </form>

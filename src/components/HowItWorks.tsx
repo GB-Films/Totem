@@ -21,11 +21,13 @@ const steps = [
 export function HowItWorks() {
   return (
     <section className="section-band">
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-8 lg:px-12">
         <div className="max-w-2xl">
-          <p className="text-xs uppercase tracking-[0.32em] text-brass/80">Método</p>
-          <h2 className="mt-3 font-display text-4xl text-bone sm:text-5xl">Cómo funciona</h2>
-          <p className="mt-4 text-bone/65">
+          <p className="eyebrow">Método</p>
+          <h2 className="mt-3 font-display text-4xl text-gabinete-darkBrown sm:text-5xl">
+            Cómo funciona
+          </h2>
+          <p className="mt-4 font-editorial text-gabinete-muted">
             Tres pasos, pocos rituales administrativos y una selección pensada para entrar bien en cámara.
           </p>
         </div>
@@ -33,15 +35,15 @@ export function HowItWorks() {
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
-              <article key={step.title} className="rounded-lg border border-bone/10 bg-ash/60 p-6 shadow-cabinet">
+              <article key={step.title} className="parchment-panel p-6">
                 <div className="flex items-center justify-between">
-                  <span className="grid h-11 w-11 place-items-center rounded-md border border-brass/30 bg-brass/10 text-brass">
+                  <span className="grid h-11 w-11 place-items-center rounded-full border border-gabinete-line/40 bg-gabinete-paperLight/24 text-gabinete-brown">
                     <Icon size={21} />
                   </span>
-                  <span className="font-display text-4xl text-bone/20">0{index + 1}</span>
+                  <span className="font-display text-4xl text-gabinete-line/35">0{index + 1}</span>
                 </div>
-                <h3 className="mt-6 font-display text-2xl text-bone">{step.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-bone/62">{step.text}</p>
+                <h3 className="mt-6 font-display text-2xl text-gabinete-darkBrown">{step.title}</h3>
+                <p className="mt-3 font-editorial text-sm leading-6 text-gabinete-muted">{step.text}</p>
               </article>
             );
           })}
