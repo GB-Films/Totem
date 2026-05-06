@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Cormorant+Garamond:wght@500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -6,8 +6,8 @@
 
 :root {
   color-scheme: light;
-  font-family: Inter, Source Sans 3, ui-sans-serif, system-ui, sans-serif;
-  background: #061014;
+  font-family: Montserrat, Inter, ui-sans-serif, system-ui, sans-serif;
+  background: #0b0d17;
 }
 
 * {
@@ -24,12 +24,12 @@ body {
   min-width: 320px;
   min-height: 100vh;
   overflow-x: hidden;
-  color: #3a2a1a;
+  color: #f2efe9;
   background:
-    radial-gradient(circle at 14% 8%, rgba(11, 47, 51, 0.75), transparent 28rem),
-    radial-gradient(circle at 86% 12%, rgba(68, 39, 18, 0.38), transparent 26rem),
-    radial-gradient(circle at 50% 100%, rgba(8, 23, 26, 0.92), transparent 34rem),
-    linear-gradient(135deg, #061014, #08171a 42%, #0b1b1f 100%);
+    radial-gradient(circle at 20% 0%, rgba(74, 28, 64, 0.42), transparent 34rem),
+    radial-gradient(circle at 86% 16%, rgba(197, 160, 89, 0.12), transparent 24rem),
+    radial-gradient(circle at 55% 100%, rgba(43, 24, 61, 0.42), transparent 34rem),
+    #0b0d17;
 }
 
 body::before {
@@ -38,8 +38,8 @@ body::before {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at center, transparent 42%, rgba(0, 0, 0, 0.56)),
-    repeating-linear-gradient(45deg, rgba(241, 228, 204, 0.025) 0 1px, transparent 1px 6px);
+    radial-gradient(circle at center, transparent 42%, rgba(0, 0, 0, 0.58)),
+    repeating-linear-gradient(45deg, rgba(230, 201, 135, 0.025) 0 1px, transparent 1px 6px);
   mix-blend-mode: screen;
   opacity: 0.5;
 }
@@ -70,7 +70,7 @@ textarea {
 
 ::selection {
   background: rgba(161, 100, 40, 0.34);
-  color: #3a2a1a;
+  color: #f2efe9;
 }
 
 @layer components {
@@ -87,17 +87,16 @@ textarea {
     min-height: calc(100vh - 28px);
     margin: 0 auto;
     overflow: hidden;
-    border: 1px solid rgba(91, 58, 30, 0.35);
-    border-radius: 18px;
+    border: 1px solid rgba(197, 160, 89, 0.16);
+    border-radius: 10px;
     background:
-      radial-gradient(circle at 18% 16%, rgba(183, 151, 108, 0.27), transparent 21rem),
-      radial-gradient(circle at 82% 8%, rgba(90, 58, 30, 0.15), transparent 18rem),
-      radial-gradient(circle at 78% 82%, rgba(138, 106, 67, 0.16), transparent 24rem),
-      linear-gradient(135deg, #f1e4cc 0%, #e8d8c0 44%, #dcc8a8 100%);
+      radial-gradient(circle at 22% 18%, rgba(74, 28, 64, 0.32), transparent 26rem),
+      radial-gradient(circle at 78% 26%, rgba(197, 160, 89, 0.11), transparent 20rem),
+      linear-gradient(135deg, rgba(11, 13, 23, 0.96), rgba(18, 22, 38, 0.92));
     box-shadow:
       0 40px 100px rgba(0, 0, 0, 0.55),
-      inset 0 0 0 10px rgba(74, 45, 22, 0.04),
-      inset 0 0 90px rgba(90, 58, 30, 0.28);
+      inset 0 0 0 1px rgba(230, 201, 135, 0.04),
+      inset 0 0 90px rgba(74, 28, 64, 0.16);
   }
 
   .parchment-shell::before {
@@ -107,10 +106,9 @@ textarea {
     z-index: -1;
     pointer-events: none;
     background:
-      radial-gradient(circle at 9% 24%, rgba(90, 58, 30, 0.13), transparent 13rem),
-      radial-gradient(circle at 92% 31%, rgba(183, 151, 108, 0.24), transparent 16rem),
-      radial-gradient(circle at 38% 78%, rgba(122, 74, 33, 0.11), transparent 19rem),
-      repeating-linear-gradient(0deg, rgba(58, 42, 26, 0.025) 0 1px, transparent 1px 4px);
+      radial-gradient(circle at 9% 24%, rgba(197, 160, 89, 0.08), transparent 13rem),
+      radial-gradient(circle at 92% 31%, rgba(74, 28, 64, 0.19), transparent 16rem),
+      repeating-linear-gradient(0deg, rgba(242, 239, 233, 0.02) 0 1px, transparent 1px 4px);
     opacity: 0.95;
   }
 
@@ -120,19 +118,20 @@ textarea {
     inset: 14px;
     z-index: -1;
     pointer-events: none;
-    border: 1px solid rgba(123, 88, 53, 0.2);
-    border-radius: 12px;
+    border: 1px solid rgba(197, 160, 89, 0.08);
+    border-radius: 6px;
   }
 
   .parchment-panel {
-    border: 1px solid rgba(91, 58, 30, 0.28);
-    border-radius: 10px;
+    border: 1px solid rgba(197, 160, 89, 0.2);
+    border-radius: 2px;
     background:
-      radial-gradient(circle at top left, rgba(255, 255, 255, 0.2), transparent 12rem),
-      rgba(255, 255, 255, 0.12);
+      radial-gradient(circle at top left, rgba(230, 201, 135, 0.08), transparent 12rem),
+      rgba(15, 20, 35, 0.75);
+    backdrop-filter: blur(12px);
     box-shadow:
-      0 16px 46px rgba(74, 45, 22, 0.13),
-      inset 0 1px 0 rgba(255, 255, 255, 0.24);
+      0 16px 46px rgba(0, 0, 0, 0.22),
+      inset 0 1px 0 rgba(242, 239, 233, 0.06);
   }
 
   .aged-border {
@@ -161,8 +160,8 @@ textarea {
   }
 
   .eyebrow {
-    color: #7a4a21;
-    font-family: Cinzel, Cormorant Garamond, Georgia, serif;
+    color: #c5a059;
+    font-family: Playfair Display, Georgia, serif;
     font-size: 0.74rem;
     font-weight: 600;
     letter-spacing: 0.22em;
@@ -174,21 +173,21 @@ textarea {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    border: 1px solid rgba(74, 45, 22, 0.5);
-    border-radius: 999px;
-    background: linear-gradient(180deg, #a16428, #7a4a21);
-    color: #f1e4cc;
-    font-family: Cinzel, Cormorant Garamond, Georgia, serif;
+    border: 1px solid rgba(197, 160, 89, 0.5);
+    border-radius: 2px;
+    background: linear-gradient(180deg, rgba(197, 160, 89, 0.22), rgba(138, 110, 53, 0.22));
+    color: #e6c987;
+    font-family: Playfair Display, Georgia, serif;
     font-size: 0.82rem;
     font-weight: 600;
     letter-spacing: 0.07em;
     text-transform: uppercase;
-    box-shadow: 0 9px 20px rgba(74, 45, 22, 0.18);
+    box-shadow: 0 9px 20px rgba(0, 0, 0, 0.2);
   }
 
   .gabinete-button:hover {
-    background: linear-gradient(180deg, #b67a32, #6e3f1c);
-    box-shadow: 0 12px 28px rgba(74, 45, 22, 0.24);
+    background: linear-gradient(180deg, rgba(197, 160, 89, 0.34), rgba(138, 110, 53, 0.26));
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
     transform: translateY(-1px);
   }
 
@@ -197,11 +196,11 @@ textarea {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    border: 1px solid rgba(91, 58, 30, 0.42);
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.1);
-    color: #4a2d16;
-    font-family: Cinzel, Cormorant Garamond, Georgia, serif;
+    border: 1px solid rgba(197, 160, 89, 0.32);
+    border-radius: 2px;
+    background: rgba(15, 20, 35, 0.45);
+    color: #c5a059;
+    font-family: Playfair Display, Georgia, serif;
     font-size: 0.82rem;
     font-weight: 600;
     letter-spacing: 0.07em;
@@ -209,27 +208,27 @@ textarea {
   }
 
   .gabinete-button-secondary:hover {
-    border-color: rgba(122, 74, 33, 0.72);
-    background: rgba(122, 74, 33, 0.08);
+    border-color: rgba(197, 160, 89, 0.72);
+    background: rgba(197, 160, 89, 0.08);
     transform: translateY(-1px);
   }
 
   .gabinete-input {
     width: 100%;
-    border: 1px solid rgba(91, 58, 30, 0.35);
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.15);
-    color: #3a2a1a;
+    border: 1px solid rgba(197, 160, 89, 0.28);
+    border-radius: 2px;
+    background: rgba(242, 239, 233, 0.08);
+    color: #f2efe9;
     outline: none;
   }
 
   .gabinete-input::placeholder {
-    color: #8a7458;
+    color: #a3a09b;
   }
 
   .gabinete-input:focus {
-    border-color: rgba(161, 100, 40, 0.72);
-    box-shadow: 0 0 0 3px rgba(161, 100, 40, 0.13);
+    border-color: rgba(197, 160, 89, 0.72);
+    box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.11);
   }
 
   .object-card {
@@ -281,7 +280,7 @@ textarea {
     border: 1px solid rgba(91, 58, 30, 0.34);
     border-radius: 999px;
     background: rgba(241, 228, 204, 0.32);
-    color: #6b563d;
+    color: #c5a059;
     font-size: 0.73rem;
     line-height: 1;
   }
