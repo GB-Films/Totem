@@ -21,6 +21,14 @@ const featuredCategories: Array<"Todas" | Category> = [
   "Objetos religiosos / místicos",
 ];
 
+const categoryLabels: Partial<Record<"Todas" | Category, string>> = {
+  Todas: "Todos",
+  "Tecnología vintage": "Vintage",
+  "Fantasía / ficción": "Fantasía",
+  "Utilería de acción": "Utilería",
+  "Objetos religiosos / místicos": "Místico",
+};
+
 export function CatalogPage() {
   const [searchParams] = useSearchParams();
   const initialCategory = searchParams.get("categoria");
@@ -109,7 +117,7 @@ export function CatalogPage() {
             </div>
           </div>
 
-          <div className="mt-7 flex flex-wrap justify-center gap-2">
+          <div className="mt-7 flex max-w-full flex-wrap justify-center gap-2 overflow-hidden">
             {featuredCategories.map((category) => (
               <button
                 key={category}
@@ -121,12 +129,12 @@ export function CatalogPage() {
                     : "gabinete-button-secondary px-4 py-2 text-xs"
                 }
               >
-                {category === "Todas" ? "Todos" : category}
+                {categoryLabels[category] ?? category}
               </button>
             ))}
           </div>
 
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
+          <div className="mt-4 flex max-w-full flex-wrap justify-center gap-2 overflow-hidden">
             {categories
               .filter((category) => !featuredCategories.includes(category))
               .slice(0, 6)

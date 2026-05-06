@@ -3,6 +3,7 @@ import type { Product } from "../types";
 interface ObjectImageProps {
   product: Product;
   compact?: boolean;
+  showLabel?: boolean;
 }
 
 const toneLabels: Record<Product["visual"]["tone"], string> = {
@@ -14,7 +15,7 @@ const toneLabels: Record<Product["visual"]["tone"], string> = {
   copper: "from-gabinete-copper/38 via-gabinete-paper2 to-gabinete-brown/32",
 };
 
-export function ObjectImage({ product, compact = false }: ObjectImageProps) {
+export function ObjectImage({ product, compact = false, showLabel = true }: ObjectImageProps) {
   return (
     <div
       className={`object-plate relative overflow-hidden rounded-[9px] border border-gabinete-line/35 bg-gradient-to-br ${toneLabels[product.visual.tone]} ${
@@ -30,14 +31,16 @@ export function ObjectImage({ product, compact = false }: ObjectImageProps) {
           {product.visual.sigil}
         </span>
       </div>
-      <div className="absolute bottom-4 left-4 right-4">
-        <p className="font-display text-[10px] uppercase tracking-[0.28em] text-gabinete-paperLight/78">
-          {product.id}
-        </p>
-        <p className="mt-1 line-clamp-2 font-display text-xl leading-none text-gabinete-paperLight sm:text-2xl">
-          {product.name}
-        </p>
-      </div>
+      {showLabel && (
+        <div className="absolute bottom-4 left-4 right-4">
+          <p className="font-display text-[10px] uppercase tracking-[0.28em] text-gabinete-paperLight/78">
+            {product.id}
+          </p>
+          <p className="mt-1 line-clamp-2 font-display text-xl leading-none text-gabinete-paperLight sm:text-2xl">
+            {product.name}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { NavLink, Link } from "react-router-dom";
 import { useSelection } from "../context/SelectionContext";
 
 const navItems = [
-  { to: "/catalogo", label: "Categorías" },
+  { to: "/catalogo", label: "Catálogo" },
   { to: "/como-funciona", label: "Cómo alquilar" },
   { to: "/contacto", label: "Contacto" },
   { to: "/catalogo", label: "Curiosidades" },
@@ -48,10 +48,10 @@ export function Header() {
       </div>
 
       <nav
-        className="archive-rule mt-6 flex items-center justify-center overflow-x-auto whitespace-nowrap py-5"
+        className="archive-rule mt-6 flex items-center justify-center overflow-hidden py-5"
         aria-label="Navegación principal"
       >
-        <div className="flex min-w-max items-center gap-8 px-2 sm:gap-12">
+        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 px-2 sm:gap-x-12">
           {navItems.map((item, index) => (
             <NavLink
               key={`${item.label}-${index}`}

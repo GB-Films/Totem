@@ -1,80 +1,83 @@
-import { Eye, Heart, Plus } from "lucide-react";
+import { Eye, Heart, ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useSelection } from "../context/SelectionContext";
-import type { Availability, Product } from "../types";
+import type { Product } from "../types";
 import { formatCurrency } from "../utils/format";
-import { CategoryBadge } from "./CategoryBadge";
 import { ObjectImage } from "./ObjectImage";
-import { TagPill } from "./TagPill";
 
 interface ProductCardProps {
   product: Product;
 }
 
-const availabilityClass: Record<Availability, string> = {
-  Disponible: "availability-disponible",
-  Consultar: "availability-consultar",
-  Reservado: "availability-reservado",
-};
-
 export function ProductCard({ product }: ProductCardProps) {
   const { addProduct, isSelected } = useSelection();
 
   return (
-    <article className="object-card group flex h-full flex-col transition">
-      <div className="relative p-2 pb-0">
-        <ObjectImage product={product} compact />
+    <article className="object-card inventory-card group flex h-full flex-col transition">
+      <Link
+        to={`/producto/${product.id}`}
+        className="relative block p-2 pb-0"
+        aria-label={`Ver ficha de ${product.name}`}
+      >
+        <ObjectImage product={product} compact showLabel={false} />
+        <span className="absolute left-4 top-4 rounded-full border border-gabinete-oldGold/35 bg-gabinete-exterior/70 px-2.5 py-1 font-display text-[10px] uppercase tracking-[0.14em] text-gabinete-oldGold">
+          {product.id}
+        </span>
         <button
           type="button"
           aria-label={`Marcar ${product.name} como favorito`}
-          className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full border border-gabinete-line/35 bg-gabinete-paperLight/60 text-gabinete-brown backdrop-blur-sm hover:bg-gabinete-paperLight"
+          className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full border border-gabinete-oldGold/35 bg-gabinete-exterior/65 text-gabinete-oldGold backdrop-blur-sm hover:bg-gabinete-brown"
+          onClick={(event) => event.preventDefault()}
         >
           <Heart size={15} />
         </button>
-      </div>
-      <div className="flex flex-1 flex-col p-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <CategoryBadge category={product.category} />
-          <span className={`availability-badge ${availabilityClass[product.availability]}`}>
-            {product.availability}
-          </span>
+      </Link>
+
+      <div className="flex flex-1 flex-col px-3 pb-3 pt-3">
+        <div className="flex items-start justify-between gap-3">
+          <Link
+            to={`/producto/${product.id}`}
+            className="font-display text-[1.08rem] leading-tight text-gabinete-paperLight hover:text-gabinete-oldGold"
+          >
+            {product.name}
+          </Link>
+          <p className="shrink-0 font-display text-base font-semibold text-gabinete-oldGold">
+            {formatCurrency(product.rentalPricePerDay)}
+            <span className="font-editorial text-xs font-normal text-gabinete-paper/70"> /día</span>
+          </p>
         </div>
-        <h3 className="mt-3 font-display text-xl leading-tight text-gabinete-darkBrown">
-          {product.name}
-        </h3>
-        <p className="mt-1 line-clamp-2 font-editorial text-xs leading-5 text-gabinete-muted">
+
+        <p className="mt-2 line-clamp-2 min-h-10 font-editorial text-[0.82rem] leading-5 text-gabinete-paper/72">
           {product.description}
         </p>
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {product.tags.slice(0, 2).map((tag) => (
-            <TagPill key={tag} tag={tag} />
-          ))}
-        </div>
-        <div className="mt-auto pt-3">
-          <div className="flex items-center justify-between gap-3 border-t border-gabinete-line/25 pt-3">
-            <p className="text-lg font-semibold text-gabinete-darkBrown">
-              {formatCurrency(product.rentalPricePerDay)}
-              <span className="font-editorial text-xs font-normal text-gabinete-muted"> / día</span>
+
+        <div className="mt-3 rounded-[9px] border border-gabinete-oldGold/28 bg-gabinete-exterior2/58 p-2.5">
+          <div className="flex items-end gap-2">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-gabinete-oldGold/35 bg-gabinete-oldGold/10 font-display text-gabinete-oldGold">
+              {product.visual.sigil}
+            </div>
+            <p className="line-clamp-2 flex-1 font-editorial text-[0.76rem] font-semibold leading-4 text-gabinete-oldGold">
+              CURIOSIDAD: {product.curiosities}
             </p>
-            <span className="rounded-full border border-gabinete-line/30 px-2 py-1 text-[11px] text-gabinete-muted">
-              {product.status}
-            </span>
-          </div>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <Link to={`/producto/${product.id}`} className="gabinete-button-secondary px-3 py-2 text-center text-xs">
-              <Eye size={15} />
-              Ficha
-            </Link>
             <button
               type="button"
               onClick={() => addProduct(product)}
-              className="gabinete-button px-3 py-2 text-xs"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-gabinete-oldGold/50 bg-gabinete-oldGold/12 text-gabinete-oldGold hover:bg-gabinete-oldGold hover:text-gabinete-exterior"
+              aria-label={`${isSelected(product.id) ? "Sumar otro" : "Sumar"} ${product.name} al carrito`}
+              title={isSelected(product.id) ? "Sumar otro" : "Sumar al carrito"}
             >
-              <Plus size={15} />
-              {isSelected(product.id) ? "Otro" : "Sumar"}
+              <ShoppingCart size={16} />
             </button>
           </div>
         </div>
+
+        <Link
+          to={`/producto/${product.id}`}
+          className="mt-2 inline-flex items-center justify-end gap-1.5 font-display text-[11px] uppercase tracking-[0.12em] text-gabinete-paper/58 hover:text-gabinete-oldGold"
+        >
+          Ficha del objeto
+          <Eye size={13} />
+        </Link>
       </div>
     </article>
   );
