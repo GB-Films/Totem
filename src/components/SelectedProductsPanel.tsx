@@ -26,6 +26,12 @@ export function SelectedProductsPanel() {
     .filter((entry): entry is { item: typeof selection[number]; product: (typeof products)[number] } =>
       Boolean(entry.product),
     );
+  const hasAnyConflict = selectedProducts.some(({ item, product }) => {
+    const startDate = item.startDate ?? todayIso();
+    const endDate = item.endDate ?? addDaysIso(startDate, Math.max(1, item.rentalDays) - 1);
+    return hasConflict(product.id, startDate, endDate);
+  });
+  const canPrepareRental = selectedProducts.length > 0 && !hasAnyConflict;
 
   return (
     <aside className="space-y-4">
@@ -169,9 +175,24 @@ export function SelectedProductsPanel() {
                 </div>
               );
             })}
-            <Link to="/contacto" className="gabinete-button w-full px-4 py-3">
-              Consultar disponibilidad
-            </Link>
+            {hasAnyConflict && (
+              <p className="rounded-md border border-gabinete-error/35 bg-gabinete-error/10 px-3 py-2 font-editorial text-sm text-gabinete-error">
+                El alquiler queda bloqueado hasta elegir fechas libres para todos los objetos.
+              </p>
+            )}
+            {canPrepareRental ? (
+              <Link to="/contacto" className="gabinete-button w-full px-4 py-3">
+                Preparar alquiler
+              </Link>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="gabinete-button w-full cursor-not-allowed px-4 py-3 opacity-50"
+              >
+                Alquiler no disponible
+              </button>
+            )}
           </div>
         )}
       </section>

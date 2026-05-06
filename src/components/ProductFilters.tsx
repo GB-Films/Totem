@@ -1,6 +1,6 @@
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X } from "lucide-react";
 import type { Availability, Category } from "../types";
-import { availableTags, categories } from "../data/products";
+import { availableTags } from "../data/products";
 import { TagPill } from "./TagPill";
 
 export interface CatalogFilters {
@@ -48,7 +48,7 @@ export function ProductFilters({
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-gabinete-darkBrown">
           <SlidersHorizontal size={18} />
-          <h2 className="font-display text-xl uppercase tracking-[0.12em]">Filtros</h2>
+          <h2 className="font-display text-lg uppercase tracking-[0.12em]">Explora y filtra</h2>
         </div>
         <button
           type="button"
@@ -60,38 +60,14 @@ export function ProductFilters({
         </button>
       </div>
 
-      <label className="mt-5 block font-display text-xs uppercase tracking-[0.14em] text-gabinete-brown" htmlFor="catalog-search">
-        Buscar en el gabinete
-      </label>
-      <div className="gabinete-input mt-2 flex items-center px-3">
-        <Search size={17} className="text-gabinete-brown" />
-        <input
-          id="catalog-search"
-          value={filters.search}
-          onChange={(event) => onChange({ ...filters, search: event.target.value })}
-          className="w-full bg-transparent px-3 py-3 text-sm text-gabinete-text outline-none placeholder:text-gabinete-faint"
-          placeholder="teléfono, ritual, policial..."
-        />
-      </div>
+      <p className="mt-4 rounded-md border border-gabinete-line/30 bg-gabinete-paperLight/24 px-3 py-2 font-editorial text-sm text-gabinete-muted">
+        {resultCount} objeto{resultCount === 1 ? "" : "s"} en inventario.
+      </p>
 
-      <label className="mt-5 block font-display text-xs uppercase tracking-[0.14em] text-gabinete-brown" htmlFor="category-filter">
-        Categoría
-      </label>
-      <select
-        id="category-filter"
-        value={filters.category}
-        onChange={(event) =>
-          onChange({ ...filters, category: event.target.value as CatalogFilters["category"] })
-        }
-        className="gabinete-input mt-2 px-3 py-3 text-sm"
+      <label
+        className="mt-5 block font-display text-xs uppercase tracking-[0.14em] text-gabinete-brown"
+        htmlFor="price-filter"
       >
-        <option>Todas</option>
-        {categories.map((category) => (
-          <option key={category}>{category}</option>
-        ))}
-      </select>
-
-      <label className="mt-5 block font-display text-xs uppercase tracking-[0.14em] text-gabinete-brown" htmlFor="price-filter">
         Precio máximo por día
       </label>
       <input
@@ -108,8 +84,11 @@ export function ProductFilters({
         Hasta ${filters.maxPrice.toLocaleString("es-AR")}
       </p>
 
-      <label className="mt-5 block font-display text-xs uppercase tracking-[0.14em] text-gabinete-brown" htmlFor="availability-filter">
-        Disponibilidad
+      <label
+        className="mt-5 block font-display text-xs uppercase tracking-[0.14em] text-gabinete-brown"
+        htmlFor="availability-filter"
+      >
+        Estado de archivo
       </label>
       <select
         id="availability-filter"
@@ -128,8 +107,11 @@ export function ProductFilters({
         <option>Reservado</option>
       </select>
 
-      <label className="mt-5 block font-display text-xs uppercase tracking-[0.14em] text-gabinete-brown" htmlFor="sort-filter">
-        Ordenar por
+      <label
+        className="mt-5 block font-display text-xs uppercase tracking-[0.14em] text-gabinete-brown"
+        htmlFor="sort-filter"
+      >
+        Ordenar el inventario
       </label>
       <select
         id="sort-filter"
@@ -147,7 +129,7 @@ export function ProductFilters({
 
       <div className="mt-5">
         <p className="mb-3 font-display text-xs uppercase tracking-[0.14em] text-gabinete-brown">
-          Etiquetas de archivo
+          Etiquetas
         </p>
         <div className="flex flex-wrap gap-2">
           {availableTags.map((tag) => (
@@ -160,10 +142,6 @@ export function ProductFilters({
           ))}
         </div>
       </div>
-
-      <p className="mt-5 rounded-md border border-gabinete-line/30 bg-gabinete-paperLight/24 px-3 py-2 font-editorial text-sm text-gabinete-muted">
-        {resultCount} objeto{resultCount === 1 ? "" : "s"} listo{resultCount === 1 ? "" : "s"} para escena.
-      </p>
     </aside>
   );
 }

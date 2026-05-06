@@ -18,7 +18,7 @@ export function ObjectImage({ product, compact = false }: ObjectImageProps) {
   return (
     <div
       className={`object-plate relative overflow-hidden rounded-[9px] border border-gabinete-line/35 bg-gradient-to-br ${toneLabels[product.visual.tone]} ${
-        compact ? "aspect-[4/5]" : "aspect-[5/4]"
+        compact ? "aspect-[5/3]" : "aspect-[5/4]"
       }`}
       aria-label={`Imagen de referencia de ${product.name}`}
       role="img"
