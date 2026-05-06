@@ -29,9 +29,9 @@ const categoryIcons: Record<Category, typeof Armchair> = {
 };
 
 const styleTags = ["vintage", "clásico", "industrial", "minimalista", "rústico"];
-const eraTags = ["época", "cine", "teatro", "publicidad", "hero prop"];
+const usageTags = ["cine", "teatro", "publicidad", "época", "hero prop", "background prop"];
 
-export function ProductFilters({ filters, maxCatalogPrice, onChange }: ProductFiltersProps) {
+export function ProductFilters({ filters, maxCatalogPrice, onChange, resultCount }: ProductFiltersProps) {
   const clearFilters = () => {
     onChange({
       search: "",
@@ -54,8 +54,24 @@ export function ProductFilters({ filters, maxCatalogPrice, onChange }: ProductFi
   const countByTag = (tag: string) => products.filter((product) => product.tags.includes(tag)).length;
 
   return (
-    <aside className="catalog-sidebar">
-      <div className="category-list">
+    <aside className="catalog-sidebar-v3">
+      <div className="filter-summary-v3">
+        <span>Archivo</span>
+        <strong>{resultCount}</strong>
+        <em>resultados activos</em>
+      </div>
+
+      <div className="category-list-v3">
+        <button
+          type="button"
+          onClick={() => onChange({ ...filters, category: "Todas" })}
+          className={filters.category === "Todas" ? "is-active" : ""}
+        >
+          <span className="category-dot-v3">✶</span>
+          <span>Todos</span>
+          <em>({products.length})</em>
+        </button>
+
         {categories.map((category) => {
           const Icon = categoryIcons[category];
           return (
@@ -65,7 +81,7 @@ export function ProductFilters({ filters, maxCatalogPrice, onChange }: ProductFi
               onClick={() => onChange({ ...filters, category })}
               className={filters.category === category ? "is-active" : ""}
             >
-              <Icon size={20} strokeWidth={1.8} />
+              <Icon size={18} strokeWidth={1.75} />
               <span>{category}</span>
               <em>({countByCategory(category)})</em>
             </button>
@@ -73,12 +89,12 @@ export function ProductFilters({ filters, maxCatalogPrice, onChange }: ProductFi
         })}
       </div>
 
-      <div className="filter-section is-open">
-        <div className="filter-section-title">
+      <div className="filter-section-v3">
+        <div className="filter-section-title-v3">
           <strong>Estilo</strong>
           <Minus size={15} />
         </div>
-        <div className="checkbox-list">
+        <div className="checkbox-list-v3">
           {styleTags.map((tag) => (
             <label key={tag}>
               <input
@@ -93,13 +109,13 @@ export function ProductFilters({ filters, maxCatalogPrice, onChange }: ProductFi
         </div>
       </div>
 
-      <div className="filter-section">
-        <div className="filter-section-title">
-          <strong>Época</strong>
+      <div className="filter-section-v3">
+        <div className="filter-section-title-v3">
+          <strong>Uso / clima</strong>
           <span>+</span>
         </div>
-        <div className="checkbox-list compact-list">
-          {eraTags.map((tag) => (
+        <div className="checkbox-list-v3">
+          {usageTags.map((tag) => (
             <label key={tag}>
               <input type="checkbox" checked={filters.tags.includes(tag)} onChange={() => toggleTag(tag)} />
               <span>{tag}</span>
@@ -109,15 +125,8 @@ export function ProductFilters({ filters, maxCatalogPrice, onChange }: ProductFi
         </div>
       </div>
 
-      <div className="filter-section">
-        <div className="filter-section-title">
-          <strong>Color</strong>
-          <span>+</span>
-        </div>
-      </div>
-
-      <div className="filter-section">
-        <div className="filter-section-title">
+      <div className="filter-section-v3">
+        <div className="filter-section-title-v3">
           <strong>Precio máximo</strong>
           <span>${filters.maxPrice.toLocaleString("es-AR")}</span>
         </div>
@@ -131,15 +140,15 @@ export function ProductFilters({ filters, maxCatalogPrice, onChange }: ProductFi
         />
       </div>
 
-      <div className="filter-section">
-        <div className="filter-section-title">
+      <div className="filter-section-v3">
+        <div className="filter-section-title-v3">
           <strong>Disponibilidad</strong>
           <Truck size={15} />
         </div>
         <select
           value={filters.availability}
           onChange={(event) => onChange({ ...filters, availability: event.target.value as CatalogFilters["availability"] })}
-          className="side-select"
+          className="side-select-v3"
         >
           <option>Todas</option>
           <option>Disponible</option>
@@ -148,7 +157,7 @@ export function ProductFilters({ filters, maxCatalogPrice, onChange }: ProductFi
         </select>
       </div>
 
-      <button type="button" onClick={clearFilters} className="clear-filters">
+      <button type="button" onClick={clearFilters} className="clear-filters-v3">
         <X size={14} />
         Limpiar filtros
       </button>

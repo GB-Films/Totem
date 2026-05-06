@@ -24,7 +24,7 @@ export function ProductDetailPage() {
 
   if (!product) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-24 text-center sm:px-8 lg:px-12">
+      <div className="mx-auto w-full max-w-[1520px] px-4 py-24 text-center sm:px-8 lg:px-12">
         <p className="font-display text-5xl text-gabinete-darkBrown">
           Ese objeto no figura en el archivo.
         </p>
@@ -52,7 +52,7 @@ export function ProductDetailPage() {
   );
 
   return (
-    <div className="mx-auto max-w-none px-4 py-10 sm:px-8 lg:px-12">
+    <div className="mx-auto w-full max-w-[1520px] px-4 py-10 sm:px-8 lg:px-12">
       <Link
         to="/catalogo"
         className="inline-flex items-center gap-2 text-sm text-gabinete-muted hover:text-gabinete-darkBrown"

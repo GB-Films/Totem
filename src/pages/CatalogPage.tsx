@@ -1,4 +1,4 @@
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { ArrowRight, Search, SlidersHorizontal, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ProductFilters, type CatalogFilters } from "../components/ProductFilters";
@@ -62,7 +62,7 @@ export function CatalogPage() {
       if (filters.sort === "priceDesc") return b.rentalPricePerDay - a.rentalPricePerDay;
       return b.featuredScore - a.featuredScore;
     });
-  }, [filters, maxCatalogPrice]);
+  }, [filters]);
 
   const toggleChip = (tag: string) => {
     setFilters((current) => ({
@@ -78,77 +78,59 @@ export function CatalogPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1520px] px-4 py-10 sm:px-8 lg:px-12">
-      <div className="mb-6 flex items-center gap-2 font-editorial text-sm text-gabinete-muted">
-        <Link to="/" className="hover:text-gabinete-darkBrown">Inicio</Link>
-        <span>›</span>
-        <span className="text-gabinete-darkBrown">Catálogo</span>
+    <div className="catalog-page-v3">
+      <div className="catalog-breadcrumb-v3">
+        <Link to="/">Inicio</Link>
+        <ArrowRight size={12} />
+        <span>Catálogo</span>
       </div>
 
-      <section className="rounded-[30px] border border-gabinete-line bg-white/50 p-6 shadow-paper sm:p-8 lg:p-10">
-        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(520px,740px)] xl:items-end">
-          <div>
-            <p className="eyebrow">Catálogo de props</p>
-            <h1 className="mt-3 max-w-[680px] font-display text-[clamp(3.5rem,5.8vw,6.1rem)] leading-[0.94] tracking-[-0.05em] text-gabinete-darkBrown">
-              Encontrá por objeto, estilo o tipo de proyecto.
-            </h1>
-            <p className="mt-5 max-w-[640px] font-editorial text-lg leading-8 text-gabinete-muted">
-              Pensamos el catálogo para que puedas entrar por lo que necesitás: una pieza puntual, una categoría,
-              un estilo visual o una atmósfera de rodaje.
-            </p>
-          </div>
+      <section className="catalog-intro-v3">
+        <div className="catalog-title-block-v3">
+          <h1>Catálogo de props</h1>
+          <div className="title-separator"><span>✶</span></div>
+          <p>Objetos únicos para cine, TV, publicidad, teatro y creación de contenido.</p>
+        </div>
 
-          <div className="space-y-4">
-            <label className="flex items-center gap-4 rounded-full border border-gabinete-darkBrown bg-white px-6 py-4 shadow-paper">
-              <Search className="h-7 w-7 shrink-0 text-gabinete-darkBrown" strokeWidth={1.8} />
-              <input
-                value={filters.search}
-                onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
-                placeholder="¿Qué objeto estás buscando?"
-                aria-label="Buscar objeto"
-                className="w-full border-0 bg-transparent font-display text-2xl text-gabinete-darkBrown outline-none placeholder:text-gabinete-faint sm:text-3xl"
-              />
-            </label>
+        <div className="catalog-search-block-v3">
+          <label className="catalog-search-v3">
+            <Search size={26} strokeWidth={1.8} />
+            <input
+              value={filters.search}
+              onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
+              placeholder="¿Qué objeto estás buscando?"
+              aria-label="Buscar objeto"
+            />
+          </label>
 
-            <div className="flex flex-wrap items-center gap-3">
+          <div className="catalog-toolbar-v3">
+            <button type="button" className="catalog-filter-button-v3">
+              <SlidersHorizontal size={16} />
+              Filtros
+            </button>
+
+            {quickFilterChips.map((tag) => (
               <button
+                key={tag}
                 type="button"
-                className="inline-flex items-center gap-2 rounded-full border border-gabinete-line bg-gabinete-paperLight px-5 py-3 font-editorial text-sm font-semibold text-gabinete-darkBrown"
+                onClick={() => toggleChip(tag)}
+                className={`catalog-chip-v3 ${filters.tags.includes(tag) ? "is-active" : ""}`}
               >
-                <SlidersHorizontal size={16} />
-                Filtros
+                {tag}
+                {filters.tags.includes(tag) && <X size={13} />}
               </button>
+            ))}
 
-              {quickFilterChips.map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => toggleChip(tag)}
-                  className={`rounded-full border px-5 py-3 font-editorial text-sm transition ${
-                    filters.tags.includes(tag)
-                      ? "border-gabinete-darkBrown bg-gabinete-darkBrown text-white"
-                      : "border-gabinete-line bg-white/80 text-gabinete-darkBrown"
-                  }`}
-                >
-                  {tag}
-                </button>
-              ))}
-
-              {filters.tags.length > 0 && (
-                <button
-                  type="button"
-                  onClick={clearQuickFilters}
-                  className="inline-flex items-center gap-2 rounded-full border border-gabinete-line bg-white/70 px-4 py-3 font-editorial text-sm text-gabinete-muted"
-                >
-                  <X size={14} /> Limpiar
-                </button>
-              )}
-            </div>
+            {filters.tags.length > 0 && (
+              <button type="button" onClick={clearQuickFilters} className="catalog-clear-v3">
+                Limpiar
+              </button>
+            )}
           </div>
         </div>
       </section>
 
-      <div className="mt-8 grid gap-8 xl:grid-cols-[280px_minmax(0,1fr)]">
+      <div className="catalog-body-v3">
         <ProductFilters
           filters={filters}
           maxCatalogPrice={maxCatalogPrice}
@@ -156,25 +138,19 @@ export function CatalogPage() {
           resultCount={filteredProducts.length}
         />
 
-        <section>
-          <div className="mb-5 flex flex-col gap-3 rounded-[20px] border border-gabinete-line bg-white/45 px-5 py-4 shadow-paper sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="font-editorial text-sm uppercase tracking-[0.12em] text-gabinete-faint">
-                Resultados
-              </p>
-              <p className="mt-1 font-editorial text-lg text-gabinete-darkBrown">
-                {filteredProducts.length} objetos disponibles para explorar
-              </p>
-            </div>
+        <section className="catalog-results-v3">
+          <div className="catalog-results-head-v3">
+            <p>
+              <strong>{filteredProducts.length}</strong> objetos encontrados
+            </p>
 
-            <label className="inline-flex items-center gap-3 rounded-full border border-gabinete-line bg-white px-4 py-3">
-              <span className="font-editorial text-sm text-gabinete-muted">Ordenar por</span>
+            <label>
+              <span>Ordenar:</span>
               <select
                 value={filters.sort}
                 onChange={(event) =>
                   setFilters((current) => ({ ...current, sort: event.target.value as CatalogFilters["sort"] }))
                 }
-                className="border-0 bg-transparent font-editorial font-medium text-gabinete-darkBrown outline-none"
               >
                 <option value="featured">Más relevantes</option>
                 <option value="name">Nombre</option>
@@ -185,33 +161,6 @@ export function CatalogPage() {
           </div>
 
           <ProductGrid products={filteredProducts} />
-
-          <div className="mt-8 grid gap-4 rounded-[24px] border border-gabinete-line bg-white/50 p-6 text-left shadow-paper md:grid-cols-3">
-            <div>
-              <p className="font-editorial text-xs font-bold uppercase tracking-[0.15em] text-gabinete-darkBrown">
-                Alquiler flexible
-              </p>
-              <p className="mt-2 font-editorial text-sm leading-6 text-gabinete-muted">
-                Por día o por el período que necesites.
-              </p>
-            </div>
-            <div>
-              <p className="font-editorial text-xs font-bold uppercase tracking-[0.15em] text-gabinete-darkBrown">
-                Entrega y retiro
-              </p>
-              <p className="mt-2 font-editorial text-sm leading-6 text-gabinete-muted">
-                Coordinado a medida según tu producción.
-              </p>
-            </div>
-            <div>
-              <p className="font-editorial text-xs font-bold uppercase tracking-[0.15em] text-gabinete-darkBrown">
-                Atención personalizada
-              </p>
-              <p className="mt-2 font-editorial text-sm leading-6 text-gabinete-muted">
-                Si no sabés cómo buscar, te ayudamos a armar la selección.
-              </p>
-            </div>
-          </div>
         </section>
       </div>
     </div>
