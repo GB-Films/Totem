@@ -1,8 +1,8 @@
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAvailability } from "../context/AvailabilityContext";
+import { useCatalog } from "../context/CatalogContext";
 import { useSelection } from "../context/SelectionContext";
-import { products } from "../data/products";
 import { formatCurrency } from "../utils/format";
 import { addDaysIso, formatDateRange, getInclusiveDays, todayIso } from "../utils/dates";
 import { calculateProductPricing } from "../utils/pricing";
@@ -18,6 +18,7 @@ export function SelectedProductsPanel() {
     clearSelection,
   } = useSelection();
   const { hasConflict } = useAvailability();
+  const { products } = useCatalog();
   const selectedProducts = selection
     .map((item) => ({
       item,
@@ -38,8 +39,8 @@ export function SelectedProductsPanel() {
       <section className="parchment-panel p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="eyebrow">Selección</p>
-            <h2 className="mt-2 font-display text-3xl text-gabinete-darkBrown">Objetos apartados</h2>
+            <p className="eyebrow">Carrito</p>
+            <h2 className="mt-2 font-display text-3xl text-gabinete-darkBrown">Objetos elegidos</h2>
           </div>
           {selection.length > 0 && (
             <button
@@ -54,7 +55,7 @@ export function SelectedProductsPanel() {
 
         {selectedProducts.length === 0 ? (
           <p className="mt-5 rounded-md border border-gabinete-line/25 bg-gabinete-paperLight/24 p-4 font-editorial text-sm leading-6 text-gabinete-muted">
-            Todavía no hay objetos seleccionados. El primer hallazgo siempre tarda un poco.
+            Todavía no hay objetos en el carrito. Elegí fechas libres desde la ficha de cada objeto.
           </p>
         ) : (
           <div className="mt-5 space-y-4">
@@ -155,7 +156,7 @@ export function SelectedProductsPanel() {
                     }`}
                   >
                     {conflict
-                      ? "Estas fechas se pisan con una solicitud existente."
+                      ? "Estas fechas se pisan con una reserva confirmada."
                       : `Fechas libres: ${formatDateRange(startDate, endDate)}.`}
                   </p>
                   <div className="mt-3">
@@ -177,12 +178,12 @@ export function SelectedProductsPanel() {
             })}
             {hasAnyConflict && (
               <p className="rounded-md border border-gabinete-error/35 bg-gabinete-error/10 px-3 py-2 font-editorial text-sm text-gabinete-error">
-                El alquiler queda bloqueado hasta elegir fechas libres para todos los objetos.
+                Para confirmar la reserva necesitás elegir fechas libres para todos los objetos.
               </p>
             )}
             {canPrepareRental ? (
               <Link to="/contacto" className="gabinete-button w-full px-4 py-3">
-                Preparar alquiler
+                Confirmar reserva
               </Link>
             ) : (
               <button

@@ -8,12 +8,12 @@ const steps = [
   },
   {
     title: "Armás tu selección",
-    text: "Sumá objetos a consulta, ajustá cantidades y días. No hay checkout: esto sigue siendo producción real.",
+    text: "Elegí fechas libres en el calendario y sumá objetos al carrito con cantidades y días definidos.",
     icon: ClipboardList,
   },
   {
-    title: "Consultás disponibilidad y garantía",
-    text: "Recibimos el resumen y confirmamos stock, depósito reintegrable, logística y condiciones.",
+    title: "Confirmás la reserva",
+    text: "Con la seña del 20%, las fechas quedan registradas como no disponibles para futuros alquileres.",
     icon: MessageSquare,
   },
 ];

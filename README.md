@@ -33,4 +33,24 @@ En Windows PowerShell:
 $env:VITE_BASE_PATH="/nombre-del-repo/"; npm run deploy
 ```
 
-La app usa rutas de React Router y conserva la selección de productos en `localStorage`. No requiere backend, login ni pagos.
+La app usa rutas de React Router. La selección de carrito se conserva en `localStorage`.
+
+## Firebase
+
+Las reservas confirmadas pueden sincronizarse en Cloud Firestore. Copiá `.env.example` a `.env` y completá las variables de tu app web de Firebase:
+
+```bash
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+```
+
+Colecciones usadas:
+
+- `products`: catálogo sincronizado. Cada documento debe tener la misma forma que los objetos de `src/data/products.ts`; el ID del documento se usa como `product.id`.
+- `reservations`: reservas confirmadas.
+
+Cada reserva guarda `productId`, `startDate`, `endDate`, `note`, `status: "confirmed"` y `createdAt`. Si las variables no están cargadas, la app usa el catálogo local y almacenamiento local de reservas como fallback para desarrollo y GitHub Pages sigue funcionando.

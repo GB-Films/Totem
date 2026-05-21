@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { categories, products } from "../data/products";
+import { useCatalog } from "../context/CatalogContext";
 
 export function CategoriesSection() {
+  const { categories, products } = useCatalog();
   const categoryCounts = categories
     .map((category) => ({
       category,

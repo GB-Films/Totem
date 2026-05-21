@@ -3,6 +3,7 @@ import type { PricingBreakdown, Product, SelectionItem } from "../types";
 export const LONG_RENTAL_DAYS = 7;
 export const LONG_RENTAL_DISCOUNT = 0.15;
 export const DELICATE_GUARANTEE_EXTRA = 0.1;
+export const RESERVATION_DEPOSIT_RATE = 0.2;
 
 export function calculateProductPricing(product: Product, item: SelectionItem): PricingBreakdown {
   const safeQuantity = Math.max(1, item.quantity);
@@ -16,7 +17,7 @@ export function calculateProductPricing(product: Product, item: SelectionItem): 
   );
   const delicateExtra = product.status === "Delicado" ? DELICATE_GUARANTEE_EXTRA : 0;
   const guaranteeAmount = baseGuarantee * (1 + delicateExtra) * safeQuantity;
-  const reserveDeposit = guaranteeAmount;
+  const reserveDeposit = rentalTotal * RESERVATION_DEPOSIT_RATE;
 
   return {
     rentalSubtotal,

@@ -7,11 +7,11 @@ export function ContactPage() {
       <section className="rounded-[30px] border border-gabinete-line bg-white/55 p-8 shadow-paper lg:p-10">
         <p className="eyebrow">Contacto</p>
         <h1 className="mt-3 max-w-[860px] font-display text-[clamp(3.2rem,5.2vw,5.8rem)] leading-[0.95] tracking-[-0.05em] text-gabinete-darkBrown">
-          Consultá disponibilidad y armemos tu selección.
+          Confirmá tu reserva y bloqueá las fechas.
         </h1>
         <p className="mt-5 max-w-[780px] font-editorial text-lg leading-8 text-gabinete-muted">
-          Esta pantalla funciona como cierre del recorrido: revisás lo que te interesa, dejás fechas tentativas y nos
-          escribís. La idea es que todo esté claro y accesible sin perder el tono editorial de la marca.
+          Esta pantalla funciona como cierre del recorrido: revisás el carrito, confirmás la seña del 20% y recién ahí
+          las piezas quedan marcadas como no disponibles.
         </p>
       </section>
 

@@ -1,15 +1,18 @@
-import { ArrowLeft, Mail, MessageCircle, Plus, Sparkles } from "lucide-react";
+import { ArrowLeft, MessageCircle, Plus, Sparkles } from "lucide-react";
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { AvailabilityCalendar } from "../components/AvailabilityCalendar";
 import { CategoryBadge } from "../components/CategoryBadge";
 import { ObjectImage } from "../components/ObjectImage";
 import { RentalCalculator } from "../components/RentalCalculator";
 import { TagPill } from "../components/TagPill";
+import { useAvailability } from "../context/AvailabilityContext";
+import { useCatalog } from "../context/CatalogContext";
 import { useSelection } from "../context/SelectionContext";
-import { products } from "../data/products";
 import type { Availability } from "../types";
+import { getInclusiveDays } from "../utils/dates";
 import { formatCurrency, formatPercent } from "../utils/format";
-import { buildContactMessage, buildMailtoUrl, buildWhatsappUrl } from "../utils/messages";
+import { buildContactMessage, buildWhatsappUrl } from "../utils/messages";
 
 const availabilityClass: Record<Availability, string> = {
   Disponible: "availability-disponible",
@@ -19,8 +22,11 @@ const availabilityClass: Record<Availability, string> = {
 
 export function ProductDetailPage() {
   const { id } = useParams();
+  const { products } = useCatalog();
   const product = products.find((candidate) => candidate.id === id);
   const { addProduct } = useSelection();
+  const { hasConflict } = useAvailability();
+  const [selectedDates, setSelectedDates] = useState<{ startDate?: string; endDate?: string }>({});
 
   if (!product) {
     return (
@@ -35,7 +41,22 @@ export function ProductDetailPage() {
     );
   }
 
-  const singleSelection = [{ productId: product.id, quantity: 1, rentalDays: 1 }];
+  const hasSelectedDates = Boolean(selectedDates.startDate && selectedDates.endDate);
+  const selectedDateConflict = hasSelectedDates
+    ? hasConflict(product.id, selectedDates.startDate, selectedDates.endDate)
+    : false;
+  const singleSelection = [
+    {
+      productId: product.id,
+      quantity: 1,
+      rentalDays:
+        selectedDates.startDate && selectedDates.endDate
+          ? getInclusiveDays(selectedDates.startDate, selectedDates.endDate)
+          : 1,
+      startDate: selectedDates.startDate,
+      endDate: selectedDates.endDate,
+    },
+  ];
   const quickMessage = buildContactMessage(
     {
       name: "",
@@ -72,7 +93,12 @@ export function ProductDetailPage() {
             ))}
           </div>
           <div className="mt-4">
-            <AvailabilityCalendar product={product} />
+            <AvailabilityCalendar
+              product={product}
+              startDate={selectedDates.startDate}
+              endDate={selectedDates.endDate}
+              onRangeChange={(startDate, endDate) => setSelectedDates({ startDate, endDate })}
+            />
           </div>
         </section>
 
@@ -125,9 +151,28 @@ export function ProductDetailPage() {
           </div>
 
           <div className="mt-7 grid gap-3 sm:grid-cols-2">
-            <button type="button" onClick={() => addProduct(product)} className="gabinete-button px-4 py-3">
+            {!hasSelectedDates && (
+              <p className="rounded-md border border-gabinete-line/25 bg-gabinete-paperLight/24 px-3 py-2 font-editorial text-sm text-gabinete-muted sm:col-span-2">
+                Elegí los días en el calendario para poder sumar este objeto al carrito.
+              </p>
+            )}
+            {selectedDateConflict && (
+              <p className="rounded-md border border-gabinete-error/35 bg-gabinete-error/10 px-3 py-2 font-editorial text-sm text-gabinete-error sm:col-span-2">
+                Ese rango pisa una reserva confirmada. Probá con otras fechas.
+              </p>
+            )}
+            <button
+              type="button"
+              disabled={!hasSelectedDates || selectedDateConflict}
+              onClick={() => {
+                if (selectedDates.startDate && selectedDates.endDate) {
+                  addProduct(product, selectedDates.startDate, selectedDates.endDate);
+                }
+              }}
+              className="gabinete-button px-4 py-3 disabled:cursor-not-allowed disabled:opacity-50"
+            >
               <Plus size={18} />
-              Sumar a consulta
+              Sumar al carrito
             </button>
             <a
               href={buildWhatsappUrl(quickMessage)}
@@ -137,10 +182,6 @@ export function ProductDetailPage() {
             >
               <MessageCircle size={18} />
               Enviar por WhatsApp
-            </a>
-            <a href={buildMailtoUrl(quickMessage)} className="gabinete-button-secondary px-4 py-3 sm:col-span-2">
-              <Mail size={18} />
-              Consultar por email
             </a>
           </div>
         </section>

@@ -15,7 +15,7 @@ const specialBadges: Record<string, string> = {
 };
 
 export function ProductCard({ product }: ProductCardProps) {
-  const { addProduct, isSelected } = useSelection();
+  const { isSelected } = useSelection();
   const selected = isSelected(product.id);
 
   return (
@@ -49,9 +49,14 @@ export function ProductCard({ product }: ProductCardProps) {
           <span className={`product-status status-${product.availability.toLowerCase()}`}>
             {product.availability}
           </span>
-          <button type="button" className="add-mini" onClick={() => addProduct(product)} aria-label="Sumar a consulta">
+          <Link
+            to={`/producto/${product.id}`}
+            className="add-mini"
+            aria-label={`Elegir fechas y sumar ${product.name} al carrito`}
+            title="Elegir fechas"
+          >
             <ShoppingCart size={16} />
-          </button>
+          </Link>
           <Link to={`/producto/${product.id}`} className="detail-btn">
             Ver detalle
           </Link>

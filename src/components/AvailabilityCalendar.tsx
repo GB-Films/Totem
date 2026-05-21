@@ -8,6 +8,7 @@ interface AvailabilityCalendarProps {
   startDate?: string;
   endDate?: string;
   compact?: boolean;
+  onRangeChange?: (startDate: string, endDate: string) => void;
 }
 
 export function AvailabilityCalendar({
@@ -15,11 +16,39 @@ export function AvailabilityCalendar({
   startDate,
   endDate,
   compact = false,
+  onRangeChange,
 }: AvailabilityCalendarProps) {
   const { getProductReservations } = useAvailability();
   const reservations = getProductReservations(product.id);
   const days = buildCalendarDays(todayIso(), compact ? 28 : 42);
   const hasSelectedRange = Boolean(startDate && endDate);
+  const interactive = Boolean(onRangeChange);
+
+  const rangeHasReservation = (rangeStart: string, rangeEnd: string) =>
+    reservations.some((reservation) =>
+      rangesOverlap(rangeStart, rangeEnd, reservation.startDate, reservation.endDate),
+    );
+
+  const selectDay = (day: string) => {
+    if (!onRangeChange || rangeHasReservation(day, day)) {
+      return;
+    }
+
+    if (!startDate || !endDate || startDate !== endDate) {
+      onRangeChange(day, day);
+      return;
+    }
+
+    const nextStart = day < startDate ? day : startDate;
+    const nextEnd = day < startDate ? startDate : day;
+
+    if (rangeHasReservation(nextStart, nextEnd)) {
+      onRangeChange(day, day);
+      return;
+    }
+
+    onRangeChange(nextStart, nextEnd);
+  };
 
   return (
     <section className="parchment-panel p-5">
@@ -50,18 +79,27 @@ export function AvailabilityCalendar({
           );
           const selected = hasSelectedRange && rangesOverlap(day, day, startDate, endDate);
 
-          return (
-            <span
+          const dayClass = `grid aspect-square place-items-center rounded-md border text-xs transition ${
+            reserved
+              ? "border-gabinete-error/35 bg-gabinete-error/12 text-gabinete-error"
+              : selected
+                ? "border-gabinete-available/45 bg-gabinete-available/14 text-gabinete-available"
+                : "border-gabinete-line/18 bg-gabinete-paperLight/18 text-gabinete-muted"
+          } ${interactive && !reserved ? "cursor-pointer hover:border-gabinete-brown hover:text-gabinete-darkBrown" : ""}`;
+
+          return interactive ? (
+            <button
               key={day}
+              type="button"
               title={day}
-              className={`grid aspect-square place-items-center rounded-md border text-xs ${
-                reserved
-                  ? "border-gabinete-error/35 bg-gabinete-error/12 text-gabinete-error"
-                  : selected
-                    ? "border-gabinete-available/45 bg-gabinete-available/14 text-gabinete-available"
-                    : "border-gabinete-line/18 bg-gabinete-paperLight/18 text-gabinete-muted"
-              }`}
+              disabled={reserved}
+              onClick={() => selectDay(day)}
+              className={dayClass}
             >
+              {Number(day.slice(-2))}
+            </button>
+          ) : (
+            <span key={day} title={day} className={dayClass}>
               {Number(day.slice(-2))}
             </span>
           );
@@ -105,8 +143,9 @@ export function AvailabilityCalendar({
       )}
 
       <p className="mt-4 font-editorial text-xs leading-5 text-gabinete-muted">
-        En esta versión estática, las fechas se actualizan en este navegador. Para que todos los
-        visitantes vean el mismo calendario hace falta conectar un backend o CMS.
+        {interactive
+          ? "Tocá una fecha de inicio y luego una de cierre. Las fechas rojas ya no se pueden reservar."
+          : "Las fechas confirmadas se sincronizan con Firebase cuando la nube está configurada."}
       </p>
     </section>
   );

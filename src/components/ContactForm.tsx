@@ -1,15 +1,16 @@
-import { Mail, MessageCircle } from "lucide-react";
+import { CheckCircle2, MessageCircle } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { useAvailability } from "../context/AvailabilityContext";
+import { useCatalog } from "../context/CatalogContext";
 import { useSelection } from "../context/SelectionContext";
-import { products } from "../data/products";
 import type { SelectionItem } from "../types";
+import { formatCurrency } from "../utils/format";
 import {
   buildContactMessage,
-  buildMailtoUrl,
   buildWhatsappUrl,
   type ContactFormValues,
 } from "../utils/messages";
+import { calculateSelectionPricing } from "../utils/pricing";
 
 const projectTypes = ["Comercial", "Videoclip", "Cine", "Serie", "Teatro", "Foto", "Evento", "Otro"];
 
@@ -29,37 +30,41 @@ interface ContactFormProps {
 }
 
 export function ContactForm({ selectionOverride }: ContactFormProps) {
-  const { selection } = useSelection();
-  const { addReservationsFromSelection, hasConflict } = useAvailability();
+  const { selection, clearSelection } = useSelection();
+  const { addReservationsFromSelection, hasConflict, syncMode } = useAvailability();
+  const { products } = useCatalog();
   const activeSelection = selectionOverride ?? selection;
   const [values, setValues] = useState(initialValues);
+  const [status, setStatus] = useState<"idle" | "saving" | "confirmed">("idle");
   const message = useMemo(
     () => buildContactMessage(values, products, activeSelection),
     [activeSelection, values],
+  );
+  const pricing = useMemo(
+    () => calculateSelectionPricing(products, activeSelection),
+    [activeSelection],
   );
 
   const updateField = (field: keyof ContactFormValues, value: string) => {
     setValues((current) => ({ ...current, [field]: value }));
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (hasSelectionConflicts) {
+    if (hasSelectionConflicts || activeSelection.length === 0) {
       return;
     }
-    addReservationsFromSelection(activeSelection, values.projectName || "Consulta enviada");
-    window.location.href = buildMailtoUrl(message);
+    setStatus("saving");
+    await addReservationsFromSelection(activeSelection, values.projectName || "Reserva confirmada");
+    if (!selectionOverride) {
+      clearSelection();
+    }
+    setStatus("confirmed");
   };
 
   const hasSelectionConflicts = activeSelection.some((item) =>
     hasConflict(item.productId, item.startDate, item.endDate),
   );
-
-  const handleWhatsappClick = () => {
-    if (!hasSelectionConflicts) {
-      addReservationsFromSelection(activeSelection, values.projectName || "Consulta enviada");
-    }
-  };
 
   const labelClass = "font-display text-xs uppercase tracking-[0.12em] text-gabinete-brown";
 
@@ -72,10 +77,17 @@ export function ContactForm({ selectionOverride }: ContactFormProps) {
         de que el objeto salga del gabinete.
       </p>
       <p className="mt-3 rounded-md border border-gabinete-line/25 bg-gabinete-paperLight/24 px-3 py-2 font-editorial text-xs leading-5 text-gabinete-muted">
-        Al enviar la consulta se bloquean las fechas elegidas en el calendario local de esta versión.
-        Para compartir disponibilidad entre todos los visitantes hará falta conectar Firebase,
-        Supabase, Google Calendar o un CMS.
+        Enviar por WhatsApp no bloquea fechas. La no disponibilidad recién se registra cuando confirmás
+        la reserva con una seña del 20%: {formatCurrency(pricing.reserveDeposit)}.
+        {syncMode === "firebase"
+          ? " Esa reserva se sincroniza en Firebase."
+          : " Hasta cargar las claves de Firebase, queda guardada en este navegador."}
       </p>
+      {status === "confirmed" && (
+        <p className="mt-3 rounded-md border border-gabinete-available/35 bg-gabinete-available/10 px-3 py-2 font-editorial text-sm text-gabinete-available">
+          Reserva confirmada. Las fechas ya quedaron marcadas como no disponibles.
+        </p>
+      )}
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <label className={labelClass}>
@@ -166,18 +178,21 @@ export function ContactForm({ selectionOverride }: ContactFormProps) {
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         {hasSelectionConflicts && (
           <p className="rounded-md border border-gabinete-error/35 bg-gabinete-error/10 px-3 py-2 text-sm text-gabinete-error sm:col-span-2">
-            Hay fechas solicitadas en tu selección. Cambialas para preparar la consulta.
+            Hay fechas no disponibles en tu carrito. Cambialas para confirmar la reserva.
           </p>
         )}
-        <button type="submit" disabled={hasSelectionConflicts} className="gabinete-button px-4 py-3 disabled:cursor-not-allowed disabled:opacity-50">
-          <Mail size={17} />
-          Enviar consulta
+        <button
+          type="submit"
+          disabled={hasSelectionConflicts || activeSelection.length === 0 || status === "saving"}
+          className="gabinete-button px-4 py-3 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <CheckCircle2 size={17} />
+          {status === "saving" ? "Confirmando..." : "Confirmar reserva"}
         </button>
         <a
           href={hasSelectionConflicts ? undefined : buildWhatsappUrl(message)}
           target="_blank"
           rel="noreferrer"
-          onClick={handleWhatsappClick}
           className="gabinete-button-secondary px-4 py-3"
         >
           <MessageCircle size={17} />

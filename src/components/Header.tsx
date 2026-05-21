@@ -56,7 +56,7 @@ export function Header() {
         <Link to="/colecciones" aria-label="Favoritos y colecciones">
           <Heart size={24} strokeWidth={1.9} />
         </Link>
-        <Link to="/contacto" className="cart-action" aria-label="Ver selección">
+        <Link to="/contacto" className="cart-action" aria-label="Ver carrito">
           <ShoppingCart size={24} strokeWidth={1.9} />
           <span>{totalItems}</span>
         </Link>

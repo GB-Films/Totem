@@ -2,7 +2,7 @@ import { ArrowRight, CalendarDays, CheckCircle2, Sparkles, Truck } from "lucide-
 import { Link } from "react-router-dom";
 import { Hero } from "../components/Hero";
 import { ObjectImage } from "../components/ObjectImage";
-import { products } from "../data/products";
+import { useCatalog } from "../context/CatalogContext";
 
 const useCases = [
   {
@@ -29,6 +29,7 @@ const benefits = [
 ];
 
 export function HomePage() {
+  const { products } = useCatalog();
   const featured = [products[0], products[2], products[5], products[6]].filter(Boolean);
 
   return (

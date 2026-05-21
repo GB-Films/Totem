@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import { products } from "../data/products";
+import { useCatalog } from "../context/CatalogContext";
 import { ProductCard } from "./ProductCard";
 
 export function FeaturedObjects() {
+  const { products } = useCatalog();
   const featured = [...products].sort((a, b) => b.featuredScore - a.featuredScore).slice(0, 3);
 
   return (

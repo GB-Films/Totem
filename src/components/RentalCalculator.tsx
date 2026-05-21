@@ -1,6 +1,11 @@
 import type { Product, SelectionItem } from "../types";
 import { formatCurrency } from "../utils/format";
-import { calculateSelectionPricing, LONG_RENTAL_DISCOUNT, LONG_RENTAL_DAYS } from "../utils/pricing";
+import {
+  calculateSelectionPricing,
+  LONG_RENTAL_DISCOUNT,
+  LONG_RENTAL_DAYS,
+  RESERVATION_DEPOSIT_RATE,
+} from "../utils/pricing";
 
 interface RentalCalculatorProps {
   products: Product[];
@@ -29,6 +34,7 @@ export function RentalCalculator({ products, selection }: RentalCalculatorProps)
             `-${formatCurrency(pricing.rentalDiscount)}`,
           ],
           ["Alquiler estimado", formatCurrency(pricing.rentalTotal)],
+          [`Seña de reserva (${RESERVATION_DEPOSIT_RATE * 100}%)`, formatCurrency(pricing.reserveDeposit)],
           ["Garantía reintegrable", formatCurrency(pricing.guaranteeAmount)],
         ].map(([label, value]) => (
           <div
@@ -52,7 +58,7 @@ export function RentalCalculator({ products, selection }: RentalCalculatorProps)
             </strong>
           </div>
           <p className="mt-2 font-editorial text-xs leading-5 text-gabinete-muted">
-            Delicados suman 10% extra sobre garantía. La reserva o depósito se confirma al consultar.
+            Delicados suman 10% extra sobre garantía. La no disponibilidad se registra al confirmar la reserva.
           </p>
         </div>
       </div>

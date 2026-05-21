@@ -3,10 +3,13 @@ import {
   PropsWithChildren,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
+import { addDoc, collection, onSnapshot, serverTimestamp } from "firebase/firestore";
 import { getSeedReservations } from "../data/availability";
+import { firebaseEnabled, getFirebaseDb } from "../services/firebase";
 import type { ReservationRange, SelectionItem } from "../types";
 import { rangesOverlap } from "../utils/dates";
 
@@ -14,7 +17,8 @@ interface AvailabilityContextValue {
   reservations: ReservationRange[];
   getProductReservations: (productId: string) => ReservationRange[];
   hasConflict: (productId: string, startDate?: string, endDate?: string) => boolean;
-  addReservationsFromSelection: (selection: SelectionItem[], note?: string) => void;
+  addReservationsFromSelection: (selection: SelectionItem[], note?: string) => Promise<void>;
+  syncMode: "firebase" | "local";
 }
 
 const STORAGE_KEY = "el-gabinete-local-reservations";
@@ -44,10 +48,34 @@ function writeLocalReservations(reservations: ReservationRange[]) {
 export function AvailabilityProvider({ children }: PropsWithChildren) {
   const seedReservations = useMemo(() => getSeedReservations(), []);
   const [localReservations, setLocalReservations] = useState<ReservationRange[]>(readLocalReservations);
+  const [firebaseReservations, setFirebaseReservations] = useState<ReservationRange[]>([]);
+
+  useEffect(() => {
+    const db = getFirebaseDb();
+    if (!db) {
+      return;
+    }
+
+    return onSnapshot(collection(db, "reservations"), (snapshot) => {
+      setFirebaseReservations(
+        snapshot.docs.map((doc) => {
+          const data = doc.data() as Omit<ReservationRange, "id" | "source">;
+          return {
+            id: doc.id,
+            productId: data.productId,
+            startDate: data.startDate,
+            endDate: data.endDate,
+            note: data.note,
+            source: "firebase",
+          };
+        }),
+      );
+    });
+  }, []);
 
   const reservations = useMemo(
-    () => [...seedReservations, ...localReservations],
-    [localReservations, seedReservations],
+    () => [...seedReservations, ...(firebaseEnabled ? firebaseReservations : localReservations)],
+    [firebaseReservations, localReservations, seedReservations],
   );
 
   const getProductReservations = useCallback(
@@ -67,9 +95,26 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
   );
 
   const addReservationsFromSelection = useCallback(
-    (selection: SelectionItem[], note = "Consulta enviada") => {
+    async (selection: SelectionItem[], note = "Reserva confirmada") => {
       const datedSelection = selection.filter((item) => item.startDate && item.endDate);
       if (datedSelection.length === 0) {
+        return;
+      }
+
+      const db = getFirebaseDb();
+      if (db) {
+        await Promise.all(
+          datedSelection.map((item) =>
+            addDoc(collection(db, "reservations"), {
+              productId: item.productId,
+              startDate: item.startDate,
+              endDate: item.endDate,
+              note,
+              status: "confirmed",
+              createdAt: serverTimestamp(),
+            }),
+          ),
+        );
         return;
       }
 
@@ -97,6 +142,7 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
       getProductReservations,
       hasConflict,
       addReservationsFromSelection,
+      syncMode: firebaseEnabled ? "firebase" as const : "local" as const,
     }),
     [addReservationsFromSelection, getProductReservations, hasConflict, reservations],
   );

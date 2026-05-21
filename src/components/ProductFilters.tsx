@@ -1,6 +1,5 @@
 import { Armchair, BadgeCheck, Brush, Clapperboard, Minus, Palette, Shirt, Sun, Truck, X } from "lucide-react";
-import type { Availability, Category } from "../types";
-import { availableTags, categories, products } from "../data/products";
+import type { Availability, Category, Product } from "../types";
 
 export interface CatalogFilters {
   search: string;
@@ -16,6 +15,9 @@ interface ProductFiltersProps {
   maxCatalogPrice: number;
   onChange: (filters: CatalogFilters) => void;
   resultCount: number;
+  products: Product[];
+  categories: Category[];
+  availableTags: string[];
 }
 
 const categoryIcons: Record<Category, typeof Armchair> = {
@@ -31,7 +33,15 @@ const categoryIcons: Record<Category, typeof Armchair> = {
 const styleTags = ["vintage", "clásico", "industrial", "minimalista", "rústico"];
 const usageTags = ["cine", "teatro", "publicidad", "época", "hero prop", "background prop"];
 
-export function ProductFilters({ filters, maxCatalogPrice, onChange, resultCount }: ProductFiltersProps) {
+export function ProductFilters({
+  filters,
+  maxCatalogPrice,
+  onChange,
+  resultCount,
+  products,
+  categories,
+  availableTags,
+}: ProductFiltersProps) {
   const clearFilters = () => {
     onChange({
       search: "",

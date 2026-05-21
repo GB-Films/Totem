@@ -13,7 +13,7 @@ import { getInclusiveDays, todayIso } from "../utils/dates";
 interface SelectionContextValue {
   selection: SelectionItem[];
   totalItems: number;
-  addProduct: (product: Product) => void;
+  addProduct: (product: Product, startDate: string, endDate: string) => void;
   removeProduct: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   updateRentalDays: (productId: string, rentalDays: number) => void;
@@ -61,19 +61,33 @@ export function SelectionProvider({ children }: PropsWithChildren) {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(selection));
   }, [selection]);
 
-  const addProduct = useCallback((product: Product) => {
+  const addProduct = useCallback((product: Product, startDate: string, endDate: string) => {
     setSelection((current) => {
       const existing = current.find((item) => item.productId === product.id);
       if (existing) {
         return current.map((item) =>
           item.productId === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? {
+                ...item,
+                quantity: item.quantity + 1,
+                startDate,
+                endDate,
+                rentalDays: getInclusiveDays(startDate, endDate),
+              }
             : item,
         );
       }
 
-      const startDate = todayIso();
-      return [...current, { productId: product.id, quantity: 1, rentalDays: 1, startDate, endDate: startDate }];
+      return [
+        ...current,
+        {
+          productId: product.id,
+          quantity: 1,
+          rentalDays: getInclusiveDays(startDate, endDate),
+          startDate,
+          endDate,
+        },
+      ];
     });
   }, []);
 

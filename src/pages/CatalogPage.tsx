@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ProductFilters, type CatalogFilters } from "../components/ProductFilters";
 import { ProductGrid } from "../components/ProductGrid";
-import { categories, products } from "../data/products";
+import { useCatalog } from "../context/CatalogContext";
 import type { Category } from "../types";
 
 function normalize(value: string) {
@@ -14,6 +14,7 @@ const quickFilterChips = ["vintage", "estudio", "living", "oficina", "rodaje", "
 
 export function CatalogPage() {
   const [searchParams] = useSearchParams();
+  const { products, categories, availableTags } = useCatalog();
   const initialCategory = searchParams.get("categoria");
   const initialSearch = searchParams.get("q") ?? "";
   const maxCatalogPrice = Math.max(...products.map((product) => product.rentalPricePerDay));
@@ -136,6 +137,9 @@ export function CatalogPage() {
           maxCatalogPrice={maxCatalogPrice}
           onChange={setFilters}
           resultCount={filteredProducts.length}
+          products={products}
+          categories={categories}
+          availableTags={availableTags}
         />
 
         <section className="catalog-results-v3">

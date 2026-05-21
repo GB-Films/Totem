@@ -44,7 +44,7 @@ export function Hero() {
         <p>Utilería, mobiliario, decoración y vestuario para cine, TV, publicidad, teatro y creación de contenido.</p>
 
         <form className="hero-search" onSubmit={submitSearch}>
-          <Search size={34} strokeWidth={1.8} />
+          <Search size={24} strokeWidth={1.8} />
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -52,7 +52,7 @@ export function Hero() {
             aria-label="Buscar objetos"
           />
           <button type="submit" aria-label="Buscar en catálogo">
-            <ArrowRight size={34} />
+            <ArrowRight size={24} />
           </button>
         </form>
 

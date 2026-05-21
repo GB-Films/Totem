@@ -61,6 +61,6 @@ export interface ReservationRange {
   productId: string;
   startDate: string;
   endDate: string;
-  source: "mock" | "local";
+  source: "mock" | "local" | "firebase";
   note?: string;
 }

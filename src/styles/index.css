@@ -289,28 +289,28 @@ input, select, textarea { font: inherit; }
 /* HERO */
 .hero-scene {
   position: relative;
-  min-height: clamp(660px, calc(100vh - 112px), 870px);
+  min-height: clamp(540px, calc(100vh - 156px), 680px);
   overflow: hidden;
   display: grid;
   place-items: center;
-  padding: clamp(3.2rem, 6vw, 7rem) 4vw 3rem;
+  padding: clamp(2.4rem, 4.5vw, 4.8rem) 4vw 2.4rem;
 }
 .hero-content {
   position: relative;
   z-index: 5;
-  width: min(980px, 72vw);
+  width: min(780px, 72vw);
   margin-inline: auto;
   text-align: center;
 }
 .hero-content h1 {
-  max-width: 980px;
+  max-width: 760px;
   margin: 0 auto;
   color: var(--ink);
   font-family: Playfair Display, Georgia, serif;
-  font-size: clamp(4rem, 6.3vw, 7.2rem);
+  font-size: clamp(2.65rem, 3.9vw, 4.45rem);
   font-weight: 600;
-  line-height: .98;
-  letter-spacing: -.045em;
+  line-height: 1.03;
+  letter-spacing: 0;
 }
 .hero-separator,
 .title-separator {
@@ -346,9 +346,9 @@ input, select, textarea { font: inherit; }
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 1.2rem;
-  width: min(980px, 100%);
-  margin: 2.2rem auto 1.9rem;
-  padding: .74rem .88rem .74rem 2rem;
+  width: min(680px, 100%);
+  margin: 1.45rem auto 1.25rem;
+  padding: .42rem .5rem .42rem 1.15rem;
   border: 1.5px solid #0b1b2b;
   border-radius: 999px;
   background: rgba(255, 253, 248, .77);
@@ -360,15 +360,15 @@ input, select, textarea { font: inherit; }
   outline: 0;
   background: transparent;
   color: var(--ink);
-  font-size: clamp(1.1rem, 1.6vw, 1.55rem);
+  font-size: clamp(1rem, 1.15vw, 1.18rem);
   font-weight: 400;
 }
 .hero-search input::placeholder { color: #8b8580; }
 .hero-search button {
   display: grid;
   place-items: center;
-  width: 66px;
-  height: 66px;
+  width: 46px;
+  height: 46px;
   border: 0;
   border-radius: 50%;
   background: #071d33;
@@ -1038,7 +1038,7 @@ input[type="range"] { accent-color: #071d33; }
   .site-header { grid-template-columns: 1fr auto; gap: 1rem; }
   .site-nav { order: 3; grid-column: 1 / -1; justify-content: flex-start; overflow-x: auto; padding-bottom: .8rem; }
   .hero-stage { opacity: .45; right: -80px; width: 380px; }
-  .hero-content { width: min(1020px, 84vw); }
+  .hero-content { width: min(760px, 84vw); }
   .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
@@ -1061,8 +1061,8 @@ input[type="range"] { accent-color: #071d33; }
   .brand-wordmark strong, .brand-wordmark em { font-size: 1rem; }
   .brand-cabinet { width: 34px; height: 45px; }
   .site-actions { gap: .85rem; }
-  .hero-scene { min-height: auto; padding: 3.5rem 1rem 2rem; }
-  .hero-content h1 { font-size: clamp(3.1rem, 14vw, 5rem); }
+  .hero-scene { min-height: auto; padding: 2.4rem 1rem 1.7rem; }
+  .hero-content h1 { font-size: clamp(2.25rem, 9.5vw, 3rem); }
   .hero-search { grid-template-columns: auto 1fr auto; padding-left: 1rem; gap: .65rem; }
   .hero-search button { width: 52px; height: 52px; }
   .hero-categories a { width: calc(50% - .65rem); min-width: 0; padding-inline: .8rem; }
@@ -1124,29 +1124,29 @@ input[type="range"] { accent-color: #071d33; }
 
 /* Home starts with the search-first hero */
 .hero-scene {
-  min-height: calc(100vh - 92px);
-  padding: clamp(3rem, 5.4vw, 5.9rem) clamp(1rem, 4vw, 4rem) 2.7rem;
+  min-height: clamp(520px, calc(100vh - 156px), 660px);
+  padding: clamp(2.2rem, 4.2vw, 4.5rem) clamp(1rem, 4vw, 4rem) 2.2rem;
 }
 .hero-content {
-  width: min(1030px, 76vw);
-  margin-top: -1.5vh;
+  width: min(780px, 74vw);
+  margin-top: 0;
 }
 .hero-content h1 {
-  font-size: clamp(4rem, 5.9vw, 7.05rem);
-  line-height: .98;
-  letter-spacing: -.045em;
+  font-size: clamp(2.65rem, 3.9vw, 4.45rem);
+  line-height: 1.04;
+  letter-spacing: 0;
 }
 .hero-content p {
   font-size: clamp(1.05rem, 1.15vw, 1.32rem);
 }
 .hero-search {
-  width: min(970px, 100%);
-  margin-top: 2.05rem;
-  padding: .68rem .75rem .68rem 1.9rem;
+  width: min(680px, 100%);
+  margin-top: 1.35rem;
+  padding: .42rem .5rem .42rem 1.15rem;
 }
 .hero-search button {
-  width: 62px;
-  height: 62px;
+  width: 46px;
+  height: 46px;
 }
 .hero-categories {
   gap: 1rem;
@@ -1349,7 +1349,7 @@ input[type="range"] { accent-color: #071d33; }
 .catalog-page-v3 {
   width: min(1520px, calc(100% - clamp(2rem, 8vw, 8rem)));
   margin: 0 auto;
-  padding: 2.1rem 0 4rem;
+  padding: 1.25rem 0 4rem;
 }
 .catalog-breadcrumb-v3 {
   display: flex;
@@ -1365,21 +1365,21 @@ input[type="range"] { accent-color: #071d33; }
 .catalog-intro-v3 {
   display: grid;
   grid-template-columns: minmax(360px, 520px) minmax(460px, 1fr);
-  align-items: end;
-  gap: clamp(2rem, 5vw, 6rem);
-  padding: 1.55rem 0 1.45rem;
+  align-items: center;
+  gap: clamp(1.5rem, 3.5vw, 4rem);
+  padding: .85rem 0 1rem;
 }
 .catalog-title-block-v3 h1 {
   margin: 0;
   font-family: Playfair Display, Georgia, serif;
-  font-size: clamp(4.2rem, 5.3vw, 6.2rem);
-  line-height: .92;
-  letter-spacing: -.055em;
+  font-size: clamp(2.8rem, 3.7vw, 4.2rem);
+  line-height: 1;
+  letter-spacing: 0;
   color: var(--ink);
 }
 .catalog-title-block-v3 .title-separator {
   justify-content: flex-start;
-  margin: 1.15rem 0 .85rem;
+  margin: .75rem 0 .55rem;
 }
 .catalog-title-block-v3 .title-separator::before,
 .catalog-title-block-v3 .title-separator::after {
@@ -1400,10 +1400,10 @@ input[type="range"] { accent-color: #071d33; }
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
-  gap: 1rem;
+  gap: .75rem;
   width: 100%;
-  min-height: 62px;
-  padding: .85rem 1.35rem;
+  min-height: 52px;
+  padding: .62rem 1rem;
   border: 1.35px solid var(--ink);
   border-radius: 999px;
   background: rgba(255,253,248,.78);
@@ -1415,7 +1415,7 @@ input[type="range"] { accent-color: #071d33; }
   outline: 0;
   background: transparent;
   color: var(--ink);
-  font-size: 1.15rem;
+  font-size: 1rem;
 }
 .catalog-search-v3 input::placeholder { color: var(--faint); }
 .catalog-toolbar-v3 {
@@ -1774,13 +1774,13 @@ footer {
   }
   .hero-scene {
     min-height: auto;
-    padding: 3.25rem 1rem 2rem;
+    padding: 2.4rem 1rem 1.7rem;
   }
   .hero-content h1 {
-    font-size: clamp(3.1rem, 14vw, 4.6rem);
+    font-size: clamp(2.25rem, 9.5vw, 3rem);
   }
   .catalog-title-block-v3 h1 {
-    font-size: clamp(3.2rem, 15vw, 4.6rem);
+    font-size: clamp(2.45rem, 10vw, 3.35rem);
   }
   .catalog-toolbar-v3 {
     gap: .55rem;
