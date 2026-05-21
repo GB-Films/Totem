@@ -1,8 +1,11 @@
 import { CheckCircle2, MessageCircle } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, type User } from "firebase/auth";
 import { useAvailability } from "../context/AvailabilityContext";
 import { useCatalog } from "../context/CatalogContext";
 import { useSelection } from "../context/SelectionContext";
+import { RESERVATIONS_ENABLED } from "../config/features";
+import { firebaseEnabled, getFirebaseApp } from "../services/firebase";
 import type { SelectionItem } from "../types";
 import { formatCurrency } from "../utils/format";
 import {
@@ -30,12 +33,15 @@ interface ContactFormProps {
 }
 
 export function ContactForm({ selectionOverride }: ContactFormProps) {
+  const app = getFirebaseApp();
+  const auth = app ? getAuth(app) : null;
   const { selection, clearSelection } = useSelection();
   const { addReservationsFromSelection, hasConflict, syncMode } = useAvailability();
   const { products } = useCatalog();
   const activeSelection = selectionOverride ?? selection;
   const [values, setValues] = useState(initialValues);
   const [status, setStatus] = useState<"idle" | "saving" | "confirmed">("idle");
+  const [user, setUser] = useState<User | null>(null);
   const message = useMemo(
     () => buildContactMessage(values, products, activeSelection),
     [activeSelection, values],
@@ -49,11 +55,39 @@ export function ContactForm({ selectionOverride }: ContactFormProps) {
     setValues((current) => ({ ...current, [field]: value }));
   };
 
+  useEffect(() => {
+    if (!auth) {
+      return;
+    }
+
+    return onAuthStateChanged(auth, (nextUser) => {
+      setUser(nextUser);
+      if (nextUser?.email) {
+        setValues((current) => ({
+          ...current,
+          email: current.email || nextUser.email || "",
+          name: current.name || nextUser.displayName || "",
+        }));
+      }
+    });
+  }, [auth]);
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (hasSelectionConflicts || activeSelection.length === 0) {
       return;
     }
+
+    if (firebaseEnabled && auth && !user) {
+      const credential = await signInWithPopup(auth, new GoogleAuthProvider());
+      setUser(credential.user);
+      setValues((current) => ({
+        ...current,
+        email: current.email || credential.user.email || "",
+        name: current.name || credential.user.displayName || "",
+      }));
+    }
+
     setStatus("saving");
     await addReservationsFromSelection(activeSelection, values.projectName || "Reserva confirmada");
     if (!selectionOverride) {
@@ -80,12 +114,16 @@ export function ContactForm({ selectionOverride }: ContactFormProps) {
         Enviar por WhatsApp no bloquea fechas. La no disponibilidad recién se registra cuando confirmás
         la reserva con una seña del 20%: {formatCurrency(pricing.reserveDeposit)}.
         {syncMode === "firebase"
-          ? " Esa reserva se sincroniza en Firebase."
+          ? RESERVATIONS_ENABLED
+            ? " Esa reserva se sincroniza en Firebase."
+            : " Modo prueba activo: al confirmar te pedimos ingresar con Google, pero por ahora no se bloquean fechas en Firebase."
           : " Hasta cargar las claves de Firebase, queda guardada en este navegador."}
       </p>
       {status === "confirmed" && (
         <p className="mt-3 rounded-md border border-gabinete-available/35 bg-gabinete-available/10 px-3 py-2 font-editorial text-sm text-gabinete-available">
-          Reserva confirmada. Las fechas ya quedaron marcadas como no disponibles.
+          {RESERVATIONS_ENABLED
+            ? "Reserva confirmada. Las fechas ya quedaron marcadas como no disponibles."
+            : "Reserva de prueba confirmada. No se bloquearon fechas porque el modo prueba está activo."}
         </p>
       )}
 

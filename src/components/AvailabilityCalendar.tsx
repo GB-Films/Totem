@@ -1,4 +1,5 @@
 import { CalendarDays } from "lucide-react";
+import { RESERVATIONS_ENABLED } from "../config/features";
 import { useAvailability } from "../context/AvailabilityContext";
 import type { Product } from "../types";
 import { buildCalendarDays, formatDateRange, rangesOverlap, todayIso } from "../utils/dates";
@@ -143,7 +144,9 @@ export function AvailabilityCalendar({
       )}
 
       <p className="mt-4 font-editorial text-xs leading-5 text-gabinete-muted">
-        {interactive
+        {!RESERVATIONS_ENABLED
+          ? "Modo prueba activo: las fechas no bloquean el calendario y se puede reservar libremente."
+          : interactive
           ? "Tocá una fecha de inicio y luego una de cierre. Las fechas rojas ya no se pueden reservar."
           : "Las fechas confirmadas se sincronizan con Firebase cuando la nube está configurada."}
       </p>

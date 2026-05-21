@@ -51,6 +51,17 @@ VITE_FIREBASE_APP_ID=
 Colecciones usadas:
 
 - `products`: catálogo sincronizado. Cada documento debe tener la misma forma que los objetos de `src/data/products.ts`; el ID del documento se usa como `product.id`.
-- `reservations`: reservas confirmadas.
+- `adminEmails`: permisos de administración. Cada documento usa como ID el email autorizado y debe tener `{ "active": true }`.
+- `reservations`: reservado para el flujo de reservas. En modo prueba está deshabilitado.
 
-Cada reserva guarda `productId`, `startDate`, `endDate`, `note`, `status: "confirmed"` y `createdAt`. Si las variables no están cargadas, la app usa el catálogo local y almacenamiento local de reservas como fallback para desarrollo y GitHub Pages sigue funcionando.
+El panel de administración vive en `/admin`. Requiere Firebase Authentication con Google y permisos en `adminEmails/{email}`.
+
+Para desplegar reglas:
+
+```bash
+npx firebase-tools deploy --only firestore
+```
+
+Si las variables no están cargadas, la app usa el catálogo local y almacenamiento local como fallback para desarrollo y GitHub Pages sigue funcionando.
+
+Cloud Storage no es obligatorio para esta etapa. El panel permite pegar URLs públicas de imágenes; si más adelante se habilita Storage o un servicio externo de imágenes, se puede reactivar la subida directa.

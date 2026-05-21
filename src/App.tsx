@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { CatalogPage } from "./pages/CatalogPage";
@@ -10,6 +11,15 @@ import { ProductDetailPage } from "./pages/ProductDetailPage";
 import { AboutPage } from "./pages/AboutPage";
 
 const basename = import.meta.env.BASE_URL === "/" ? undefined : import.meta.env.BASE_URL.replace(/\/$/, "");
+const AdminPage = lazy(() => import("./pages/AdminPage").then((module) => ({ default: module.AdminPage })));
+
+function AdminRoute() {
+  return (
+    <Suspense fallback={<div className="admin-page">Cargando panel...</div>}>
+      <AdminPage />
+    </Suspense>
+  );
+}
 
 const router = createBrowserRouter(
   [
@@ -25,6 +35,7 @@ const router = createBrowserRouter(
         { path: "inspiracion", element: <InspirationPage /> },
         { path: "sobre-nosotros", element: <AboutPage /> },
         { path: "contacto", element: <ContactPage /> },
+        { path: "admin", element: <AdminRoute /> },
       ],
     },
   ],

@@ -50,7 +50,7 @@ export function Header() {
         <Link to="/catalogo" aria-label="Buscar">
           <Search size={24} strokeWidth={1.9} />
         </Link>
-        <Link to="/contacto" aria-label="Mi cuenta">
+        <Link to="/admin" aria-label="Administración">
           <UserRound size={23} strokeWidth={1.9} />
         </Link>
         <Link to="/colecciones" aria-label="Favoritos y colecciones">

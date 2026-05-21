@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { addDoc, collection, onSnapshot, serverTimestamp } from "firebase/firestore";
+import { RESERVATIONS_ENABLED } from "../config/features";
 import { getSeedReservations } from "../data/availability";
 import { firebaseEnabled, getFirebaseDb } from "../services/firebase";
 import type { ReservationRange, SelectionItem } from "../types";
@@ -74,7 +75,10 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
   }, []);
 
   const reservations = useMemo(
-    () => [...seedReservations, ...(firebaseEnabled ? firebaseReservations : localReservations)],
+    () =>
+      RESERVATIONS_ENABLED
+        ? [...seedReservations, ...(firebaseEnabled ? firebaseReservations : localReservations)]
+        : [],
     [firebaseReservations, localReservations, seedReservations],
   );
 
@@ -96,6 +100,10 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
 
   const addReservationsFromSelection = useCallback(
     async (selection: SelectionItem[], note = "Reserva confirmada") => {
+      if (!RESERVATIONS_ENABLED) {
+        return;
+      }
+
       const datedSelection = selection.filter((item) => item.startDate && item.endDate);
       if (datedSelection.length === 0) {
         return;

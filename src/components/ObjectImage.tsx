@@ -38,15 +38,23 @@ function ProductIllustration({ id, sigil }: { id: string; sigil: string }) {
 }
 
 export function ObjectImage({ product, compact = false, showLabel = true }: ObjectImageProps) {
+  const uploadedImage = product.images.find((image) => /^https?:\/\//.test(image));
+
   return (
     <div
       className={`object-plate ${compact ? "object-plate-compact" : ""}`}
       aria-label={`Imagen de referencia de ${product.name}`}
       role="img"
     >
-      <div className="object-wall" />
-      <div className="object-floor" />
-      <ProductIllustration id={product.id} sigil={product.visual.sigil} />
+      {uploadedImage ? (
+        <img className="object-photo" src={uploadedImage} alt="" />
+      ) : (
+        <>
+          <div className="object-wall" />
+          <div className="object-floor" />
+          <ProductIllustration id={product.id} sigil={product.visual.sigil} />
+        </>
+      )}
       {showLabel && (
         <div className="object-label">
           <p>{product.id}</p>

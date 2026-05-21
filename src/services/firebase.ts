@@ -15,13 +15,25 @@ export const firebaseEnabled = Object.values(firebaseConfig).every(Boolean);
 let app: FirebaseApp | null = null;
 let db: Firestore | null = null;
 
-export function getFirebaseDb() {
+export function getFirebaseApp() {
   if (!firebaseEnabled) {
     return null;
   }
 
   if (!app) {
     app = getApps()[0] ?? initializeApp(firebaseConfig);
+  }
+
+  return app;
+}
+
+export function getFirebaseDb() {
+  const app = getFirebaseApp();
+  if (!app) {
+    return null;
+  }
+
+  if (!db) {
     db = getFirestore(app);
   }
 
