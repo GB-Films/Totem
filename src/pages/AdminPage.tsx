@@ -23,6 +23,33 @@ import {
 } from "../services/firebase";
 import type { Availability, Product, ProductStatus, ProductVisual } from "../types";
 
+function isUsableImageUrl(image: string) {
+  return /^https?:\/\//.test(image) || /^data:image\//.test(image);
+}
+
+function AdminImagePreview({
+  image,
+  onRemove,
+}: {
+  image: string;
+  onRemove: () => void;
+}) {
+  const [failed, setFailed] = useState(false);
+
+  return (
+    <figure>
+      {failed ? (
+        <div className="admin-image-fallback">Imagen no disponible</div>
+      ) : (
+        <img src={image} alt="" onError={() => setFailed(true)} />
+      )}
+      <button type="button" onClick={onRemove}>
+        Quitar
+      </button>
+    </figure>
+  );
+}
+
 type ProductForm = {
   id: string;
   name: string;
@@ -98,7 +125,7 @@ function toForm(product: Product): ProductForm {
     minimumDeposit: String(product.minimumDeposit),
     featuredScore: String(product.featuredScore),
     internalNotes: product.internalNotes ?? "",
-    images: product.images,
+    images: product.images.filter(isUsableImageUrl),
     visualTone: product.visual.tone,
     visualSigil: product.visual.sigil,
   };
@@ -134,7 +161,7 @@ function toProduct(form: ProductForm): Product {
     minimumDeposit: toNumber(form.minimumDeposit),
     featuredScore: toNumber(form.featuredScore, 50),
     internalNotes: form.internalNotes.trim() || undefined,
-    images: form.images.filter(Boolean),
+    images: form.images.filter(isUsableImageUrl),
     visual: {
       tone: form.visualTone,
       sigil: form.visualSigil.trim() || "‚ú∂",
@@ -230,7 +257,7 @@ export function AdminPage() {
 
   const uploadImage = async (file: File | undefined) => {
     if (!file || !storage || !form.id) {
-      setMessage("Complet· el ID antes de subir im·genes.");
+      setMessage("Complet√° el ID antes de subir im√°genes.");
       return;
     }
 
@@ -240,13 +267,13 @@ export function AdminPage() {
       await uploadBytes(imageRef, file, { contentType: file.type });
       const url = await getDownloadURL(imageRef);
       updateField("images", [url, ...form.images]);
-      setMessage("Imagen subida. Guard· el producto para conservarla en el cat·logo.");
+      setMessage("Imagen subida. Guard√° el producto para conservarla en el cat√°logo.");
     } catch (error) {
       console.error(error);
       const firebaseError = error as { code?: string; message?: string };
       setMessage(
         `No se pudo subir la imagen (${firebaseError.code ?? "error desconocido"}). ${
-          firebaseError.message ?? "Revis· las reglas de Storage y tus permisos de admin."
+          firebaseError.message ?? "Revis√° las reglas de Storage y tus permisos de admin."
         }`,
       );
     } finally {
@@ -432,15 +459,11 @@ export function AdminPage() {
             </div>
             <div className="admin-image-grid">
               {form.images.map((image) => (
-                <figure key={image}>
-                  <img src={image} alt="" />
-                  <button
-                    type="button"
-                    onClick={() => updateField("images", form.images.filter((candidate) => candidate !== image))}
-                  >
-                    Quitar
-                  </button>
-                </figure>
+                <AdminImagePreview
+                  key={image}
+                  image={image}
+                  onRemove={() => updateField("images", form.images.filter((candidate) => candidate !== image))}
+                />
               ))}
             </div>
           </div>
@@ -449,5 +472,6 @@ export function AdminPage() {
     </section>
   );
 }
+
 
 
