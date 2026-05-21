@@ -59,9 +59,9 @@ El panel de administración vive en `/admin`. Requiere Firebase Authentication c
 Para desplegar reglas:
 
 ```bash
-npx firebase-tools deploy --only firestore
+npx firebase-tools deploy --only firestore,storage
 ```
 
 Si las variables no están cargadas, la app usa el catálogo local y almacenamiento local como fallback para desarrollo y GitHub Pages sigue funcionando.
 
-Cloud Storage no es obligatorio para esta etapa. El panel permite pegar URLs públicas de imágenes; si más adelante se habilita Storage o un servicio externo de imágenes, se puede reactivar la subida directa.
+El panel permite subir imágenes a Cloud Storage o pegar URLs públicas de imágenes.

@@ -18,6 +18,8 @@ import {
 } from "firebase/auth";
 import { deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { getStorage } from "firebase/storage";
 import { useCatalog } from "../context/CatalogContext";
 import { categories as fallbackCategories, products as fallbackProducts } from "../data/products";
 import {
@@ -156,10 +158,15 @@ function slugify(value: string) {
     .replace(/(^-|-$)/g, "");
 }
 
+function fileSafeName(name: string) {
+  return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]+/g, "-");
+}
+
 export function AdminPage() {
   const app = getFirebaseApp();
   const auth = app ? getAuth(app) : null;
   const db = getFirebaseDb();
+  const storage = app ? getStorage(app) : null;
   const { products, syncMode } = useCatalog();
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -168,6 +175,7 @@ export function AdminPage() {
   const [form, setForm] = useState<ProductForm>(emptyForm);
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const sortedProducts = useMemo(
     () => [...products].sort((a, b) => a.name.localeCompare(b.name)),
@@ -251,6 +259,21 @@ export function AdminPage() {
     updateField("images", [url, ...form.images]);
     setImageUrl("");
     setMessage("Imagen agregada. Guardá el producto para conservarla en el catálogo.");
+  };
+
+  const uploadImage = async (file: File | undefined) => {
+    if (!file || !storage || !form.id) {
+      setMessage("Completá el ID antes de subir imágenes.");
+      return;
+    }
+
+    setUploading(true);
+    const imageRef = ref(storage, `products/${form.id}/${Date.now()}-${fileSafeName(file.name)}`);
+    await uploadBytes(imageRef, file, { contentType: file.type });
+    const url = await getDownloadURL(imageRef);
+    updateField("images", [url, ...form.images]);
+    setUploading(false);
+    setMessage("Imagen subida. Guardá el producto para conservarla en el catálogo.");
   };
 
   const seedCatalog = async () => {
@@ -403,6 +426,11 @@ export function AdminPage() {
           <label className="admin-wide">Notas internas<textarea className="gabinete-input" rows={3} value={form.internalNotes} onChange={(event) => updateField("internalNotes", event.target.value)} /></label>
 
           <div className="admin-images">
+            <label className="admin-upload">
+              <ImagePlus size={18} />
+              {uploading ? "Subiendo..." : "Subir archivo"}
+              <input type="file" accept="image/*" onChange={(event) => uploadImage(event.target.files?.[0])} />
+            </label>
             <div className="admin-image-url">
               <label>
                 URL pública de imagen
