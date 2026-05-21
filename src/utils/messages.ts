@@ -38,24 +38,24 @@ export function buildContactMessage(
 ) {
   const pricing = calculateSelectionPricing(products, selection);
   return [
-    "Hola, EL GABINETE. Quiero consultar disponibilidad para una selección de props.",
+    "Hola, EL GABINETE. Quiero avanzar con esta reserva de props.",
     "",
-    `Nombre: ${values.name || "-"}`,
-    `Productora / Empresa: ${values.company || "-"}`,
-    `Email: ${values.email || "-"}`,
-    `Teléfono: ${values.phone || "-"}`,
-    `Proyecto: ${values.projectName || "-"}`,
-    `Tipo de proyecto: ${values.projectType || "-"}`,
-    `Fechas generales: ${values.dates || "-"}`,
+    ...(values.name || values.email
+      ? [
+          "Datos de contacto:",
+          ...(values.name ? [`Nombre: ${values.name}`] : []),
+          ...(values.email ? [`Email: ${values.email}`] : []),
+          "",
+        ]
+      : []),
     "",
     "Productos seleccionados:",
     buildSelectionSummary(products, selection),
     "",
     `Alquiler estimado: ${formatCurrency(pricing.rentalTotal)}`,
+    `Seña estimada 20%: ${formatCurrency(pricing.reserveDeposit)}`,
     `Garantía reintegrable estimada: ${formatCurrency(pricing.guaranteeAmount)}`,
     `Total estimado general: ${formatCurrency(pricing.totalEstimated)}`,
-    "",
-    `Mensaje: ${values.message || "-"}`,
   ].join("\n");
 }
 

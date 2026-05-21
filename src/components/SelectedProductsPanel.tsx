@@ -6,10 +6,14 @@ import { useSelection } from "../context/SelectionContext";
 import { formatCurrency } from "../utils/format";
 import { addDaysIso, formatDateRange, getInclusiveDays, todayIso } from "../utils/dates";
 import { calculateProductPricing } from "../utils/pricing";
-import { AvailabilityCalendar } from "./AvailabilityCalendar";
+import { ObjectImage } from "./ObjectImage";
 import { RentalCalculator } from "./RentalCalculator";
 
-export function SelectedProductsPanel() {
+interface SelectedProductsPanelProps {
+  showAction?: boolean;
+}
+
+export function SelectedProductsPanel({ showAction = true }: SelectedProductsPanelProps) {
   const {
     selection,
     updateQuantity,
@@ -66,11 +70,17 @@ export function SelectedProductsPanel() {
               const conflict = hasConflict(product.id, startDate, endDate);
               return (
                 <div key={product.id} className="rounded-md border border-gabinete-line/25 bg-gabinete-paperLight/18 p-3">
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="grid gap-3 sm:grid-cols-[128px_1fr_auto]">
+                    <div className="overflow-hidden rounded-md border border-gabinete-line/25">
+                      <ObjectImage product={product} compact showLabel={false} />
+                    </div>
                     <div>
                       <p className="font-display text-lg text-gabinete-darkBrown">{product.name}</p>
                       <p className="mt-1 text-xs text-gabinete-muted">
                         {product.id} · {formatCurrency(product.rentalPricePerDay)} / día
+                      </p>
+                      <p className="mt-2 font-editorial text-sm text-gabinete-muted">
+                        {formatDateRange(startDate, endDate)}
                       </p>
                     </div>
                     <button
@@ -117,7 +127,10 @@ export function SelectedProductsPanel() {
                         type="number"
                         min={1}
                         value={getInclusiveDays(startDate, endDate)}
-                        readOnly
+                        onChange={(event) => {
+                          const nextDays = Math.max(1, Number(event.target.value) || 1);
+                          updateRentalDates(product.id, startDate, addDaysIso(startDate, nextDays - 1));
+                        }}
                         className="gabinete-input mt-1 p-2 text-center text-sm"
                       />
                     </label>
@@ -159,14 +172,6 @@ export function SelectedProductsPanel() {
                       ? "Estas fechas se pisan con una reserva confirmada."
                       : `Fechas libres: ${formatDateRange(startDate, endDate)}.`}
                   </p>
-                  <div className="mt-3">
-                    <AvailabilityCalendar
-                      product={product}
-                      startDate={startDate}
-                      endDate={endDate}
-                      compact
-                    />
-                  </div>
                   <p className="mt-3 text-right text-sm text-gabinete-muted">
                     Estimado:{" "}
                     <strong className="font-display text-gabinete-darkBrown">
@@ -181,11 +186,11 @@ export function SelectedProductsPanel() {
                 Para confirmar la reserva necesitás elegir fechas libres para todos los objetos.
               </p>
             )}
-            {canPrepareRental ? (
+            {showAction && canPrepareRental ? (
               <Link to="/contacto" className="gabinete-button w-full px-4 py-3">
                 Confirmar reserva
               </Link>
-            ) : (
+            ) : showAction ? (
               <button
                 type="button"
                 disabled
@@ -193,7 +198,7 @@ export function SelectedProductsPanel() {
               >
                 Alquiler no disponible
               </button>
-            )}
+            ) : null}
           </div>
         )}
       </section>
