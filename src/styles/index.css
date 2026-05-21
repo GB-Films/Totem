@@ -2058,6 +2058,19 @@ footer {
   color: var(--available);
   font-size: .9rem;
 }
+.admin-auth-debug {
+  display: grid;
+  gap: .35rem;
+  padding: .75rem .9rem;
+  border: 1px solid rgba(197, 160, 89, .22);
+  border-radius: 10px;
+  background: rgba(15, 20, 35, .08);
+  font-size: .78rem;
+  overflow-wrap: anywhere;
+}
+.admin-auth-debug p {
+  margin: 0;
+}
 .admin-layout {
   display: grid;
   grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);

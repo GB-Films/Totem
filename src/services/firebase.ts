@@ -11,6 +11,7 @@ const firebaseConfig = {
 };
 
 export const firebaseEnabled = Object.values(firebaseConfig).every(Boolean);
+export const publicFirebaseConfig = firebaseConfig;
 
 let app: FirebaseApp | null = null;
 let db: Firestore | null = null;

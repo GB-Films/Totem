@@ -26,6 +26,7 @@ import {
   firebaseEnabled,
   getFirebaseApp,
   getFirebaseDb,
+  publicFirebaseConfig,
 } from "../services/firebase";
 import type { Availability, Product, ProductStatus, ProductVisual } from "../types";
 
@@ -217,7 +218,12 @@ export function AdminPage() {
       await signInWithPopup(auth, new GoogleAuthProvider());
     } catch (error) {
       console.error(error);
-      setMessage("No se pudo abrir el login de Google. Revisá que el dominio esté autorizado en Firebase Auth.");
+      const firebaseError = error as { code?: string; message?: string };
+      setMessage(
+        `No se pudo abrir el login de Google (${firebaseError.code ?? "error desconocido"}). ${
+          firebaseError.message ?? "Revisá que el dominio esté autorizado en Firebase Auth."
+        }`,
+      );
     }
   };
 
@@ -312,6 +318,12 @@ export function AdminPage() {
           <p className="eyebrow">Admin</p>
           <h1>Ingresar al catálogo</h1>
           <p>Usá la cuenta de Google autorizada para editar productos y administrar el catálogo.</p>
+          <div className="admin-auth-debug">
+            <p><strong>Dominio actual:</strong> {window.location.hostname}</p>
+            <p><strong>Auth domain:</strong> {publicFirebaseConfig.authDomain || "sin configurar"}</p>
+            <p><strong>Project ID:</strong> {publicFirebaseConfig.projectId || "sin configurar"}</p>
+          </div>
+          {message && <p className="admin-message">{message}</p>}
           <button type="submit" className="gabinete-button">
             <Lock size={17} />
             Entrar con Google
