@@ -1,0 +1,33 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isDateString(value) {
+      return value is string && value.matches('^\\d{4}-\\d{2}-\\d{2}$');
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /reservations/{reservationId} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly([
+          'productId',
+          'startDate',
+          'endDate',
+          'note',
+          'status',
+          'createdAt'
+        ])
+        && request.resource.data.productId is string
+        && isDateString(request.resource.data.startDate)
+        && isDateString(request.resource.data.endDate)
+        && request.resource.data.status == 'confirmed'
+        && (!('note' in request.resource.data) || request.resource.data.note is string)
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
+  }
+}
