@@ -12,7 +12,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   GoogleAuthProvider,
   onAuthStateChanged,
-  signInWithRedirect,
+  signInWithPopup,
   signOut,
   type User,
 } from "firebase/auth";
@@ -213,7 +213,12 @@ export function AdminPage() {
     event.preventDefault();
     if (!auth) return;
     setMessage("");
-    await signInWithRedirect(auth, new GoogleAuthProvider());
+    try {
+      await signInWithPopup(auth, new GoogleAuthProvider());
+    } catch (error) {
+      console.error(error);
+      setMessage("No se pudo abrir el login de Google. Revisá que el dominio esté autorizado en Firebase Auth.");
+    }
   };
 
   const newProduct = () => {

@@ -1,6 +1,6 @@
 import { CheckCircle2, MessageCircle } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithRedirect, type User } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, type User } from "firebase/auth";
 import { useAvailability } from "../context/AvailabilityContext";
 import { useCatalog } from "../context/CatalogContext";
 import { RESERVATIONS_ENABLED } from "../config/features";
@@ -24,6 +24,7 @@ export function ContactForm({ selection }: ContactFormProps) {
   const { products } = useCatalog();
   const [status, setStatus] = useState<"idle" | "saving" | "confirmed">("idle");
   const [user, setUser] = useState<User | null>(null);
+  const [authError, setAuthError] = useState("");
   const message = useMemo(
     () =>
       buildContactMessage(
@@ -62,7 +63,13 @@ export function ContactForm({ selection }: ContactFormProps) {
     }
 
     if (firebaseEnabled && auth && !user) {
-      await signInWithRedirect(auth, new GoogleAuthProvider());
+      try {
+        setAuthError("");
+        await signInWithPopup(auth, new GoogleAuthProvider());
+      } catch (error) {
+        console.error(error);
+        setAuthError("No se pudo abrir el login de Google. Revisá que el dominio esté autorizado en Firebase Auth.");
+      }
       return;
     }
 
@@ -108,6 +115,11 @@ export function ContactForm({ selection }: ContactFormProps) {
             Hablar por WhatsApp
           </a>
         </div>
+      )}
+      {authError && (
+        <p className="mt-3 rounded-md border border-gabinete-error/35 bg-gabinete-error/10 px-3 py-2 text-sm text-gabinete-error">
+          {authError}
+        </p>
       )}
 
       <div className="mt-5 grid gap-3">
