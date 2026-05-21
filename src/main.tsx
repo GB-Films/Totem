@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { App } from "./App";
+import { AuthProvider } from "./context/AuthContext";
 import { AvailabilityProvider } from "./context/AvailabilityContext";
 import { CatalogProvider } from "./context/CatalogContext";
 import { SelectionProvider } from "./context/SelectionContext";
@@ -8,12 +9,14 @@ import "./styles/index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <CatalogProvider>
-      <AvailabilityProvider>
-        <SelectionProvider>
-          <App />
-        </SelectionProvider>
-      </AvailabilityProvider>
-    </CatalogProvider>
+    <AuthProvider>
+      <CatalogProvider>
+        <AvailabilityProvider>
+          <SelectionProvider>
+            <App />
+          </SelectionProvider>
+        </AvailabilityProvider>
+      </CatalogProvider>
+    </AuthProvider>
   </React.StrictMode>,
 );

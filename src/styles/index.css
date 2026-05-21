@@ -267,8 +267,19 @@ input, select, textarea { font: inherit; }
 .site-nav-link:hover::after,
 .site-nav-link.is-active::after { width: 44px; }
 .site-actions { display: flex; align-items: center; justify-content: flex-end; gap: 1.45rem; color: var(--ink); }
-.site-actions a { display: grid; place-items: center; opacity: .98; }
-.site-actions a:hover { transform: translateY(-1px); color: var(--accent); }
+.site-actions a,
+.site-actions button {
+  display: grid;
+  place-items: center;
+  opacity: .98;
+  color: inherit;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+.site-actions a:hover,
+.site-actions button:hover { transform: translateY(-1px); color: var(--accent); }
 .cart-action { position: relative; }
 .cart-action span {
   position: absolute;

@@ -8,18 +8,11 @@ import {
   Trash2,
   UploadCloud,
 } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useState } from "react";
-import {
-  GoogleAuthProvider,
-  onAuthStateChanged,
-  signInWithPopup,
-  signOut,
-  type User,
-} from "firebase/auth";
-import { deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { FormEvent, useMemo, useState } from "react";
+import { deleteDoc, doc, setDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { getStorage } from "firebase/storage";
+import { useAuth } from "../context/AuthContext";
 import { useCatalog } from "../context/CatalogContext";
 import { categories as fallbackCategories, products as fallbackProducts } from "../data/products";
 import {
@@ -165,13 +158,10 @@ function fileSafeName(name: string) {
 
 export function AdminPage() {
   const app = getFirebaseApp();
-  const auth = app ? getAuth(app) : null;
   const db = getFirebaseDb();
   const storage = app ? getStorage(app) : null;
+  const { user, isAdmin, checkingAdmin, loginWithGoogle, logout, authError } = useAuth();
   const { products, syncMode } = useCatalog();
-  const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [checkingAdmin, setCheckingAdmin] = useState(true);
   const [imageUrl, setImageUrl] = useState("");
   const [form, setForm] = useState<ProductForm>(emptyForm);
   const [message, setMessage] = useState("");
@@ -183,48 +173,14 @@ export function AdminPage() {
     [products],
   );
 
-  useEffect(() => {
-    if (!auth || !db) {
-      setCheckingAdmin(false);
-      return;
-    }
-
-    return onAuthStateChanged(auth, async (nextUser) => {
-      setUser(nextUser);
-      setIsAdmin(false);
-      setCheckingAdmin(Boolean(nextUser));
-
-      if (!nextUser) {
-        setCheckingAdmin(false);
-        return;
-      }
-
-      const adminEmail = nextUser.email ?? "";
-      const adminDoc = adminEmail ? await getDoc(doc(db, "adminEmails", adminEmail)) : null;
-      setIsAdmin(Boolean(adminDoc?.exists() && adminDoc.data().active === true));
-      setCheckingAdmin(false);
-    });
-  }, [auth, db]);
-
   const updateField = <K extends keyof ProductForm>(field: K, value: ProductForm[K]) => {
     setForm((current) => ({ ...current, [field]: value }));
   };
 
   const login = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!auth) return;
     setMessage("");
-    try {
-      await signInWithPopup(auth, new GoogleAuthProvider());
-    } catch (error) {
-      console.error(error);
-      const firebaseError = error as { code?: string; message?: string };
-      setMessage(
-        `No se pudo abrir el login de Google (${firebaseError.code ?? "error desconocido"}). ${
-          firebaseError.message ?? "Revis√° que el dominio est√© autorizado en Firebase Auth."
-        }`,
-      );
-    }
+    await loginWithGoogle();
   };
 
   const newProduct = () => {
@@ -274,17 +230,28 @@ export function AdminPage() {
 
   const uploadImage = async (file: File | undefined) => {
     if (!file || !storage || !form.id) {
-      setMessage("Complet√° el ID antes de subir im√°genes.");
+      setMessage("Complet· el ID antes de subir im·genes.");
       return;
     }
 
-    setUploading(true);
-    const imageRef = ref(storage, `products/${form.id}/${Date.now()}-${fileSafeName(file.name)}`);
-    await uploadBytes(imageRef, file, { contentType: file.type });
-    const url = await getDownloadURL(imageRef);
-    updateField("images", [url, ...form.images]);
-    setUploading(false);
-    setMessage("Imagen subida. Guard√° el producto para conservarla en el cat√°logo.");
+    try {
+      setUploading(true);
+      const imageRef = ref(storage, `products/${form.id}/${Date.now()}-${fileSafeName(file.name)}`);
+      await uploadBytes(imageRef, file, { contentType: file.type });
+      const url = await getDownloadURL(imageRef);
+      updateField("images", [url, ...form.images]);
+      setMessage("Imagen subida. Guard· el producto para conservarla en el cat·logo.");
+    } catch (error) {
+      console.error(error);
+      const firebaseError = error as { code?: string; message?: string };
+      setMessage(
+        `No se pudo subir la imagen (${firebaseError.code ?? "error desconocido"}). ${
+          firebaseError.message ?? "Revis· las reglas de Storage y tus permisos de admin."
+        }`,
+      );
+    } finally {
+      setUploading(false);
+    }
   };
 
   const seedCatalog = async () => {
@@ -298,7 +265,7 @@ export function AdminPage() {
     setMessage("Cat√°logo local cargado en Firestore.");
   };
 
-  if (!firebaseEnabled || !auth || !db) {
+  if (!firebaseEnabled || !db) {
     return (
       <section className="admin-page">
         <div className="admin-card">
@@ -323,7 +290,7 @@ export function AdminPage() {
             <p><strong>Auth domain:</strong> {publicFirebaseConfig.authDomain || "sin configurar"}</p>
             <p><strong>Project ID:</strong> {publicFirebaseConfig.projectId || "sin configurar"}</p>
           </div>
-          {message && <p className="admin-message">{message}</p>}
+          {(message || authError) && <p className="admin-message">{message || authError}</p>}
           <button type="submit" className="gabinete-button">
             <Lock size={17} />
             Entrar con Google
@@ -344,7 +311,7 @@ export function AdminPage() {
           <p className="eyebrow">Sin permiso</p>
           <h1>Tu usuario no es administrador</h1>
           <p>Ped√≠ que agreguen este email en Firestore: <strong>{user.email}</strong></p>
-          <button type="button" className="gabinete-button-secondary" onClick={() => auth && signOut(auth)}>
+          <button type="button" className="gabinete-button-secondary" onClick={logout}>
             <LogOut size={17} />
             Salir
           </button>
@@ -366,7 +333,7 @@ export function AdminPage() {
             <UploadCloud size={17} />
             Subir cat√°logo local
           </button>
-          <button type="button" className="gabinete-button-secondary" onClick={() => auth && signOut(auth)}>
+          <button type="button" className="gabinete-button-secondary" onClick={logout}>
             <LogOut size={17} />
             Salir
           </button>
@@ -482,3 +449,5 @@ export function AdminPage() {
     </section>
   );
 }
+
+

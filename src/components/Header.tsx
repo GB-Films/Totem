@@ -1,5 +1,6 @@
-import { Heart, Search, ShoppingCart, UserRound } from "lucide-react";
+import { Heart, LayoutDashboard, LogOut, Search, ShoppingCart, UserRound } from "lucide-react";
 import { NavLink, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { useSelection } from "../context/SelectionContext";
 
 const navItems = [
@@ -27,6 +28,7 @@ function CabinetLogo() {
 
 export function Header() {
   const { totalItems } = useSelection();
+  const { user, isAdmin, checkingAdmin, loginWithGoogle, logout } = useAuth();
 
   return (
     <header className="site-header">
@@ -50,9 +52,25 @@ export function Header() {
         <Link to="/catalogo" aria-label="Buscar">
           <Search size={24} strokeWidth={1.9} />
         </Link>
-        <Link to="/admin" aria-label="Administración">
-          <UserRound size={23} strokeWidth={1.9} />
-        </Link>
+        {isAdmin && (
+          <Link to="/admin" aria-label="Panel de administración" title="Panel de administración">
+            <LayoutDashboard size={23} strokeWidth={1.9} />
+          </Link>
+        )}
+        {user ? (
+          <button type="button" aria-label="Cerrar sesión" title={user.email ?? "Cerrar sesión"} onClick={logout}>
+            <LogOut size={23} strokeWidth={1.9} />
+          </button>
+        ) : (
+          <button
+            type="button"
+            aria-label="Ingresar con Google"
+            title={checkingAdmin ? "Verificando sesión" : "Ingresar con Google"}
+            onClick={loginWithGoogle}
+          >
+            <UserRound size={23} strokeWidth={1.9} />
+          </button>
+        )}
         <Link to="/colecciones" aria-label="Favoritos y colecciones">
           <Heart size={24} strokeWidth={1.9} />
         </Link>
