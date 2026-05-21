@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>EL GABINETE | Admin</title>
+    <script>
+      var path = window.location.pathname;
+      var parts = path.split("/").filter(Boolean);
+      var repo = parts[0] || "";
+      var base = repo ? "/" + repo + "/" : "/";
+      window.location.replace(base + "?redirect=%2Fadmin");
+    </script>
+  </head>
+  <body></body>
+</html>
