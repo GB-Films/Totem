@@ -75,10 +75,7 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
   }, []);
 
   const reservations = useMemo(
-    () =>
-      RESERVATIONS_ENABLED
-        ? [...seedReservations, ...(firebaseEnabled ? firebaseReservations : localReservations)]
-        : [],
+    () => (firebaseEnabled ? firebaseReservations : RESERVATIONS_ENABLED ? [...seedReservations, ...localReservations] : []),
     [firebaseReservations, localReservations, seedReservations],
   );
 

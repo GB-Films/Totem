@@ -1,8 +1,9 @@
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+import { useMemo, useState } from "react";
 import { RESERVATIONS_ENABLED } from "../config/features";
 import { useAvailability } from "../context/AvailabilityContext";
 import type { Product } from "../types";
-import { buildCalendarDays, formatDateRange, rangesOverlap, todayIso } from "../utils/dates";
+import { formatDateRange, parseIsoDate, rangesOverlap, todayIso, toIsoDate } from "../utils/dates";
 
 interface AvailabilityCalendarProps {
   product: Product;
@@ -10,6 +11,39 @@ interface AvailabilityCalendarProps {
   endDate?: string;
   compact?: boolean;
   onRangeChange?: (startDate: string, endDate: string) => void;
+}
+
+const weekdays = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+function monthStart(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function addMonths(date: Date, amount: number) {
+  return new Date(date.getFullYear(), date.getMonth() + amount, 1);
+}
+
+function buildMonthDays(month: Date) {
+  const first = monthStart(month);
+  const startOffset = (first.getDay() + 6) % 7;
+  const gridStart = new Date(first);
+  gridStart.setDate(first.getDate() - startOffset);
+
+  return Array.from({ length: 42 }, (_, index) => {
+    const date = new Date(gridStart);
+    date.setDate(gridStart.getDate() + index);
+    return {
+      iso: toIsoDate(date),
+      inMonth: date.getMonth() === first.getMonth(),
+    };
+  });
+}
+
+function formatMonth(date: Date) {
+  return new Intl.DateTimeFormat("es-AR", {
+    month: "long",
+    year: "numeric",
+  }).format(date);
 }
 
 export function AvailabilityCalendar({
@@ -21,7 +55,11 @@ export function AvailabilityCalendar({
 }: AvailabilityCalendarProps) {
   const { getProductReservations } = useAvailability();
   const reservations = getProductReservations(product.id);
-  const days = buildCalendarDays(todayIso(), compact ? 28 : 42);
+  const today = todayIso();
+  const [visibleMonth, setVisibleMonth] = useState(() =>
+    monthStart(startDate ? parseIsoDate(startDate) : parseIsoDate(today)),
+  );
+  const days = useMemo(() => buildMonthDays(visibleMonth), [visibleMonth]);
   const hasSelectedRange = Boolean(startDate && endDate);
   const interactive = Boolean(onRangeChange);
 
@@ -31,7 +69,7 @@ export function AvailabilityCalendar({
     );
 
   const selectDay = (day: string) => {
-    if (!onRangeChange || rangeHasReservation(day, day)) {
+    if (!onRangeChange || day < today || rangeHasReservation(day, day)) {
       return;
     }
 
@@ -65,59 +103,73 @@ export function AvailabilityCalendar({
         </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-7 gap-1.5">
-        {["L", "M", "M", "J", "V", "S", "D"].map((day, index) => (
-          <span
-            key={`${day}-${index}`}
-            className="text-center font-display text-[11px] uppercase text-gabinete-faint"
-          >
+      <div className="calendar-month-bar">
+        <button type="button" onClick={() => setVisibleMonth((current) => addMonths(current, -1))}>
+          <ChevronLeft size={18} />
+        </button>
+        <strong>{formatMonth(visibleMonth)}</strong>
+        <button type="button" onClick={() => setVisibleMonth((current) => addMonths(current, 1))}>
+          <ChevronRight size={18} />
+        </button>
+      </div>
+
+      <div className={`availability-calendar-grid ${compact ? "is-compact" : ""}`}>
+        {weekdays.map((day) => (
+          <span key={day} className="calendar-weekday">
             {day}
           </span>
         ))}
-        {days.map((day) => {
+        {days.map(({ iso, inMonth }) => {
           const reserved = reservations.some((reservation) =>
-            rangesOverlap(day, day, reservation.startDate, reservation.endDate),
+            rangesOverlap(iso, iso, reservation.startDate, reservation.endDate),
           );
-          const selected = hasSelectedRange && rangesOverlap(day, day, startDate, endDate);
+          const selected = hasSelectedRange && rangesOverlap(iso, iso, startDate, endDate);
+          const selectedStart = selected && iso === startDate;
+          const selectedEnd = selected && iso === endDate;
+          const past = iso < today;
+          const disabled = reserved || past;
 
-          const dayClass = `grid aspect-square place-items-center rounded-md border text-xs transition ${
-            reserved
-              ? "border-gabinete-error/35 bg-gabinete-error/12 text-gabinete-error"
-              : selected
-                ? "border-gabinete-available/45 bg-gabinete-available/14 text-gabinete-available"
-                : "border-gabinete-line/18 bg-gabinete-paperLight/18 text-gabinete-muted"
-          } ${interactive && !reserved ? "cursor-pointer hover:border-gabinete-brown hover:text-gabinete-darkBrown" : ""}`;
+          const dayClass = [
+            "calendar-day",
+            !inMonth ? "is-outside" : "",
+            past ? "is-past" : "",
+            reserved ? "is-reserved" : "",
+            selected ? "is-selected" : "",
+            selectedStart ? "is-start" : "",
+            selectedEnd ? "is-end" : "",
+            interactive && !disabled ? "is-clickable" : "",
+          ].filter(Boolean).join(" ");
 
           return interactive ? (
             <button
-              key={day}
+              key={iso}
               type="button"
-              title={day}
-              disabled={reserved}
-              onClick={() => selectDay(day)}
+              title={iso}
+              disabled={disabled}
+              onClick={() => selectDay(iso)}
               className={dayClass}
             >
-              {Number(day.slice(-2))}
+              {Number(iso.slice(-2))}
             </button>
           ) : (
-            <span key={day} title={day} className={dayClass}>
-              {Number(day.slice(-2))}
+            <span key={iso} title={iso} className={dayClass}>
+              {Number(iso.slice(-2))}
             </span>
           );
         })}
       </div>
 
-      <div className="mt-5 flex flex-wrap gap-3 text-xs text-gabinete-muted">
+      <div className="calendar-legend">
         <span className="inline-flex items-center gap-2">
-          <span className="h-3 w-3 rounded-sm border border-gabinete-line/25 bg-gabinete-paperLight/30" />
+          <span className="calendar-key is-free" />
           Libre
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="h-3 w-3 rounded-sm border border-gabinete-error/35 bg-gabinete-error/12" />
-          Solicitado
+          <span className="calendar-key is-reserved" />
+          No disponible
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="h-3 w-3 rounded-sm border border-gabinete-available/45 bg-gabinete-available/14" />
+          <span className="calendar-key is-selected" />
           Tu selección
         </span>
       </div>
@@ -145,9 +197,9 @@ export function AvailabilityCalendar({
 
       <p className="mt-4 font-editorial text-xs leading-5 text-gabinete-muted">
         {!RESERVATIONS_ENABLED
-          ? "Modo prueba activo: las fechas no bloquean el calendario y se puede reservar libremente."
+          ? "Modo prueba activo: no se graban nuevas reservas al confirmar. Los días no disponibles vienen de la nube."
           : interactive
-          ? "Tocá una fecha de inicio y luego una de cierre. Las fechas rojas ya no se pueden reservar."
+          ? "Tocá una fecha de inicio y luego una de cierre. Los días marcados como no disponibles salen de la nube."
           : "Las fechas confirmadas se sincronizan con Firebase cuando la nube está configurada."}
       </p>
     </section>

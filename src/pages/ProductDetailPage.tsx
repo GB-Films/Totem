@@ -27,6 +27,7 @@ export function ProductDetailPage() {
   const { addProduct } = useSelection();
   const { hasConflict } = useAvailability();
   const [selectedDates, setSelectedDates] = useState<{ startDate?: string; endDate?: string }>({});
+  const [addedMessage, setAddedMessage] = useState(false);
 
   if (!product) {
     return (
@@ -167,6 +168,8 @@ export function ProductDetailPage() {
               onClick={() => {
                 if (selectedDates.startDate && selectedDates.endDate) {
                   addProduct(product, selectedDates.startDate, selectedDates.endDate);
+                  setAddedMessage(true);
+                  window.setTimeout(() => setAddedMessage(false), 1800);
                 }
               }}
               className="gabinete-button px-4 py-3 disabled:cursor-not-allowed disabled:opacity-50"
@@ -183,6 +186,11 @@ export function ProductDetailPage() {
               <MessageCircle size={18} />
               Enviar por WhatsApp
             </a>
+            {addedMessage && (
+              <p className="rounded-md border border-gabinete-available/35 bg-gabinete-available/10 px-3 py-2 text-center font-editorial text-sm text-gabinete-available sm:col-span-2">
+                Agregado
+              </p>
+            )}
           </div>
         </section>
       </div>
