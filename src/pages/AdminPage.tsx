@@ -12,7 +12,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   GoogleAuthProvider,
   onAuthStateChanged,
-  signInWithPopup,
+  signInWithRedirect,
   signOut,
   type User,
 } from "firebase/auth";
@@ -205,7 +205,7 @@ export function AdminPage() {
     event.preventDefault();
     if (!auth) return;
     setMessage("");
-    await signInWithPopup(auth, new GoogleAuthProvider());
+    await signInWithRedirect(auth, new GoogleAuthProvider());
   };
 
   const newProduct = () => {
