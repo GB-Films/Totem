@@ -39,7 +39,16 @@ export function CatalogProvider({ children }: PropsWithChildren) {
     });
   }, []);
 
-  const products = firebaseEnabled && firebaseProducts.length > 0 ? firebaseProducts : fallbackProducts;
+  const products = useMemo(() => {
+    if (!firebaseEnabled || firebaseProducts.length === 0) {
+      return fallbackProducts;
+    }
+
+    const productsById = new Map(fallbackProducts.map((product) => [product.id, product]));
+    firebaseProducts.forEach((product) => productsById.set(product.id, product));
+    return Array.from(productsById.values()).sort((a, b) => b.featuredScore - a.featuredScore);
+  }, [firebaseProducts]);
+
   const categories = useMemo(() => getCategories(products), [products]);
   const availableTags = useMemo(() => getTags(products), [products]);
 

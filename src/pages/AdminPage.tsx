@@ -9,7 +9,7 @@ import {
   UploadCloud,
 } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
-import { deleteDoc, doc, setDoc } from "firebase/firestore";
+import { deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { getStorage } from "firebase/storage";
 import { useAuth } from "../context/AuthContext";
@@ -302,14 +302,44 @@ export function AdminPage() {
   };
 
   const seedCatalog = async () => {
-    if (!db || !isAdmin || !window.confirm("¿Cargar el catálogo local actual en Firestore?")) {
+    if (!db || !isAdmin || !window.confirm("¿Restaurar en Firestore los productos base que falten? No se pisan productos ya editados.")) {
       return;
     }
 
-    setSaving(true);
-    await Promise.all(fallbackProducts.map((product) => setDoc(doc(db, "products", product.id), product)));
-    setSaving(false);
-    setMessage("Catálogo local cargado en Firestore.");
+    try {
+      setSaving(true);
+      let created = 0;
+
+      await Promise.all(
+        fallbackProducts.map(async (product) => {
+          const productRef = doc(db, "products", product.id);
+          const existingProduct = await getDoc(productRef);
+
+          if (existingProduct.exists()) {
+            return;
+          }
+
+          await setDoc(productRef, product);
+          created += 1;
+        }),
+      );
+
+      setMessage(
+        created > 0
+          ? `Catálogo base restaurado. Se agregaron ${created} productos.`
+          : "Firestore ya tenía todos los productos base.",
+      );
+    } catch (error) {
+      console.error(error);
+      const firebaseError = error as { code?: string; message?: string };
+      setMessage(
+        `No se pudo restaurar el catálogo base (${firebaseError.code ?? "error desconocido"}). ${
+          firebaseError.message ?? "Revisá tus permisos de admin."
+        }`,
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (!firebaseEnabled || !db) {
@@ -378,7 +408,7 @@ export function AdminPage() {
         <div className="admin-actions">
           <button type="button" className="gabinete-button-secondary" onClick={seedCatalog} disabled={saving}>
             <UploadCloud size={17} />
-            Subir catálogo local
+            Restaurar catálogo base
           </button>
           <button type="button" className="gabinete-button-secondary" onClick={logout}>
             <LogOut size={17} />
