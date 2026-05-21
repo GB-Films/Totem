@@ -1,5 +1,8 @@
 import {
+  CalendarDays,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   ImagePlus,
   Lock,
   LogOut,
@@ -13,6 +16,7 @@ import { deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { getStorage } from "firebase/storage";
 import { useAuth } from "../context/AuthContext";
+import { useAvailability } from "../context/AvailabilityContext";
 import { useCatalog } from "../context/CatalogContext";
 import { categories as fallbackCategories, products as fallbackProducts } from "../data/products";
 import {
@@ -22,6 +26,7 @@ import {
   publicFirebaseConfig,
 } from "../services/firebase";
 import type { Availability, Product, ProductStatus, ProductVisual } from "../types";
+import { formatDateRange, parseIsoDate, rangesOverlap, todayIso, toIsoDate } from "../utils/dates";
 
 function isUsableImageUrl(image: string) {
   return /^https?:\/\//.test(image) || /^data:image\//.test(image);
@@ -190,6 +195,137 @@ function slugify(value: string) {
 
 function fileSafeName(name: string) {
   return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]+/g, "-");
+}
+
+const adminWeekdays = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+function monthStart(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function addMonths(date: Date, amount: number) {
+  return new Date(date.getFullYear(), date.getMonth() + amount, 1);
+}
+
+function buildMonthDays(month: Date) {
+  const first = monthStart(month);
+  const startOffset = (first.getDay() + 6) % 7;
+  const gridStart = new Date(first);
+  gridStart.setDate(first.getDate() - startOffset);
+
+  return Array.from({ length: 42 }, (_, index) => {
+    const date = new Date(gridStart);
+    date.setDate(gridStart.getDate() + index);
+    return {
+      iso: toIsoDate(date),
+      inMonth: date.getMonth() === first.getMonth(),
+    };
+  });
+}
+
+function formatMonth(date: Date) {
+  return new Intl.DateTimeFormat("es-AR", {
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+function AdminReservationsCalendar({ products }: { products: Product[] }) {
+  const { reservations, syncMode } = useAvailability();
+  const [visibleMonth, setVisibleMonth] = useState(() => monthStart(parseIsoDate(todayIso())));
+  const days = useMemo(() => buildMonthDays(visibleMonth), [visibleMonth]);
+  const productsById = useMemo(() => new Map(products.map((product) => [product.id, product])), [products]);
+  const monthStartIso = toIsoDate(monthStart(visibleMonth));
+  const monthEndIso = toIsoDate(new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 0));
+  const monthReservations = useMemo(
+    () =>
+      reservations
+        .filter((reservation) => rangesOverlap(monthStartIso, monthEndIso, reservation.startDate, reservation.endDate))
+        .sort((a, b) => a.startDate.localeCompare(b.startDate) || a.productId.localeCompare(b.productId)),
+    [monthEndIso, monthStartIso, reservations],
+  );
+
+  return (
+    <section className="admin-reservations parchment-panel">
+      <div className="admin-reservations-head">
+        <div>
+          <p className="eyebrow flex items-center gap-2">
+            <CalendarDays size={15} />
+            Calendario admin
+          </p>
+          <h2>Pedidos y alquileres por fecha</h2>
+          <p>
+            Fuente de reservas: {syncMode === "firebase" ? "Firestore" : "local"}. Cada marca bloquea el objeto para futuros clientes.
+          </p>
+        </div>
+        <div className="calendar-month-bar admin-calendar-nav">
+          <button type="button" onClick={() => setVisibleMonth((current) => addMonths(current, -1))}>
+            <ChevronLeft size={18} />
+          </button>
+          <strong>{formatMonth(visibleMonth)}</strong>
+          <button type="button" onClick={() => setVisibleMonth((current) => addMonths(current, 1))}>
+            <ChevronRight size={18} />
+          </button>
+        </div>
+      </div>
+
+      <div className="admin-calendar-grid">
+        {adminWeekdays.map((day) => (
+          <span key={day} className="calendar-weekday">
+            {day}
+          </span>
+        ))}
+        {days.map(({ iso, inMonth }) => {
+          const dayReservations = reservations.filter((reservation) =>
+            rangesOverlap(iso, iso, reservation.startDate, reservation.endDate),
+          );
+          return (
+            <div
+              key={iso}
+              className={`admin-calendar-day ${inMonth ? "" : "is-outside"} ${dayReservations.length > 0 ? "has-reservations" : ""}`}
+            >
+              <span className="admin-calendar-number">{Number(iso.slice(-2))}</span>
+              {dayReservations.slice(0, 2).map((reservation) => {
+                const product = productsById.get(reservation.productId);
+                return (
+                  <span key={reservation.id} className="admin-calendar-chip" title={product?.name ?? reservation.productId}>
+                    {product?.name ?? reservation.productId}
+                  </span>
+                );
+              })}
+              {dayReservations.length > 2 && (
+                <span className="admin-calendar-more">+{dayReservations.length - 2}</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="admin-reservation-list">
+        <p className="eyebrow">Reservas del mes</p>
+        {monthReservations.length === 0 ? (
+          <p className="admin-empty-reservations">No hay objetos alquilados o pedidos para este mes.</p>
+        ) : (
+          monthReservations.map((reservation) => {
+            const product = productsById.get(reservation.productId);
+            return (
+              <article key={reservation.id} className="admin-reservation-row">
+                <div>
+                  <strong>{product?.name ?? reservation.productId}</strong>
+                  <span>{formatDateRange(reservation.startDate, reservation.endDate)}</span>
+                </div>
+                <div>
+                  <span>Cantidad: {reservation.quantity ?? 1}</span>
+                  <span>{reservation.customerName || reservation.customerEmail || "Cliente sin datos visibles"}</span>
+                </div>
+                {reservation.note && <p>{reservation.note}</p>}
+              </article>
+            );
+          })
+        )}
+      </div>
+    </section>
+  );
 }
 
 export function AdminPage() {
@@ -423,6 +559,8 @@ export function AdminPage() {
           {message}
         </p>
       )}
+
+      <AdminReservationsCalendar products={products} />
 
       <div className="admin-layout">
         <aside className="admin-list">

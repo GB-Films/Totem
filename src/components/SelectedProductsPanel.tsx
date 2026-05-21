@@ -69,115 +69,107 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
               const endDate = item.endDate ?? addDaysIso(startDate, Math.max(1, item.rentalDays) - 1);
               const conflict = hasConflict(product.id, startDate, endDate);
               return (
-                <div key={product.id} className="rounded-md border border-gabinete-line/25 bg-gabinete-paperLight/18 p-3">
-                  <div className="grid gap-3 sm:grid-cols-[128px_1fr_auto]">
-                    <div className="overflow-hidden rounded-md border border-gabinete-line/25">
+                <div key={product.id} className="selected-item-card">
+                  <div className="selected-item-main">
+                    <div className="selected-item-image">
                       <ObjectImage product={product} compact showLabel={false} />
                     </div>
-                    <div>
-                      <p className="font-display text-lg text-gabinete-darkBrown">{product.name}</p>
-                      <p className="mt-1 text-xs text-gabinete-muted">
-                        {product.id} · {formatCurrency(product.rentalPricePerDay)} / día
-                      </p>
-                      <p className="mt-2 font-editorial text-sm text-gabinete-muted">
-                        {formatDateRange(startDate, endDate)}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      aria-label={`Quitar ${product.name}`}
-                      onClick={() => removeProduct(product.id)}
-                      className="rounded-full border border-gabinete-line/25 p-2 text-gabinete-muted hover:border-gabinete-error hover:text-gabinete-error"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                  <div className="mt-3 grid grid-cols-2 gap-3">
-                    <label className="text-xs uppercase tracking-[0.08em] text-gabinete-muted">
-                      Cantidad
-                      <div className="gabinete-input mt-1 flex items-center">
+                    <div className="selected-item-info">
+                      <div className="selected-item-topline">
+                        <div>
+                          <p className="selected-item-name">{product.name}</p>
+                          <p className="selected-item-meta">
+                            {product.id} · {formatCurrency(product.rentalPricePerDay)} / día
+                          </p>
+                        </div>
                         <button
                           type="button"
-                          aria-label="Restar cantidad"
-                          onClick={() => updateQuantity(product.id, item.quantity - 1)}
-                          className="p-2 text-gabinete-muted hover:text-gabinete-darkBrown"
+                          aria-label={`Quitar ${product.name}`}
+                          onClick={() => removeProduct(product.id)}
+                          className="selected-remove-button"
                         >
-                          <Minus size={14} />
-                        </button>
-                        <input
-                          type="number"
-                          min={1}
-                          value={item.quantity}
-                          onChange={(event) => updateQuantity(product.id, Number(event.target.value))}
-                          className="w-full bg-transparent p-2 text-center text-sm text-gabinete-text outline-none"
-                        />
-                        <button
-                          type="button"
-                          aria-label="Sumar cantidad"
-                          onClick={() => updateQuantity(product.id, item.quantity + 1)}
-                          className="p-2 text-gabinete-muted hover:text-gabinete-darkBrown"
-                        >
-                          <Plus size={14} />
+                          <Trash2 size={15} />
                         </button>
                       </div>
-                    </label>
-                    <label className="text-xs uppercase tracking-[0.08em] text-gabinete-muted">
-                      Días
-                      <input
-                        type="number"
-                        min={1}
-                        value={getInclusiveDays(startDate, endDate)}
-                        onChange={(event) => {
-                          const nextDays = Math.max(1, Number(event.target.value) || 1);
-                          updateRentalDates(product.id, startDate, addDaysIso(startDate, nextDays - 1));
-                        }}
-                        className="gabinete-input mt-1 p-2 text-center text-sm"
-                      />
-                    </label>
+
+                      <p className="selected-item-range">{formatDateRange(startDate, endDate)}</p>
+
+                      <div className="selected-compact-controls">
+                        <label>
+                          <span>Cant.</span>
+                          <div className="selected-stepper">
+                            <button
+                              type="button"
+                              aria-label="Restar cantidad"
+                              onClick={() => updateQuantity(product.id, item.quantity - 1)}
+                            >
+                              <Minus size={12} />
+                            </button>
+                            <input
+                              type="number"
+                              min={1}
+                              value={item.quantity}
+                              onChange={(event) => updateQuantity(product.id, Number(event.target.value))}
+                            />
+                            <button
+                              type="button"
+                              aria-label="Sumar cantidad"
+                              onClick={() => updateQuantity(product.id, item.quantity + 1)}
+                            >
+                              <Plus size={12} />
+                            </button>
+                          </div>
+                        </label>
+                        <label>
+                          <span>Días</span>
+                          <input
+                            type="number"
+                            min={1}
+                            value={getInclusiveDays(startDate, endDate)}
+                            onChange={(event) => {
+                              const nextDays = Math.max(1, Number(event.target.value) || 1);
+                              updateRentalDates(product.id, startDate, addDaysIso(startDate, nextDays - 1));
+                            }}
+                          />
+                        </label>
+                      </div>
+
+                      <div className="selected-date-controls">
+                        <label>
+                          <span>Desde</span>
+                          <input
+                            type="date"
+                            min={todayIso()}
+                            value={startDate}
+                            onChange={(event) => {
+                              const nextStart = event.target.value;
+                              const nextEnd = endDate < nextStart ? nextStart : endDate;
+                              updateRentalDates(product.id, nextStart, nextEnd);
+                            }}
+                          />
+                        </label>
+                        <label>
+                          <span>Hasta</span>
+                          <input
+                            type="date"
+                            min={startDate}
+                            value={endDate}
+                            onChange={(event) => updateRentalDates(product.id, startDate, event.target.value)}
+                          />
+                        </label>
+                      </div>
+
+                      <p className={`selected-item-status ${conflict ? "is-conflict" : "is-free"}`}>
+                        {conflict
+                          ? "Estas fechas se pisan con una reserva confirmada."
+                          : `Fechas libres: ${formatDateRange(startDate, endDate)}.`}
+                      </p>
+
+                      <p className="selected-item-total">
+                        Estimado: <strong>{formatCurrency(pricing.totalEstimated)}</strong>
+                      </p>
+                    </div>
                   </div>
-                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                    <label className="text-xs uppercase tracking-[0.08em] text-gabinete-muted">
-                      Desde
-                      <input
-                        type="date"
-                        min={todayIso()}
-                        value={startDate}
-                        onChange={(event) => {
-                          const nextStart = event.target.value;
-                          const nextEnd = endDate < nextStart ? nextStart : endDate;
-                          updateRentalDates(product.id, nextStart, nextEnd);
-                        }}
-                        className="gabinete-input mt-1 p-2 text-sm"
-                      />
-                    </label>
-                    <label className="text-xs uppercase tracking-[0.08em] text-gabinete-muted">
-                      Hasta
-                      <input
-                        type="date"
-                        min={startDate}
-                        value={endDate}
-                        onChange={(event) => updateRentalDates(product.id, startDate, event.target.value)}
-                        className="gabinete-input mt-1 p-2 text-sm"
-                      />
-                    </label>
-                  </div>
-                  <p
-                    className={`mt-3 rounded-md border px-3 py-2 font-editorial text-xs leading-5 ${
-                      conflict
-                        ? "border-gabinete-error/35 bg-gabinete-error/10 text-gabinete-error"
-                        : "border-gabinete-available/35 bg-gabinete-available/10 text-gabinete-available"
-                    }`}
-                  >
-                    {conflict
-                      ? "Estas fechas se pisan con una reserva confirmada."
-                      : `Fechas libres: ${formatDateRange(startDate, endDate)}.`}
-                  </p>
-                  <p className="mt-3 text-right text-sm text-gabinete-muted">
-                    Estimado:{" "}
-                    <strong className="font-display text-gabinete-darkBrown">
-                      {formatCurrency(pricing.totalEstimated)}
-                    </strong>
-                  </p>
                 </div>
               );
             })}

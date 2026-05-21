@@ -12,13 +12,19 @@ import { RESERVATIONS_ENABLED } from "../config/features";
 import { getSeedReservations } from "../data/availability";
 import { firebaseEnabled, getFirebaseDb } from "../services/firebase";
 import type { ReservationRange, SelectionItem } from "../types";
-import { rangesOverlap } from "../utils/dates";
+import { getInclusiveDays, rangesOverlap } from "../utils/dates";
+
+interface ReservationMeta {
+  customerName?: string;
+  customerEmail?: string;
+  createdByUid?: string;
+}
 
 interface AvailabilityContextValue {
   reservations: ReservationRange[];
   getProductReservations: (productId: string) => ReservationRange[];
   hasConflict: (productId: string, startDate?: string, endDate?: string) => boolean;
-  addReservationsFromSelection: (selection: SelectionItem[], note?: string) => Promise<void>;
+  addReservationsFromSelection: (selection: SelectionItem[], note?: string, meta?: ReservationMeta) => Promise<void>;
   syncMode: "firebase" | "local";
 }
 
@@ -67,6 +73,12 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
             startDate: data.startDate,
             endDate: data.endDate,
             note: data.note,
+            quantity: data.quantity,
+            rentalDays: data.rentalDays,
+            status: data.status,
+            customerName: data.customerName,
+            customerEmail: data.customerEmail,
+            createdByUid: data.createdByUid,
             source: "firebase",
           };
         }),
@@ -96,7 +108,7 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
   );
 
   const addReservationsFromSelection = useCallback(
-    async (selection: SelectionItem[], note = "Reserva confirmada") => {
+    async (selection: SelectionItem[], note = "Reserva confirmada", meta: ReservationMeta = {}) => {
       if (!RESERVATIONS_ENABLED) {
         return;
       }
@@ -109,16 +121,32 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
       const db = getFirebaseDb();
       if (db) {
         await Promise.all(
-          datedSelection.map((item) =>
-            addDoc(collection(db, "reservations"), {
+          datedSelection.map((item) => {
+            const payload: Omit<ReservationRange, "id" | "source"> & { createdAt: ReturnType<typeof serverTimestamp> } = {
               productId: item.productId,
-              startDate: item.startDate,
-              endDate: item.endDate,
+              quantity: Math.max(1, item.quantity),
+              rentalDays: getInclusiveDays(item.startDate, item.endDate),
+              startDate: item.startDate!,
+              endDate: item.endDate!,
               note,
               status: "confirmed",
               createdAt: serverTimestamp(),
-            }),
-          ),
+            };
+
+            if (meta.customerName) {
+              payload.customerName = meta.customerName;
+            }
+
+            if (meta.customerEmail) {
+              payload.customerEmail = meta.customerEmail;
+            }
+
+            if (meta.createdByUid) {
+              payload.createdByUid = meta.createdByUid;
+            }
+
+            return addDoc(collection(db, "reservations"), payload);
+          }),
         );
         return;
       }
@@ -128,10 +156,16 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
         const nextReservations = datedSelection.map<ReservationRange>((item, index) => ({
           id: `local-${timestamp}-${index}-${item.productId}`,
           productId: item.productId,
+          quantity: Math.max(1, item.quantity),
+          rentalDays: getInclusiveDays(item.startDate, item.endDate),
           startDate: item.startDate!,
           endDate: item.endDate!,
           source: "local",
+          status: "confirmed",
           note,
+          customerName: meta.customerName,
+          customerEmail: meta.customerEmail,
+          createdByUid: meta.createdByUid,
         }));
         const next = [...current, ...nextReservations];
         writeLocalReservations(next);

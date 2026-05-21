@@ -1,10 +1,10 @@
 import { CheckCircle2, MessageCircle } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useState } from "react";
-import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, type User } from "firebase/auth";
+import { FormEvent, useMemo, useState } from "react";
 import { useAvailability } from "../context/AvailabilityContext";
+import { useAuth } from "../context/AuthContext";
 import { useCatalog } from "../context/CatalogContext";
 import { RESERVATIONS_ENABLED } from "../config/features";
-import { firebaseEnabled, getFirebaseApp } from "../services/firebase";
+import { firebaseEnabled } from "../services/firebase";
 import type { SelectionItem } from "../types";
 import { formatCurrency } from "../utils/format";
 import {
@@ -18,12 +18,10 @@ interface ContactFormProps {
 }
 
 export function ContactForm({ selection }: ContactFormProps) {
-  const app = getFirebaseApp();
-  const auth = app ? getAuth(app) : null;
   const { addReservationsFromSelection, hasConflict, syncMode } = useAvailability();
+  const { user, loginWithGoogle, authError: googleAuthError } = useAuth();
   const { products } = useCatalog();
   const [status, setStatus] = useState<"idle" | "saving" | "confirmed">("idle");
-  const [user, setUser] = useState<User | null>(null);
   const [authError, setAuthError] = useState("");
   const message = useMemo(
     () =>
@@ -48,34 +46,37 @@ export function ContactForm({ selection }: ContactFormProps) {
     [products, selection],
   );
 
-  useEffect(() => {
-    if (!auth) {
-      return;
-    }
-
-    return onAuthStateChanged(auth, setUser);
-  }, [auth]);
-
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (hasSelectionConflicts || selection.length === 0) {
       return;
     }
 
-    if (firebaseEnabled && auth && !user) {
-      try {
-        setAuthError("");
-        await signInWithPopup(auth, new GoogleAuthProvider());
-      } catch (error) {
-        console.error(error);
-        setAuthError("No se pudo abrir el login de Google. Revisá que el dominio esté autorizado en Firebase Auth.");
-      }
+    if (firebaseEnabled && !user) {
+      setAuthError("");
+      await loginWithGoogle();
       return;
     }
 
-    setStatus("saving");
-    await addReservationsFromSelection(selection, "Reserva confirmada");
-    setStatus("confirmed");
+    try {
+      setStatus("saving");
+      setAuthError("");
+      await addReservationsFromSelection(selection, "Reserva confirmada", {
+        customerName: user?.displayName ?? undefined,
+        customerEmail: user?.email ?? undefined,
+        createdByUid: user?.uid ?? undefined,
+      });
+      setStatus("confirmed");
+    } catch (error) {
+      console.error(error);
+      const firebaseError = error as { code?: string; message?: string };
+      setAuthError(
+        `No se pudo confirmar la reserva (${firebaseError.code ?? "error desconocido"}). ${
+          firebaseError.message ?? "Revisá permisos y conexión."
+        }`,
+      );
+      setStatus("idle");
+    }
   };
 
   const hasSelectionConflicts = selection.some((item) =>
@@ -116,9 +117,9 @@ export function ContactForm({ selection }: ContactFormProps) {
           </a>
         </div>
       )}
-      {authError && (
+      {(authError || googleAuthError) && (
         <p className="mt-3 rounded-md border border-gabinete-error/35 bg-gabinete-error/10 px-3 py-2 text-sm text-gabinete-error">
-          {authError}
+          {authError || googleAuthError}
         </p>
       )}
 

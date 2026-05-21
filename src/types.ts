@@ -59,8 +59,14 @@ export interface PricingBreakdown {
 export interface ReservationRange {
   id: string;
   productId: string;
+  quantity?: number;
+  rentalDays?: number;
   startDate: string;
   endDate: string;
   source: "mock" | "local" | "firebase";
+  status?: "pending" | "confirmed" | "cancelled";
   note?: string;
+  customerName?: string;
+  customerEmail?: string;
+  createdByUid?: string;
 }

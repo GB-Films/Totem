@@ -25,7 +25,31 @@ service cloud.firestore {
 
     match /reservations/{reservationId} {
       allow read: if true;
-      allow create, update, delete: if false;
+      allow create: if isAdmin() || (
+        isSignedIn()
+        && request.auth.token.email_verified == true
+        && request.resource.data.keys().hasOnly([
+          'productId',
+          'quantity',
+          'rentalDays',
+          'startDate',
+          'endDate',
+          'note',
+          'status',
+          'customerName',
+          'customerEmail',
+          'createdByUid',
+          'createdAt'
+        ])
+        && request.resource.data.keys().hasAll(['productId', 'startDate', 'endDate', 'status', 'createdByUid', 'createdAt'])
+        && request.resource.data.productId is string
+        && request.resource.data.startDate is string
+        && request.resource.data.endDate is string
+        && request.resource.data.status == 'confirmed'
+        && request.resource.data.createdByUid == request.auth.uid
+        && (!('customerEmail' in request.resource.data) || request.resource.data.customerEmail == request.auth.token.email)
+      );
+      allow update, delete: if isAdmin();
     }
   }
 }
