@@ -138,7 +138,8 @@ function toNumber(value: string, fallback = 0) {
 
 function toProduct(form: ProductForm): Product {
   const weeklyPrice = form.rentalPricePerWeek.trim();
-  return {
+  const internalNotes = form.internalNotes.trim();
+  const product: Product = {
     id: form.id.trim(),
     name: form.name.trim(),
     category: form.category,
@@ -147,7 +148,6 @@ function toProduct(form: ProductForm): Product {
       .map((tag) => tag.trim())
       .filter(Boolean),
     rentalPricePerDay: toNumber(form.rentalPricePerDay),
-    rentalPricePerWeek: weeklyPrice ? toNumber(weeklyPrice) : undefined,
     description: form.description.trim(),
     curiosities: form.curiosities.trim(),
     status: form.status,
@@ -160,13 +160,22 @@ function toProduct(form: ProductForm): Product {
     guaranteePercentage: toNumber(form.guaranteePercentage, 0.3),
     minimumDeposit: toNumber(form.minimumDeposit),
     featuredScore: toNumber(form.featuredScore, 50),
-    internalNotes: form.internalNotes.trim() || undefined,
     images: form.images.filter(isUsableImageUrl),
     visual: {
       tone: form.visualTone,
       sigil: form.visualSigil.trim() || "✶",
     },
   };
+
+  if (weeklyPrice) {
+    product.rentalPricePerWeek = toNumber(weeklyPrice);
+  }
+
+  if (internalNotes) {
+    product.internalNotes = internalNotes;
+  }
+
+  return product;
 }
 
 function slugify(value: string) {
@@ -225,10 +234,21 @@ export function AdminPage() {
       return;
     }
 
-    setSaving(true);
-    await setDoc(doc(db, "products", product.id), product);
-    setSaving(false);
-    setMessage(`Producto guardado: ${product.name}`);
+    try {
+      setSaving(true);
+      await setDoc(doc(db, "products", product.id), product);
+      setMessage(`Producto guardado: ${product.name}`);
+    } catch (error) {
+      console.error(error);
+      const firebaseError = error as { code?: string; message?: string };
+      setMessage(
+        `No se pudo guardar el producto (${firebaseError.code ?? "error desconocido"}). ${
+          firebaseError.message ?? "Revisá los datos cargados y tus permisos de admin."
+        }`,
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   const removeProduct = async () => {
