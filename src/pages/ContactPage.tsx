@@ -1,4 +1,5 @@
 import { ContactForm } from "../components/ContactForm";
+import { ReservationHistory } from "../components/ReservationHistory";
 import { SelectedProductsPanel } from "../components/SelectedProductsPanel";
 import { useSelection } from "../context/SelectionContext";
 
@@ -21,6 +22,9 @@ export function ContactPage() {
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
         <SelectedProductsPanel showAction={false} />
         <ContactForm selection={selection} />
+      </div>
+      <div className="mt-8">
+        <ReservationHistory />
       </div>
     </div>
   );

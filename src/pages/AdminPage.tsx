@@ -11,8 +11,8 @@ import {
   Trash2,
   UploadCloud,
 } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
-import { deleteDoc, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { collection, deleteDoc, doc, getDoc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { getStorage } from "firebase/storage";
 import { useAuth } from "../context/AuthContext";
@@ -25,7 +25,7 @@ import {
   getFirebaseDb,
   publicFirebaseConfig,
 } from "../services/firebase";
-import type { Availability, Product, ProductStatus, ProductVisual, ReservationRange } from "../types";
+import type { Availability, Product, ProductStatus, ProductVisual, ReservationRange, UserProfile } from "../types";
 import { getInclusiveDays, parseIsoDate, rangesOverlap, todayIso, toIsoDate } from "../utils/dates";
 
 function isUsableImageUrl(image: string) {
@@ -233,10 +233,12 @@ function formatMonth(date: Date) {
 function ReservationAdminRow({
   reservation,
   productName,
+  profile,
   onMessage,
 }: {
   reservation: ReservationRange;
   productName: string;
+  profile?: UserProfile;
   onMessage: (message: string) => void;
 }) {
   const db = getFirebaseDb();
@@ -311,7 +313,10 @@ function ReservationAdminRow({
     <article className="admin-reservation-row">
       <div>
         <strong>{productName}</strong>
-        <span>{reservation.customerName || reservation.customerEmail || "Cliente sin datos visibles"}</span>
+        <span>{profile ? `${profile.firstName} ${profile.lastName}` : reservation.customerName || reservation.customerEmail || "Cliente sin datos visibles"}</span>
+        {profile && <span>DNI: {profile.dni}</span>}
+        {profile && <span>Celular: {profile.phone}</span>}
+        {profile?.email && <span>{profile.email}</span>}
       </div>
       <div className="admin-reservation-fields">
         <label>
@@ -348,9 +353,11 @@ function ReservationAdminRow({
 function AdminReservationsCalendar({ products }: { products: Product[] }) {
   const { reservations, syncMode } = useAvailability();
   const [message, setMessage] = useState("");
+  const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [visibleMonth, setVisibleMonth] = useState(() => monthStart(parseIsoDate(todayIso())));
   const days = useMemo(() => buildMonthDays(visibleMonth), [visibleMonth]);
   const productsById = useMemo(() => new Map(products.map((product) => [product.id, product])), [products]);
+  const profilesByUid = useMemo(() => new Map(profiles.map((profile) => [profile.uid, profile])), [profiles]);
   const monthStartIso = toIsoDate(monthStart(visibleMonth));
   const monthEndIso = toIsoDate(new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 0));
   const monthReservations = useMemo(
@@ -360,6 +367,17 @@ function AdminReservationsCalendar({ products }: { products: Product[] }) {
         .sort((a, b) => a.startDate.localeCompare(b.startDate) || a.productId.localeCompare(b.productId)),
     [monthEndIso, monthStartIso, reservations],
   );
+
+  useEffect(() => {
+    const db = getFirebaseDb();
+    if (!db) {
+      return;
+    }
+
+    return onSnapshot(collection(db, "userProfiles"), (snapshot) => {
+      setProfiles(snapshot.docs.map((profileDoc) => profileDoc.data() as UserProfile));
+    });
+  }, []);
 
   return (
     <section className="admin-reservations parchment-panel">
@@ -430,6 +448,7 @@ function AdminReservationsCalendar({ products }: { products: Product[] }) {
                 key={reservation.id}
                 reservation={reservation}
                 productName={product?.name ?? reservation.productId}
+                profile={reservation.createdByUid ? profilesByUid.get(reservation.createdByUid) : undefined}
                 onMessage={setMessage}
               />
             );
@@ -451,6 +470,7 @@ export function AdminPage() {
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [activeTab, setActiveTab] = useState<"reservations" | "catalog">("reservations");
 
   const sortedProducts = useMemo(
     () => [...products].sort((a, b) => a.name.localeCompare(b.name)),
@@ -650,7 +670,7 @@ export function AdminPage() {
       <div className="admin-head">
         <div>
           <p className="eyebrow">Admin</p>
-          <h1>Catálogo</h1>
+          <h1>Panel</h1>
           <p>Fuente actual: {syncMode === "firebase" ? "Firestore" : "catálogo local de respaldo"}</p>
         </div>
         <div className="admin-actions">
@@ -672,9 +692,28 @@ export function AdminPage() {
         </p>
       )}
 
-      <AdminReservationsCalendar products={products} />
+      <div className="admin-tabs" role="tablist" aria-label="Secciones del panel">
+        <button
+          type="button"
+          className={activeTab === "reservations" ? "is-active" : ""}
+          onClick={() => setActiveTab("reservations")}
+        >
+          <CalendarDays size={16} />
+          Calendario y reservas
+        </button>
+        <button
+          type="button"
+          className={activeTab === "catalog" ? "is-active" : ""}
+          onClick={() => setActiveTab("catalog")}
+        >
+          <UploadCloud size={16} />
+          Actualización del catálogo
+        </button>
+      </div>
 
-      <div className="admin-layout">
+      {activeTab === "reservations" && <AdminReservationsCalendar products={products} />}
+
+      {activeTab === "catalog" && <div className="admin-layout">
         <aside className="admin-list">
           <button type="button" className="admin-new-button" onClick={newProduct}>
             <Plus size={16} />
@@ -768,7 +807,7 @@ export function AdminPage() {
             </div>
           </div>
         </form>
-      </div>
+      </div>}
     </section>
   );
 }

@@ -70,3 +70,12 @@ export interface ReservationRange {
   customerEmail?: string;
   createdByUid?: string;
 }
+
+export interface UserProfile {
+  uid: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  dni: string;
+  phone: string;
+}

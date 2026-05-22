@@ -1137,6 +1137,15 @@ input, select, textarea { font: inherit; }
   height: 100%;
   min-height: 170px;
 }
+.selected-item-link {
+  display: block;
+  color: inherit;
+  transition: border-color .2s ease, transform .2s ease;
+}
+.selected-item-link:hover {
+  border-color: rgba(122, 31, 31, .42);
+  transform: translateY(-1px);
+}
 .selected-item-info {
   display: flex;
   min-width: 0;
@@ -1150,10 +1159,14 @@ input, select, textarea { font: inherit; }
   align-items: start;
 }
 .selected-item-name {
+  display: inline-block;
   color: var(--ink);
   font-family: var(--font-display);
   font-size: 1.15rem;
   line-height: 1.05;
+}
+.selected-item-name-link:hover {
+  color: var(--accent);
 }
 .selected-item-meta,
 .selected-item-range {
@@ -2215,6 +2228,32 @@ footer {
   color: var(--available);
   font-size: .9rem;
 }
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65rem;
+  margin: 0 0 1rem;
+  border-bottom: 1px solid rgba(120, 105, 88, .22);
+  padding-bottom: .75rem;
+}
+.admin-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  min-height: 42px;
+  border: 1px solid rgba(120, 105, 88, .28);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, .5);
+  padding: .65rem 1rem;
+  color: var(--muted);
+  font-weight: 800;
+}
+.admin-tabs button:hover,
+.admin-tabs button.is-active {
+  border-color: rgba(122, 31, 31, .38);
+  background: rgba(122, 31, 31, .08);
+  color: var(--accent);
+}
 .admin-auth-debug {
   display: grid;
   gap: .35rem;
@@ -2426,6 +2465,40 @@ footer {
   padding: .45rem .75rem;
   font-size: .82rem;
 }
+.reservation-customer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .75rem;
+}
+.reservation-customer-grid label {
+  display: grid;
+  gap: .3rem;
+  color: var(--muted);
+  font-family: var(--font-serif);
+  font-size: .82rem;
+}
+.reservation-history-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(140px, .8fr);
+  gap: .8rem;
+  border: 1px solid rgba(120, 105, 88, .22);
+  border-radius: 10px;
+  background: rgba(255, 253, 248, .48);
+  padding: .85rem;
+}
+.reservation-history-row strong,
+.reservation-history-row span {
+  display: block;
+}
+.reservation-history-row strong {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+}
+.reservation-history-row span {
+  color: var(--muted);
+  font-size: .82rem;
+}
 .admin-editor {
   padding: 1rem;
   border-radius: 12px;
@@ -2531,6 +2604,7 @@ footer {
   .admin-calendar-day { min-height: 74px; padding: .35rem; }
   .admin-calendar-chip { display: none; }
   .admin-reservation-row { grid-template-columns: 1fr; }
+  .admin-reservation-fields { grid-template-columns: 1fr; }
   .admin-layout { grid-template-columns: 1fr; }
   .admin-list {
     position: static;
@@ -2538,6 +2612,8 @@ footer {
   }
   .admin-grid { grid-template-columns: 1fr; }
   .admin-image-url { grid-template-columns: 1fr; }
+  .reservation-customer-grid,
+  .reservation-history-row { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {

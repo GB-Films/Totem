@@ -71,13 +71,15 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
               return (
                 <div key={product.id} className="selected-item-card">
                   <div className="selected-item-main">
-                    <div className="selected-item-image">
+                    <Link to={`/producto/${product.id}`} className="selected-item-image selected-item-link">
                       <ObjectImage product={product} compact showLabel={false} />
-                    </div>
+                    </Link>
                     <div className="selected-item-info">
                       <div className="selected-item-topline">
                         <div>
-                          <p className="selected-item-name">{product.name}</p>
+                          <Link to={`/producto/${product.id}`} className="selected-item-name selected-item-name-link">
+                            {product.name}
+                          </Link>
                           <p className="selected-item-meta">
                             {product.id} · {formatCurrency(product.rentalPricePerDay)} / día
                           </p>

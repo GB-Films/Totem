@@ -53,6 +53,7 @@ Colecciones usadas:
 - `products`: catálogo sincronizado. Cada documento debe tener la misma forma que los objetos de `src/data/products.ts`; el ID del documento se usa como `product.id`.
 - `adminEmails`: permisos de administración. Cada documento usa como ID el email autorizado y debe tener `{ "active": true }`.
 - `reservations`: reservas confirmadas desde el sitio. Requieren login con Google y bloquean las fechas en el calendario.
+- `userProfiles`: datos de usuarios para gestionar reservas: nombre, apellido, DNI y celular. Cada usuario edita su propio perfil; los admins pueden leerlos desde el panel.
 
 El panel de administración vive en `/admin`. Requiere Firebase Authentication con Google y permisos en `adminEmails/{email}`.
 
