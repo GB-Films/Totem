@@ -4,7 +4,6 @@ import { useAvailability } from "../context/AvailabilityContext";
 import { useAuth } from "../context/AuthContext";
 import { useCatalog } from "../context/CatalogContext";
 import { RESERVATIONS_ENABLED } from "../config/features";
-import { firebaseEnabled } from "../services/firebase";
 import type { SelectionItem } from "../types";
 import { formatCurrency } from "../utils/format";
 import {
@@ -52,19 +51,24 @@ export function ContactForm({ selection }: ContactFormProps) {
       return;
     }
 
-    if (firebaseEnabled && !user) {
-      setAuthError("");
-      await loginWithGoogle();
-      return;
-    }
-
     try {
       setStatus("saving");
       setAuthError("");
+      let reservationUser = user;
+
+      if (!reservationUser) {
+        reservationUser = await loginWithGoogle();
+      }
+
+      if (!reservationUser) {
+        setStatus("idle");
+        return;
+      }
+
       await addReservationsFromSelection(selection, "Reserva confirmada", {
-        customerName: user?.displayName ?? undefined,
-        customerEmail: user?.email ?? undefined,
-        createdByUid: user?.uid ?? undefined,
+        customerName: reservationUser.displayName ?? undefined,
+        customerEmail: reservationUser.email ?? undefined,
+        createdByUid: reservationUser.uid,
       });
       setStatus("confirmed");
     } catch (error) {
@@ -97,7 +101,7 @@ export function ContactForm({ selection }: ContactFormProps) {
           ? RESERVATIONS_ENABLED
             ? " Esa reserva se sincroniza en Firebase."
             : " Modo prueba activo: al confirmar te pedimos ingresar con Google, pero por ahora no se bloquean fechas."
-          : " Hasta cargar las claves de Firebase, queda guardada en este navegador."}
+          : " Para confirmar con login y bloquear fechas hace falta configurar Firebase."}
       </p>
       {status === "confirmed" && (
         <div className="mt-3 rounded-md border border-gabinete-available/35 bg-gabinete-available/10 px-3 py-3 font-editorial text-sm text-gabinete-available">
@@ -137,7 +141,7 @@ export function ContactForm({ selection }: ContactFormProps) {
           <CheckCircle2 size={17} />
           {status === "saving"
             ? "Confirmando..."
-            : firebaseEnabled && !user
+            : !user
               ? "Ingresar con Google y confirmar"
               : "Confirmar reserva"}
         </button>

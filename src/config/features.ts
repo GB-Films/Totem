@@ -1,1 +1,1 @@
-export const RESERVATIONS_ENABLED = false;
+export const RESERVATIONS_ENABLED = true;

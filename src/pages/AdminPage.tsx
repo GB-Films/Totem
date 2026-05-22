@@ -12,7 +12,7 @@ import {
   UploadCloud,
 } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
-import { deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
+import { deleteDoc, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { getStorage } from "firebase/storage";
 import { useAuth } from "../context/AuthContext";
@@ -25,8 +25,8 @@ import {
   getFirebaseDb,
   publicFirebaseConfig,
 } from "../services/firebase";
-import type { Availability, Product, ProductStatus, ProductVisual } from "../types";
-import { formatDateRange, parseIsoDate, rangesOverlap, todayIso, toIsoDate } from "../utils/dates";
+import type { Availability, Product, ProductStatus, ProductVisual, ReservationRange } from "../types";
+import { getInclusiveDays, parseIsoDate, rangesOverlap, todayIso, toIsoDate } from "../utils/dates";
 
 function isUsableImageUrl(image: string) {
   return /^https?:\/\//.test(image) || /^data:image\//.test(image);
@@ -230,8 +230,124 @@ function formatMonth(date: Date) {
   }).format(date);
 }
 
+function ReservationAdminRow({
+  reservation,
+  productName,
+  onMessage,
+}: {
+  reservation: ReservationRange;
+  productName: string;
+  onMessage: (message: string) => void;
+}) {
+  const db = getFirebaseDb();
+  const [startDate, setStartDate] = useState(reservation.startDate);
+  const [endDate, setEndDate] = useState(reservation.endDate);
+  const [quantity, setQuantity] = useState(String(reservation.quantity ?? 1));
+  const [note, setNote] = useState(reservation.note ?? "");
+  const [saving, setSaving] = useState(false);
+
+  const saveReservation = async () => {
+    if (!db || reservation.source !== "firebase") {
+      onMessage("Esta reserva no se puede editar desde el panel porque no viene de Firestore.");
+      return;
+    }
+
+    if (!startDate || !endDate || endDate < startDate) {
+      onMessage("Revisá las fechas de la reserva antes de guardar.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      await updateDoc(doc(db, "reservations", reservation.id), {
+        startDate,
+        endDate,
+        quantity: Math.max(1, Number(quantity) || 1),
+        rentalDays: getInclusiveDays(startDate, endDate),
+        note: note.trim(),
+      });
+      onMessage(`Reserva actualizada: ${productName}`);
+    } catch (error) {
+      console.error(error);
+      const firebaseError = error as { code?: string; message?: string };
+      onMessage(
+        `No se pudo actualizar la reserva (${firebaseError.code ?? "error desconocido"}). ${
+          firebaseError.message ?? "Revisá tus permisos de admin."
+        }`,
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const removeReservation = async () => {
+    if (!db || reservation.source !== "firebase") {
+      onMessage("Esta reserva no se puede borrar desde el panel porque no viene de Firestore.");
+      return;
+    }
+
+    if (!window.confirm(`¿Borrar la reserva de ${productName}?`)) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+      await deleteDoc(doc(db, "reservations", reservation.id));
+      onMessage(`Reserva borrada: ${productName}`);
+    } catch (error) {
+      console.error(error);
+      const firebaseError = error as { code?: string; message?: string };
+      onMessage(
+        `No se pudo borrar la reserva (${firebaseError.code ?? "error desconocido"}). ${
+          firebaseError.message ?? "Revisá tus permisos de admin."
+        }`,
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <article className="admin-reservation-row">
+      <div>
+        <strong>{productName}</strong>
+        <span>{reservation.customerName || reservation.customerEmail || "Cliente sin datos visibles"}</span>
+      </div>
+      <div className="admin-reservation-fields">
+        <label>
+          Desde
+          <input className="gabinete-input" type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
+        </label>
+        <label>
+          Hasta
+          <input className="gabinete-input" type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
+        </label>
+        <label>
+          Cant.
+          <input className="gabinete-input" type="number" min="1" value={quantity} onChange={(event) => setQuantity(event.target.value)} />
+        </label>
+      </div>
+      <label className="admin-reservation-note">
+        Nota
+        <input className="gabinete-input" value={note} onChange={(event) => setNote(event.target.value)} />
+      </label>
+      <div className="admin-reservation-actions">
+        <button type="button" className="gabinete-button-secondary" onClick={removeReservation} disabled={saving}>
+          <Trash2 size={16} />
+          Borrar
+        </button>
+        <button type="button" className="gabinete-button" onClick={saveReservation} disabled={saving}>
+          <Save size={16} />
+          {saving ? "Guardando..." : "Guardar"}
+        </button>
+      </div>
+    </article>
+  );
+}
+
 function AdminReservationsCalendar({ products }: { products: Product[] }) {
   const { reservations, syncMode } = useAvailability();
+  const [message, setMessage] = useState("");
   const [visibleMonth, setVisibleMonth] = useState(() => monthStart(parseIsoDate(todayIso())));
   const days = useMemo(() => buildMonthDays(visibleMonth), [visibleMonth]);
   const productsById = useMemo(() => new Map(products.map((product) => [product.id, product])), [products]);
@@ -303,23 +419,19 @@ function AdminReservationsCalendar({ products }: { products: Product[] }) {
 
       <div className="admin-reservation-list">
         <p className="eyebrow">Reservas del mes</p>
+        {message && <p className="admin-message">{message}</p>}
         {monthReservations.length === 0 ? (
           <p className="admin-empty-reservations">No hay objetos alquilados o pedidos para este mes.</p>
         ) : (
           monthReservations.map((reservation) => {
             const product = productsById.get(reservation.productId);
             return (
-              <article key={reservation.id} className="admin-reservation-row">
-                <div>
-                  <strong>{product?.name ?? reservation.productId}</strong>
-                  <span>{formatDateRange(reservation.startDate, reservation.endDate)}</span>
-                </div>
-                <div>
-                  <span>Cantidad: {reservation.quantity ?? 1}</span>
-                  <span>{reservation.customerName || reservation.customerEmail || "Cliente sin datos visibles"}</span>
-                </div>
-                {reservation.note && <p>{reservation.note}</p>}
-              </article>
+              <ReservationAdminRow
+                key={reservation.id}
+                reservation={reservation}
+                productName={product?.name ?? reservation.productId}
+                onMessage={setMessage}
+              />
             );
           })
         )}

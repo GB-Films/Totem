@@ -2362,7 +2362,7 @@ footer {
 }
 .admin-reservation-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(180px, .8fr);
+  grid-template-columns: minmax(150px, .8fr) minmax(240px, 1.2fr);
   gap: .8rem;
   margin-top: .65rem;
   border: 1px solid rgba(120, 105, 88, .22);
@@ -2390,6 +2390,41 @@ footer {
   border-top: 1px solid rgba(120, 105, 88, .18);
   padding-top: .55rem;
   font-family: var(--font-serif);
+}
+.admin-reservation-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(70px, .5fr);
+  gap: .55rem;
+}
+.admin-reservation-fields label,
+.admin-reservation-note {
+  color: var(--muted);
+  font-family: var(--font-serif);
+  font-size: .78rem;
+}
+.admin-reservation-fields .gabinete-input,
+.admin-reservation-note .gabinete-input {
+  margin-top: .25rem;
+  width: 100%;
+  padding: .5rem .55rem;
+  font-size: .82rem;
+}
+.admin-reservation-note,
+.admin-reservation-actions {
+  grid-column: 1 / -1;
+}
+.admin-reservation-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: .5rem;
+  border-top: 1px solid rgba(120, 105, 88, .18);
+  padding-top: .65rem;
+}
+.admin-reservation-actions .gabinete-button,
+.admin-reservation-actions .gabinete-button-secondary {
+  min-height: 2.35rem;
+  padding: .45rem .75rem;
+  font-size: .82rem;
 }
 .admin-editor {
   padding: 1rem;

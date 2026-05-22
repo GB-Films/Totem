@@ -9,7 +9,7 @@ interface AuthContextValue {
   checkingAuth: boolean;
   checkingAdmin: boolean;
   authError: string;
-  loginWithGoogle: () => Promise<void>;
+  loginWithGoogle: () => Promise<User | null>;
   logout: () => Promise<void>;
 }
 
@@ -67,15 +67,17 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const loginWithGoogle = useCallback(async () => {
     if (!auth) {
       setAuthError("Firebase no está configurado.");
-      return;
+      return null;
     }
 
     try {
       setAuthError("");
-      await signInWithPopup(auth, new GoogleAuthProvider());
+      const credential = await signInWithPopup(auth, new GoogleAuthProvider());
+      return credential.user;
     } catch (error) {
       console.error(error);
       setAuthError(getFirebaseErrorMessage(error));
+      return null;
     }
   }, [auth]);
 
