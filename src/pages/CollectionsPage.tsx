@@ -28,8 +28,8 @@ export function CollectionsPage() {
   const { products } = useCatalog();
 
   return (
-    <div className="collections-page-mobile mx-auto w-full max-w-[1520px] px-4 py-10 sm:px-8 lg:px-12">
-      <section className="collections-hero rounded-[30px] border border-gabinete-line bg-white/55 p-8 shadow-paper lg:p-10">
+    <div className="mx-auto w-full max-w-[1520px] px-4 py-10 sm:px-8 lg:px-12">
+      <section className="rounded-[30px] border border-gabinete-line bg-white/55 p-8 shadow-paper lg:p-10">
         <p className="eyebrow">Colecciones</p>
         <h1 className="mt-3 max-w-[900px] font-display text-[clamp(3.2rem,5.2vw,5.8rem)] leading-[0.95] tracking-[-0.05em] text-gabinete-darkBrown">
           Entradas rápidas para buscar por universo, no sólo por nombre.
