@@ -1,56 +1,59 @@
 import { Link } from "react-router-dom";
-import { HowItWorks } from "../components/HowItWorks";
-import { RentalCalculator } from "../components/RentalCalculator";
-import { SelectedProductsPanel } from "../components/SelectedProductsPanel";
-import { useCatalog } from "../context/CatalogContext";
 
-const sampleSelection = [
-  { productId: "EG-001", quantity: 1, rentalDays: 3 },
-  { productId: "EG-007", quantity: 1, rentalDays: 3 },
+const steps = [
+  {
+    title: "Buscá",
+    text: "Entrá al catálogo y filtrá por categoría, estilo, precio o disponibilidad.",
+  },
+  {
+    title: "Elegí fechas",
+    text: "Cada objeto muestra calendario. Si el período está libre, podés sumarlo a tu selección.",
+  },
+  {
+    title: "Confirmá",
+    text: "Revisá alquiler, garantía reintegrable y seña estimada antes de enviar la solicitud.",
+  },
+  {
+    title: "Coordinamos",
+    text: "Cerramos entrega, retiro y detalles de producción por WhatsApp o email.",
+  },
 ];
 
 export function HowItWorksPage() {
-  const { products } = useCatalog();
   return (
-    <>
-      <section className="mx-auto w-full max-w-[1520px] px-4 py-10 sm:px-8 lg:px-12">
-        <div className="rounded-[30px] border border-gabinete-line bg-white/55 p-8 shadow-paper lg:p-10">
+    <div className="simple-page mx-auto w-full max-w-[1520px] px-4 py-10 sm:px-8 lg:px-12">
+      <section className="simple-page-hero">
+        <div>
           <p className="eyebrow">Cómo funciona</p>
-          <h1 className="mt-3 max-w-[900px] font-display text-[clamp(3.2rem,5.2vw,5.8rem)] leading-[0.95] tracking-[-0.05em] text-gabinete-darkBrown">
-            Un recorrido simple: buscar, elegir fechas y reservar.
+          <h1 className="mt-3 max-w-[760px] font-display text-[clamp(2.4rem,4.6vw,4.6rem)] font-medium uppercase leading-[0.96] tracking-[0.02em] text-gabinete-darkBrown">
+            Alquilar props, sin vueltas.
           </h1>
-          <p className="mt-5 max-w-[780px] font-editorial text-lg leading-8 text-gabinete-muted">
-            Esta sección explica la lógica de uso del sitio. Primero encontrás objetos desde la búsqueda o las categorías,
-            después armás tu carrito con fechas libres, y por último confirmás la reserva con una seña del 20%.
+          <p className="mt-5 max-w-[660px] font-editorial text-base leading-7 text-gabinete-muted">
+            Totem Rental funciona como una herramienta de producción: buscás, verificás fechas y armás una selección lista
+            para coordinar.
           </p>
         </div>
+        <Link to="/catalogo" className="gabinete-button w-fit px-5 py-3">
+          Ver catálogo
+        </Link>
       </section>
 
-      <HowItWorks />
-
-      <section className="mx-auto grid w-full max-w-[1520px] gap-8 px-4 py-16 sm:px-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:px-12">
-        <div className="parchment-panel p-6">
-          <h2 className="font-display text-4xl text-gabinete-darkBrown">Garantía y cálculo rápido</h2>
-          <div className="mt-5 space-y-4 font-editorial leading-7 text-gabinete-muted">
-            <p>
-              Cada pieza tiene un valor estimado y una garantía sugerida. Eso ayuda a producción a entender desde el
-              principio cuánto necesita reservar para avanzar con tranquilidad.
-            </p>
-            <p>
-              La calculadora no reemplaza la cotización final, pero hace la experiencia más user friendly y orienta la
-              decisión sin salir del sitio.
-            </p>
-          </div>
-          <Link to="/catalogo" className="gabinete-button mt-7 px-5 py-3">
-            Explorar catálogo
-          </Link>
-        </div>
-        <RentalCalculator products={products} selection={sampleSelection} />
+      <section className="minimal-process-grid mt-8">
+        {steps.map((step, index) => (
+          <article key={step.title} className="minimal-process-card">
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <h2>{step.title}</h2>
+            <p>{step.text}</p>
+          </article>
+        ))}
       </section>
 
-      <section className="mx-auto w-full max-w-[1520px] px-4 pb-16 sm:px-8 lg:px-12">
-        <SelectedProductsPanel />
+      <section className="process-note mt-8">
+        <p>
+          La garantía es reintegrable. El monto final puede variar según logística, cantidad de piezas y condiciones del
+          rodaje.
+        </p>
       </section>
-    </>
+    </div>
   );
 }

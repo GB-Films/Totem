@@ -1,4 +1,4 @@
-# EL GABINETE
+# TOTEM RENTAL
 
 Aplicación estática en React + Vite + TypeScript + Tailwind CSS para un catálogo de props de producción audiovisual.
 

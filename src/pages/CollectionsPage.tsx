@@ -29,14 +29,13 @@ export function CollectionsPage() {
 
   return (
     <div className="collections-page-mobile mx-auto w-full max-w-[1520px] px-4 py-10 sm:px-8 lg:px-12">
-      <section className="collections-hero rounded-[30px] border border-gabinete-line bg-white/55 p-8 shadow-paper lg:p-10">
+      <section className="collections-hero simple-page-hero">
         <p className="eyebrow">Colecciones</p>
-        <h1 className="mt-3 max-w-[900px] font-display text-[clamp(3.2rem,5.2vw,5.8rem)] leading-[0.95] tracking-[-0.05em] text-gabinete-darkBrown">
-          Entradas rápidas para buscar por universo, no sólo por nombre.
+        <h1 className="mt-3 max-w-[780px] font-display text-[clamp(2.4rem,4.6vw,4.6rem)] font-medium uppercase leading-[0.96] tracking-[0.02em] text-gabinete-darkBrown">
+          Buscá por universo.
         </h1>
-        <p className="mt-5 max-w-[760px] font-editorial text-lg leading-8 text-gabinete-muted">
-          La idea es que un usuario pueda empezar con menos fricción: si todavía no sabe el objeto puntual,
-          puede entrar por atmósfera, tipo de escena o necesidad de producción.
+        <p className="mt-5 max-w-[700px] font-editorial text-base leading-7 text-gabinete-muted">
+          Si todavía no tenés el objeto exacto, entrá por atmósfera, tipo de escena o necesidad de producción.
         </p>
       </section>
 
@@ -52,11 +51,11 @@ export function CollectionsPage() {
           <Link
             key={item.title}
             to={item.href}
-            className="overflow-hidden rounded-[24px] border border-gabinete-line bg-white/60 shadow-paper transition hover:-translate-y-1"
+            className="overflow-hidden rounded-[18px] border border-gabinete-line bg-gabinete-panel/70 shadow-paper transition hover:-translate-y-1"
           >
             <ObjectImage product={product} compact />
             <div className="p-6">
-              <h2 className="font-display text-4xl leading-none text-gabinete-darkBrown">{item.title}</h2>
+              <h2 className="font-display text-2xl font-medium uppercase tracking-[0.04em] text-gabinete-darkBrown">{item.title}</h2>
               <p className="mt-4 font-editorial text-base leading-7 text-gabinete-muted">{item.description}</p>
               <span className="mt-6 inline-flex items-center gap-2 font-editorial text-sm font-semibold uppercase tracking-[0.12em] text-gabinete-brown">
                 Abrir colección <ArrowRight size={15} />

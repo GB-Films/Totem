@@ -5,7 +5,7 @@ export function Footer() {
     <footer className="border-t border-gabinete-line/60 bg-white/35">
       <div className="mx-auto grid w-full max-w-[1520px] gap-10 px-4 py-12 sm:px-8 lg:grid-cols-[1.6fr_1fr_1fr_1.1fr] lg:px-12">
         <div>
-          <p className="font-display text-3xl tracking-[0.16em] text-gabinete-darkBrown">EL GABINETE</p>
+          <p className="font-display text-3xl tracking-[0.16em] text-gabinete-darkBrown">TOTEM RENTAL</p>
           <p className="mt-4 max-w-md font-editorial text-sm leading-7 text-gabinete-muted">
             Cada objeto tiene un pasado. Vos decidís su próxima historia. Utilería, mobiliario,
             vestuario y piezas especiales para cine, TV, publicidad, teatro y contenidos.
@@ -38,11 +38,11 @@ export function Footer() {
 
         <div>
           <p className="font-editorial text-xs font-semibold uppercase tracking-[0.18em] text-gabinete-faint">
-            Contacto
+            Atención
           </p>
           <div className="mt-4 space-y-2 font-editorial text-sm leading-7 text-gabinete-darkBrown">
             <p>Buenos Aires, Argentina</p>
-            <p>hola@elgabineteprops.com</p>
+            <p>hola@totemrental.com</p>
             <p>Atención personalizada para cada proyecto</p>
           </div>
         </div>

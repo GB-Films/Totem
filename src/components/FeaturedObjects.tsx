@@ -16,7 +16,7 @@ export function FeaturedObjects() {
           </h2>
         </div>
         <Link to="/catalogo" className="gabinete-button-secondary w-fit px-5 py-2.5">
-          Abrir el gabinete
+          Abrir Totem Rental
         </Link>
       </div>
       <div className="mt-9 grid gap-5 md:grid-cols-3">

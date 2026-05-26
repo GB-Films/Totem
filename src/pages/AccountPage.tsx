@@ -109,7 +109,7 @@ export function AccountPage() {
         <section className="user-hero">
           <div>
             <p className="eyebrow">Cuenta</p>
-            <h1>Tu gabinete personal</h1>
+            <h1>Tu cuenta Totem</h1>
             <p>Ingresá con Google para ver reservas, favoritos y datos de contacto.</p>
           </div>
           <button type="button" className="gabinete-button px-5 py-3" onClick={loginWithGoogle}>

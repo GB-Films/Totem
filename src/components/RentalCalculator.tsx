@@ -19,7 +19,7 @@ export function RentalCalculator({ products, selection }: RentalCalculatorProps)
   return (
     <section className="parchment-panel p-5">
       <p className="eyebrow">Cálculo de alquiler y garantía</p>
-      <h2 className="mt-2 font-display text-3xl text-gabinete-darkBrown">La cuenta del gabinete</h2>
+      <h2 className="mt-2 font-display text-3xl text-gabinete-darkBrown">La cuenta dTotem Rental</h2>
       <p className="mt-2 font-editorial text-sm leading-6 text-gabinete-muted">
         La garantía es reintegrable, siempre que el objeto vuelva con su historia intacta. El monto
         final puede variar según disponibilidad, logística y condiciones de rodaje.

@@ -38,7 +38,7 @@ export function buildContactMessage(
 ) {
   const pricing = calculateSelectionPricing(products, selection);
   return [
-    "Hola, EL GABINETE. Quiero avanzar con esta reserva de props.",
+    "Hola, TOTEM RENTAL. Quiero avanzar con esta reserva de props.",
     "",
     ...(values.name || values.email
       ? [
@@ -60,9 +60,9 @@ export function buildContactMessage(
 }
 
 export function buildMailtoUrl(message: string) {
-  const subject = encodeURIComponent("Consulta de reserva - EL GABINETE");
+  const subject = encodeURIComponent("Consulta de reserva - TOTEM RENTAL");
   const body = encodeURIComponent(message);
-  return `mailto:hola@elgabineteprops.com?subject=${subject}&body=${body}`;
+  return `mailto:hola@totemrental.com?subject=${subject}&body=${body}`;
 }
 
 export function buildWhatsappUrl(message: string) {

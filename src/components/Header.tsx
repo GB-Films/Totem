@@ -19,7 +19,7 @@ function CabinetLogo() {
         <b />
       </span>
       <span className="brand-wordmark brand-wordmark-single">
-        <strong>EL GABINETE</strong>
+        <strong>TOTEM RENTAL</strong>
       </span>
     </span>
   );
@@ -31,7 +31,7 @@ export function Header() {
   const [desktopView, setDesktopView] = useState(false);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem("el-gabinete-desktop-view") === "true";
+    const stored = window.localStorage.getItem("totem-rental-desktop-view") === "true";
     setDesktopView(stored);
     document.body.classList.toggle("force-desktop-view", stored);
   }, []);
@@ -39,13 +39,13 @@ export function Header() {
   const toggleDesktopView = () => {
     const next = !desktopView;
     setDesktopView(next);
-    window.localStorage.setItem("el-gabinete-desktop-view", String(next));
+    window.localStorage.setItem("totem-rental-desktop-view", String(next));
     document.body.classList.toggle("force-desktop-view", next);
   };
 
   return (
     <header className="site-header">
-      <Link to="/" className="site-logo" aria-label="Ir al inicio de El Gabinete">
+      <Link to="/" className="site-logo" aria-label="Ir al inicio de Totem Rental">
         <CabinetLogo />
       </Link>
 
