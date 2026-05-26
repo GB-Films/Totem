@@ -19,8 +19,8 @@ export function Footer() {
           <div className="mt-4 grid gap-2 text-sm text-gabinete-darkBrown">
             <Link to="/catalogo" className="hover:text-gabinete-brown">Catálogo</Link>
             <Link to="/colecciones" className="hover:text-gabinete-brown">Colecciones</Link>
-            <Link to="/inspiracion" className="hover:text-gabinete-brown">Inspiración</Link>
             <Link to="/como-funciona" className="hover:text-gabinete-brown">Cómo funciona</Link>
+            <Link to="/cuenta" className="hover:text-gabinete-brown">Cuenta</Link>
           </div>
         </div>
 

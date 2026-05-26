@@ -1,4 +1,4 @@
-import { LayoutDashboard, LogOut, Monitor, ShoppingCart, UserRound } from "lucide-react";
+import { LayoutDashboard, Monitor, ShoppingCart, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -8,9 +8,7 @@ const navItems = [
   { to: "/como-funciona", label: "Cómo funciona", mobile: false },
   { to: "/catalogo", label: "Catálogo", mobile: true },
   { to: "/colecciones", label: "Colecciones", mobile: true },
-  { to: "/inspiracion", label: "Inspiración", mobile: false },
   { to: "/sobre-nosotros", label: "Sobre nosotros", mobile: false },
-  { to: "/contacto", label: "Contacto", mobile: false },
 ];
 
 function CabinetLogo() {
@@ -29,7 +27,7 @@ function CabinetLogo() {
 
 export function Header() {
   const { totalItems } = useSelection();
-  const { user, isAdmin, checkingAdmin, loginWithGoogle, logout } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [desktopView, setDesktopView] = useState(false);
 
   useEffect(() => {
@@ -70,20 +68,9 @@ export function Header() {
             <LayoutDashboard size={23} strokeWidth={1.9} />
           </Link>
         )}
-        {user ? (
-          <button type="button" aria-label="Cerrar sesión" title={user.email ?? "Cerrar sesión"} onClick={logout}>
-            <LogOut size={23} strokeWidth={1.9} />
-          </button>
-        ) : (
-          <button
-            type="button"
-            aria-label="Ingresar con Google"
-            title={checkingAdmin ? "Verificando sesión" : "Ingresar con Google"}
-            onClick={loginWithGoogle}
-          >
-            <UserRound size={23} strokeWidth={1.9} />
-          </button>
-        )}
+        <Link to="/cuenta" aria-label="Cuenta" title={user?.email ?? "Cuenta"}>
+          <UserRound size={23} strokeWidth={1.9} />
+        </Link>
         <button
           type="button"
           className="desktop-view-toggle"

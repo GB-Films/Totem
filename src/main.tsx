@@ -4,6 +4,7 @@ import { App } from "./App";
 import { AuthProvider } from "./context/AuthContext";
 import { AvailabilityProvider } from "./context/AvailabilityContext";
 import { CatalogProvider } from "./context/CatalogContext";
+import { FavoritesProvider } from "./context/FavoritesContext";
 import { SelectionProvider } from "./context/SelectionContext";
 import "./styles/index.css";
 
@@ -12,9 +13,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <AuthProvider>
       <CatalogProvider>
         <AvailabilityProvider>
-          <SelectionProvider>
-            <App />
-          </SelectionProvider>
+          <FavoritesProvider>
+            <SelectionProvider>
+              <App />
+            </SelectionProvider>
+          </FavoritesProvider>
         </AvailabilityProvider>
       </CatalogProvider>
     </AuthProvider>

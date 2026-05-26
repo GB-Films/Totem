@@ -1,5 +1,6 @@
 import { Heart, ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useFavorites } from "../context/FavoritesContext";
 import { useSelection } from "../context/SelectionContext";
 import type { Product } from "../types";
 import { formatCurrency } from "../utils/format";
@@ -16,7 +17,9 @@ const specialBadges: Record<string, string> = {
 
 export function ProductCard({ product }: ProductCardProps) {
   const { isSelected } = useSelection();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const selected = isSelected(product.id);
+  const favorite = isFavorite(product.id);
 
   return (
     <article className={`product-card ${selected ? "is-selected" : ""}`}>
@@ -26,10 +29,13 @@ export function ProductCard({ product }: ProductCardProps) {
         <button
           type="button"
           aria-label={`Marcar ${product.name} como favorito`}
-          className="favorite-btn"
-          onClick={(event) => event.preventDefault()}
+          className={`favorite-btn ${favorite ? "is-favorite" : ""}`}
+          onClick={(event) => {
+            event.preventDefault();
+            toggleFavorite(product.id);
+          }}
         >
-          <Heart size={22} strokeWidth={1.8} />
+          <Heart size={22} strokeWidth={1.8} fill={favorite ? "currentColor" : "none"} />
         </button>
       </Link>
 

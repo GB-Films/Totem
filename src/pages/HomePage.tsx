@@ -16,9 +16,9 @@ const useCases = [
     href: "/colecciones",
   },
   {
-    title: "Todavía estoy bajando ideas",
-    text: "Usá inspiración para buscar por atmósfera, época, textura o intención visual.",
-    href: "/inspiracion",
+    title: "Quiero guardar para después",
+    text: "Marcá favoritos y dejá una selección a mano para volver cuando el proyecto tome forma.",
+    href: "/cuenta",
   },
 ];
 

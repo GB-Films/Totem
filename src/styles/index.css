@@ -3033,6 +3033,12 @@ footer {
   border-color: rgba(122, 31, 31, .38);
   color: var(--accent);
 }
+.user-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-top: 1rem;
+}
 .admin-editor {
   padding: 1rem;
   border-radius: 12px;
@@ -3232,4 +3238,68 @@ body.force-desktop-view .catalog-sidebar-v3 {
 
 body.force-desktop-view .product-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 820px) {
+  body:not(.force-desktop-view) .site-header {
+    grid-template-columns: minmax(140px, 1fr) max-content;
+    gap: .45rem;
+  }
+
+  body:not(.force-desktop-view) .site-actions {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 32px;
+    align-items: center;
+    justify-content: end;
+    gap: .28rem;
+  }
+
+  body:not(.force-desktop-view) .site-actions a,
+  body:not(.force-desktop-view) .site-actions button,
+  body:not(.force-desktop-view) .desktop-view-toggle {
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    padding: 0;
+  }
+
+  body:not(.force-desktop-view) .desktop-view-toggle span {
+    display: none;
+  }
+
+  body:not(.force-desktop-view) .site-actions svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  body:not(.force-desktop-view) .cart-action span {
+    right: -7px;
+    top: -6px;
+  }
+
+  body:not(.force-desktop-view) .user-page {
+    padding: .85rem .78rem 3rem;
+  }
+
+  body:not(.force-desktop-view) .user-hero {
+    display: grid;
+    border-radius: 18px;
+    padding: 1.15rem;
+  }
+
+  body:not(.force-desktop-view) .user-dashboard,
+  body:not(.force-desktop-view) .reservation-customer-grid,
+  body:not(.force-desktop-view) .user-favorite-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body:not(.force-desktop-view) .user-favorite-card {
+    grid-template-columns: 92px minmax(0, 1fr) 34px;
+  }
+
+  body:not(.force-desktop-view) .user-quick-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
 }
