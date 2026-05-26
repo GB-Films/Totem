@@ -15,6 +15,7 @@ const quickFilterChips = ["vintage", "estudio", "living", "oficina", "rodaje", "
 export function CatalogPage() {
   const [searchParams] = useSearchParams();
   const { products, categories, availableTags } = useCatalog();
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const initialCategory = searchParams.get("categoria");
   const initialSearch = searchParams.get("q") ?? "";
   const maxCatalogPrice = Math.max(...products.map((product) => product.rentalPricePerDay));
@@ -78,6 +79,10 @@ export function CatalogPage() {
     setFilters((current) => ({ ...current, tags: [] }));
   };
 
+  const setCategory = (category: CatalogFilters["category"]) => {
+    setFilters((current) => ({ ...current, category }));
+  };
+
   return (
     <div className="catalog-page-v3">
       <div className="catalog-breadcrumb-v3">
@@ -94,6 +99,7 @@ export function CatalogPage() {
         </div>
 
         <div className="catalog-search-block-v3">
+          <p className="mobile-search-kicker">¿Qué estás buscando?</p>
           <label className="catalog-search-v3">
             <Search size={26} strokeWidth={1.8} />
             <input
@@ -104,8 +110,33 @@ export function CatalogPage() {
             />
           </label>
 
+          <div className="mobile-category-strip-v3" aria-label="Categorías rápidas">
+            <button
+              type="button"
+              onClick={() => setCategory("Todas")}
+              className={filters.category === "Todas" ? "is-active" : ""}
+            >
+              Todo
+            </button>
+            {categories.map((category) => (
+              <button
+                key={category}
+                type="button"
+                onClick={() => setCategory(category)}
+                className={filters.category === category ? "is-active" : ""}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+
           <div className="catalog-toolbar-v3">
-            <button type="button" className="catalog-filter-button-v3">
+            <button
+              type="button"
+              className="catalog-filter-button-v3"
+              onClick={() => setFiltersOpen(true)}
+              aria-expanded={filtersOpen}
+            >
               <SlidersHorizontal size={16} />
               Filtros
             </button>
@@ -132,15 +163,31 @@ export function CatalogPage() {
       </section>
 
       <div className="catalog-body-v3">
-        <ProductFilters
-          filters={filters}
-          maxCatalogPrice={maxCatalogPrice}
-          onChange={setFilters}
-          resultCount={filteredProducts.length}
-          products={products}
-          categories={categories}
-          availableTags={availableTags}
-        />
+        <div className={`catalog-filters-shell-v3 ${filtersOpen ? "is-open" : ""}`}>
+          <button
+            type="button"
+            className="catalog-filter-backdrop-v3"
+            aria-label="Cerrar filtros"
+            onClick={() => setFiltersOpen(false)}
+          />
+          <div className="catalog-filter-drawer-v3">
+            <div className="catalog-filter-drawer-head-v3">
+              <strong>Filtros</strong>
+              <button type="button" onClick={() => setFiltersOpen(false)} aria-label="Cerrar filtros">
+                <X size={18} />
+              </button>
+            </div>
+            <ProductFilters
+              filters={filters}
+              maxCatalogPrice={maxCatalogPrice}
+              onChange={setFilters}
+              resultCount={filteredProducts.length}
+              products={products}
+              categories={categories}
+              availableTags={availableTags}
+            />
+          </div>
+        </div>
 
         <section className="catalog-results-v3">
           <div className="catalog-results-head-v3">
