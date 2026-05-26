@@ -19,7 +19,7 @@ export function RentalCalculator({ products, selection }: RentalCalculatorProps)
   return (
     <section className="parchment-panel p-5">
       <p className="eyebrow">Cálculo de alquiler y garantía</p>
-      <h2 className="mt-2 font-display text-3xl text-gabinete-darkBrown">La cuenta dTotem Rental</h2>
+      <h2 className="mt-2 font-display text-3xl text-gabinete-darkBrown">Resumen estimado</h2>
       <p className="mt-2 font-editorial text-sm leading-6 text-gabinete-muted">
         La garantía es reintegrable, siempre que el objeto vuelva con su historia intacta. El monto
         final puede variar según disponibilidad, logística y condiciones de rodaje.
@@ -58,7 +58,7 @@ export function RentalCalculator({ products, selection }: RentalCalculatorProps)
             </strong>
           </div>
           <p className="mt-2 font-editorial text-xs leading-5 text-gabinete-muted">
-            Delicados suman 10% extra sobre garantía. La no disponibilidad se registra al confirmar la reserva.
+            Algunos objetos delicados pueden requerir una garantía mayor. La disponibilidad queda bloqueada al confirmar la reserva.
           </p>
         </div>
       </div>

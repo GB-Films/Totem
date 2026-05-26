@@ -25,8 +25,9 @@ import {
   getFirebaseDb,
   publicFirebaseConfig,
 } from "../services/firebase";
-import type { Availability, Product, ProductStatus, ProductVisual, ReservationRange, UserProfile } from "../types";
+import type { Availability, Product, ProductStatus, ProductVisual, ReservationRange, ReservationStatus, UserProfile } from "../types";
 import { getInclusiveDays, parseIsoDate, rangesOverlap, todayIso, toIsoDate } from "../utils/dates";
+import { getReservationStatusLabel } from "../utils/reservations";
 
 function isUsableImageUrl(image: string) {
   return /^https?:\/\//.test(image) || /^data:image\//.test(image);
@@ -81,6 +82,15 @@ type ProductForm = {
 };
 
 const statusOptions: ProductStatus[] = ["Excelente", "Muy bueno", "Bueno", "Delicado"];
+const reservationStatusOptions: ReservationStatus[] = [
+  "request_sent",
+  "payment_pending",
+  "confirmed",
+  "ready_for_pickup",
+  "active",
+  "returned",
+  "cancelled",
+];
 const availabilityOptions: Availability[] = ["Disponible", "Consultar", "Reservado"];
 const toneOptions: ProductVisual["tone"][] = ["brass", "green", "red", "blue", "paper", "copper"];
 
@@ -246,6 +256,7 @@ function ReservationAdminRow({
   const [endDate, setEndDate] = useState(reservation.endDate);
   const [quantity, setQuantity] = useState(String(reservation.quantity ?? 1));
   const [note, setNote] = useState(reservation.note ?? "");
+  const [status, setStatus] = useState<ReservationStatus>(reservation.status ?? "confirmed");
   const [saving, setSaving] = useState(false);
 
   const saveReservation = async () => {
@@ -267,6 +278,7 @@ function ReservationAdminRow({
         quantity: Math.max(1, Number(quantity) || 1),
         rentalDays: getInclusiveDays(startDate, endDate),
         note: note.trim(),
+        status,
       });
       onMessage(`Reserva actualizada: ${productName}`);
     } catch (error) {
@@ -317,6 +329,8 @@ function ReservationAdminRow({
         {profile && <span>DNI: {profile.dni}</span>}
         {profile && <span>Celular: {profile.phone}</span>}
         {profile?.email && <span>{profile.email}</span>}
+        {reservation.paymentAlias && <span>Pago: Mercado Pago alias {reservation.paymentAlias}</span>}
+        {typeof reservation.reserveDeposit === "number" && <span>Seña: ${reservation.reserveDeposit.toLocaleString("es-AR")}</span>}
       </div>
       <div className="admin-reservation-fields">
         <label>
@@ -330,6 +344,14 @@ function ReservationAdminRow({
         <label>
           Cant.
           <input className="gabinete-input" type="number" min="1" value={quantity} onChange={(event) => setQuantity(event.target.value)} />
+        </label>
+        <label>
+          Estado
+          <select className="gabinete-input" value={status} onChange={(event) => setStatus(event.target.value as ReservationStatus)}>
+            {reservationStatusOptions.map((option) => (
+              <option key={option} value={option}>{getReservationStatusLabel(option)}</option>
+            ))}
+          </select>
         </label>
       </div>
       <label className="admin-reservation-note">
@@ -422,7 +444,11 @@ function AdminReservationsCalendar({ products }: { products: Product[] }) {
               {dayReservations.slice(0, 2).map((reservation) => {
                 const product = productsById.get(reservation.productId);
                 return (
-                  <span key={reservation.id} className="admin-calendar-chip" title={product?.name ?? reservation.productId}>
+                  <span
+                    key={reservation.id}
+                    className={`admin-calendar-chip status-${reservation.status ?? "confirmed"}`}
+                    title={`${product?.name ?? reservation.productId} · ${getReservationStatusLabel(reservation.status)}`}
+                  >
                     {product?.name ?? reservation.productId}
                   </span>
                 );

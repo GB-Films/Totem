@@ -62,15 +62,22 @@ service cloud.firestore {
           'customerName',
           'customerEmail',
           'createdByUid',
+          'paymentAlias',
+          'pickupOption',
+          'reserveDeposit',
+          'guaranteeAmount',
+          'totalEstimated',
           'createdAt'
         ])
         && request.resource.data.keys().hasAll(['productId', 'startDate', 'endDate', 'status', 'createdByUid', 'createdAt'])
         && request.resource.data.productId is string
         && request.resource.data.startDate is string
         && request.resource.data.endDate is string
-        && request.resource.data.status == 'confirmed'
+        && request.resource.data.status in ['request_sent', 'payment_pending', 'confirmed']
         && request.resource.data.createdByUid == request.auth.uid
         && (!('customerEmail' in request.resource.data) || request.resource.data.customerEmail == request.auth.token.email)
+        && (!('paymentAlias' in request.resource.data) || request.resource.data.paymentAlias == 'tomiboe')
+        && (!('pickupOption' in request.resource.data) || request.resource.data.pickupOption in ['reservation_day', 'previous_day_requested'])
       );
       allow update, delete: if isAdmin();
     }

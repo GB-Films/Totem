@@ -10,9 +10,10 @@ import { useAvailability } from "../context/AvailabilityContext";
 import { useCatalog } from "../context/CatalogContext";
 import { useSelection } from "../context/SelectionContext";
 import type { Availability } from "../types";
-import { getInclusiveDays } from "../utils/dates";
-import { formatCurrency, formatPercent } from "../utils/format";
+import { getInclusiveDays, hasOperationalEndpoints } from "../utils/dates";
+import { formatCurrency } from "../utils/format";
 import { buildContactMessage, buildWhatsappUrl } from "../utils/messages";
+import { calculateProductPricing } from "../utils/pricing";
 
 const availabilityClass: Record<Availability, string> = {
   Disponible: "availability-disponible",
@@ -46,6 +47,7 @@ export function ProductDetailPage() {
   const selectedDateConflict = hasSelectedDates
     ? hasConflict(product.id, selectedDates.startDate, selectedDates.endDate)
     : false;
+  const selectedDatesAreOperational = hasOperationalEndpoints(selectedDates.startDate, selectedDates.endDate);
   const singleSelection = [
     {
       productId: product.id,
@@ -72,6 +74,7 @@ export function ProductDetailPage() {
     products,
     singleSelection,
   );
+  const productPricing = calculateProductPricing(product, singleSelection[0]);
 
   return (
     <div className="mx-auto w-full max-w-[1520px] px-4 py-10 sm:px-8 lg:px-12">
@@ -120,7 +123,7 @@ export function ProductDetailPage() {
             {product.description}
           </p>
 
-          <div className="mt-7 grid gap-3 sm:grid-cols-2">
+          <div className="mt-7 grid gap-3 sm:grid-cols-3">
             <div className="parchment-panel p-4">
               <p className="eyebrow">Alquiler diario</p>
               <p className="mt-2 font-display text-2xl font-semibold text-gabinete-darkBrown">
@@ -131,6 +134,15 @@ export function ProductDetailPage() {
               <p className="eyebrow">Alquiler semanal</p>
               <p className="mt-2 font-display text-2xl font-semibold text-gabinete-darkBrown">
                 {product.rentalPricePerWeek ? formatCurrency(product.rentalPricePerWeek) : "Consultar"}
+              </p>
+            </div>
+            <div className="parchment-panel p-4">
+              <p className="eyebrow">Garantía final</p>
+              <p className="mt-2 font-display text-2xl font-semibold text-gabinete-darkBrown">
+                {formatCurrency(productPricing.guaranteeAmount)}
+              </p>
+              <p className="mt-1 font-editorial text-xs leading-5 text-gabinete-muted">
+                Reintegrable al devolver la pieza en buen estado.
               </p>
             </div>
           </div>
@@ -162,9 +174,14 @@ export function ProductDetailPage() {
                 Ese rango pisa una reserva confirmada. Probá con otras fechas.
               </p>
             )}
+            {hasSelectedDates && !selectedDatesAreOperational && (
+              <p className="rounded-md border border-gabinete-error/35 bg-gabinete-error/10 px-3 py-2 font-editorial text-sm text-gabinete-error sm:col-span-2">
+                El retiro y la devolución deben caer en días hábiles. No operamos fines de semana ni feriados.
+              </p>
+            )}
             <button
               type="button"
-              disabled={!hasSelectedDates || selectedDateConflict}
+              disabled={!hasSelectedDates || selectedDateConflict || !selectedDatesAreOperational}
               onClick={() => {
                 if (selectedDates.startDate && selectedDates.endDate) {
                   addProduct(product, selectedDates.startDate, selectedDates.endDate);
@@ -205,9 +222,7 @@ export function ProductDetailPage() {
               ["Material", product.material],
               ["Color", product.color],
               ["Época / estilo", product.eraStyle],
-              ["Valor estimado", formatCurrency(product.estimatedValue)],
-              ["Garantía sugerida", formatPercent(product.guaranteePercentage)],
-              ["Depósito mínimo", formatCurrency(product.minimumDeposit)],
+              ["Disponibilidad", product.availability],
             ].map(([label, value]) => (
               <div key={label} className="rounded-md border border-gabinete-line/24 bg-gabinete-paperLight/18 p-4">
                 <dt className="font-display text-xs uppercase tracking-[0.16em] text-gabinete-faint">

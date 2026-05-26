@@ -1,6 +1,6 @@
 import { LayoutDashboard, Monitor, ShoppingCart, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
-import { NavLink, Link } from "react-router-dom";
+import { NavLink, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useSelection } from "../context/SelectionContext";
 
@@ -28,7 +28,11 @@ function CabinetLogo() {
 export function Header() {
   const { totalItems } = useSelection();
   const { user, isAdmin } = useAuth();
+  const location = useLocation();
   const [desktopView, setDesktopView] = useState(false);
+  const isCartActive = location.pathname === "/contacto";
+  const isAccountActive = location.pathname === "/cuenta";
+  const isAdminActive = location.pathname.startsWith("/admin");
 
   useEffect(() => {
     const stored = window.localStorage.getItem("totem-rental-desktop-view") === "true";
@@ -64,11 +68,21 @@ export function Header() {
 
       <div className="site-actions" aria-label="Acciones rápidas">
         {isAdmin && (
-          <Link to="/admin" aria-label="Panel de administración" title="Panel de administración">
+          <Link
+            to="/admin"
+            aria-label="Panel de administración"
+            title="Panel de administración"
+            className={`action-link ${isAdminActive ? "is-active" : ""}`}
+          >
             <LayoutDashboard size={23} strokeWidth={1.9} />
           </Link>
         )}
-        <Link to="/cuenta" aria-label="Cuenta" title={user?.email ?? "Cuenta"}>
+        <Link
+          to="/cuenta"
+          aria-label="Cuenta"
+          title={user?.email ?? "Cuenta"}
+          className={`action-link ${isAccountActive ? "is-active" : ""}`}
+        >
           <UserRound size={23} strokeWidth={1.9} />
         </Link>
         <button
@@ -82,7 +96,11 @@ export function Header() {
           <Monitor size={22} strokeWidth={1.9} />
           <span>{desktopView ? "Mobile" : "Escritorio"}</span>
         </button>
-        <Link to="/contacto" className="cart-action" aria-label="Ver carrito">
+        <Link
+          to="/contacto"
+          className={`cart-action action-link ${isCartActive ? "is-active" : ""}`}
+          aria-label="Ver carrito"
+        >
           <ShoppingCart size={24} strokeWidth={1.9} />
           <span>{totalItems}</span>
         </Link>

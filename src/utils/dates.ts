@@ -1,3 +1,5 @@
+import { nonOperationalDates } from "../data/nonOperationalDays";
+
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 export function toIsoDate(date: Date) {
@@ -63,4 +65,37 @@ export function formatDisplayDate(dateIso: string) {
 
 export function buildCalendarDays(startDate: string, amount: number) {
   return Array.from({ length: amount }, (_, index) => addDaysIso(startDate, index));
+}
+
+export function isWeekend(dateIso: string) {
+  const day = parseIsoDate(dateIso).getDay();
+  return day === 0 || day === 6;
+}
+
+export function isHoliday(dateIso: string) {
+  return nonOperationalDates.has(dateIso);
+}
+
+export function isOperationalDate(dateIso?: string) {
+  return Boolean(dateIso) && !isWeekend(dateIso!) && !isHoliday(dateIso!);
+}
+
+export function hasOperationalEndpoints(startDate?: string, endDate?: string) {
+  return isOperationalDate(startDate) && isOperationalDate(endDate);
+}
+
+export function getNonOperationalReason(dateIso?: string) {
+  if (!dateIso) {
+    return "";
+  }
+
+  if (isWeekend(dateIso)) {
+    return "fin de semana";
+  }
+
+  if (isHoliday(dateIso)) {
+    return "feriado";
+  }
+
+  return "";
 }

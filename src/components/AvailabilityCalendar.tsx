@@ -3,7 +3,16 @@ import { useMemo, useState } from "react";
 import { RESERVATIONS_ENABLED } from "../config/features";
 import { useAvailability } from "../context/AvailabilityContext";
 import type { Product } from "../types";
-import { formatDateRange, parseIsoDate, rangesOverlap, todayIso, toIsoDate } from "../utils/dates";
+import {
+  formatDateRange,
+  getNonOperationalReason,
+  isOperationalDate,
+  parseIsoDate,
+  rangesOverlap,
+  todayIso,
+  toIsoDate,
+} from "../utils/dates";
+import { getReservationStatusLabel } from "../utils/reservations";
 
 interface AvailabilityCalendarProps {
   product: Product;
@@ -69,7 +78,7 @@ export function AvailabilityCalendar({
     );
 
   const selectDay = (day: string) => {
-    if (!onRangeChange || day < today || rangeHasReservation(day, day)) {
+    if (!onRangeChange || day < today || !isOperationalDate(day) || rangeHasReservation(day, day)) {
       return;
     }
 
@@ -127,12 +136,15 @@ export function AvailabilityCalendar({
           const selectedStart = selected && iso === startDate;
           const selectedEnd = selected && iso === endDate;
           const past = iso < today;
-          const disabled = reserved || past;
+          const nonOperational = !isOperationalDate(iso);
+          const disabled = reserved || past || nonOperational;
+          const reason = getNonOperationalReason(iso);
 
           const dayClass = [
             "calendar-day",
             !inMonth ? "is-outside" : "",
             past ? "is-past" : "",
+            nonOperational && !past ? "is-closed" : "",
             reserved ? "is-reserved" : "",
             selected ? "is-selected" : "",
             selectedStart ? "is-start" : "",
@@ -144,7 +156,7 @@ export function AvailabilityCalendar({
             <button
               key={iso}
               type="button"
-              title={iso}
+              title={reason ? `${iso} · Sin retiro/devolución por ${reason}` : iso}
               disabled={disabled}
               onClick={() => selectDay(iso)}
               className={dayClass}
@@ -152,7 +164,7 @@ export function AvailabilityCalendar({
               {Number(iso.slice(-2))}
             </button>
           ) : (
-            <span key={iso} title={iso} className={dayClass}>
+            <span key={iso} title={reason ? `${iso} · Sin retiro/devolución por ${reason}` : iso} className={dayClass}>
               {Number(iso.slice(-2))}
             </span>
           );
@@ -167,6 +179,10 @@ export function AvailabilityCalendar({
         <span className="inline-flex items-center gap-2">
           <span className="calendar-key is-reserved" />
           No disponible
+        </span>
+        <span className="inline-flex items-center gap-2">
+          <span className="calendar-key is-closed" />
+          Sin retiro/devolución
         </span>
         <span className="inline-flex items-center gap-2">
           <span className="calendar-key is-selected" />
@@ -188,6 +204,7 @@ export function AvailabilityCalendar({
                 <span className="font-medium text-gabinete-darkBrown">
                   {formatDateRange(reservation.startDate, reservation.endDate)}
                 </span>
+                <span> · {getReservationStatusLabel(reservation.status)}</span>
                 {reservation.note && <span> · {reservation.note}</span>}
               </div>
             ))}
@@ -199,7 +216,7 @@ export function AvailabilityCalendar({
         {!RESERVATIONS_ENABLED
           ? "Modo prueba activo: no se graban nuevas reservas al confirmar. Los días no disponibles vienen de la nube."
           : interactive
-          ? "Tocá una fecha de inicio y luego una de cierre. Los días marcados como no disponibles salen de la nube."
+          ? "Tocá una fecha de inicio y luego una de cierre. No se puede retirar ni devolver fines de semana o feriados."
           : "Las fechas confirmadas se sincronizan con Firebase cuando la nube está configurada."}
       </p>
     </section>

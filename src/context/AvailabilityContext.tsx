@@ -18,6 +18,12 @@ interface ReservationMeta {
   customerName?: string;
   customerEmail?: string;
   createdByUid?: string;
+  status?: ReservationRange["status"];
+  paymentAlias?: string;
+  pickupOption?: ReservationRange["pickupOption"];
+  reserveDeposit?: number;
+  guaranteeAmount?: number;
+  totalEstimated?: number;
 }
 
 interface AvailabilityContextValue {
@@ -30,6 +36,10 @@ interface AvailabilityContextValue {
 
 const STORAGE_KEY = "el-gabinete-local-reservations";
 const AvailabilityContext = createContext<AvailabilityContextValue | undefined>(undefined);
+
+function blocksAvailability(reservation: ReservationRange) {
+  return reservation.status !== "cancelled" && reservation.status !== "returned";
+}
 
 function readLocalReservations(): ReservationRange[] {
   if (typeof window === "undefined") {
@@ -79,6 +89,11 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
             customerName: data.customerName,
             customerEmail: data.customerEmail,
             createdByUid: data.createdByUid,
+            paymentAlias: data.paymentAlias,
+            pickupOption: data.pickupOption,
+            reserveDeposit: data.reserveDeposit,
+            guaranteeAmount: data.guaranteeAmount,
+            totalEstimated: data.totalEstimated,
             source: "firebase",
           };
         }),
@@ -94,7 +109,7 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
   const getProductReservations = useCallback(
     (productId: string) =>
       reservations
-        .filter((reservation) => reservation.productId === productId)
+        .filter((reservation) => reservation.productId === productId && blocksAvailability(reservation))
         .sort((a, b) => a.startDate.localeCompare(b.startDate)),
     [reservations],
   );
@@ -108,7 +123,7 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
   );
 
   const addReservationsFromSelection = useCallback(
-    async (selection: SelectionItem[], note = "Reserva confirmada", meta: ReservationMeta = {}) => {
+    async (selection: SelectionItem[], note = "Reserva pendiente de pago", meta: ReservationMeta = {}) => {
       if (!RESERVATIONS_ENABLED) {
         return;
       }
@@ -129,7 +144,7 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
               startDate: item.startDate!,
               endDate: item.endDate!,
               note,
-              status: "confirmed",
+              status: meta.status ?? "payment_pending",
               createdAt: serverTimestamp(),
             };
 
@@ -143,6 +158,26 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
 
             if (meta.createdByUid) {
               payload.createdByUid = meta.createdByUid;
+            }
+
+            if (meta.paymentAlias) {
+              payload.paymentAlias = meta.paymentAlias;
+            }
+
+            if (meta.pickupOption) {
+              payload.pickupOption = meta.pickupOption;
+            }
+
+            if (typeof meta.reserveDeposit === "number") {
+              payload.reserveDeposit = meta.reserveDeposit;
+            }
+
+            if (typeof meta.guaranteeAmount === "number") {
+              payload.guaranteeAmount = meta.guaranteeAmount;
+            }
+
+            if (typeof meta.totalEstimated === "number") {
+              payload.totalEstimated = meta.totalEstimated;
             }
 
             return addDoc(collection(db, "reservations"), payload);
@@ -161,11 +196,16 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
           startDate: item.startDate!,
           endDate: item.endDate!,
           source: "local",
-          status: "confirmed",
+          status: meta.status ?? "payment_pending",
           note,
           customerName: meta.customerName,
           customerEmail: meta.customerEmail,
           createdByUid: meta.createdByUid,
+          paymentAlias: meta.paymentAlias,
+          pickupOption: meta.pickupOption,
+          reserveDeposit: meta.reserveDeposit,
+          guaranteeAmount: meta.guaranteeAmount,
+          totalEstimated: meta.totalEstimated,
         }));
         const next = [...current, ...nextReservations];
         writeLocalReservations(next);

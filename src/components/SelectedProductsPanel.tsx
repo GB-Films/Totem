@@ -4,7 +4,7 @@ import { useAvailability } from "../context/AvailabilityContext";
 import { useCatalog } from "../context/CatalogContext";
 import { useSelection } from "../context/SelectionContext";
 import { formatCurrency } from "../utils/format";
-import { addDaysIso, formatDateRange, getInclusiveDays, todayIso } from "../utils/dates";
+import { addDaysIso, formatDateRange, getInclusiveDays, hasOperationalEndpoints, todayIso } from "../utils/dates";
 import { calculateProductPricing } from "../utils/pricing";
 import { ObjectImage } from "./ObjectImage";
 import { RentalCalculator } from "./RentalCalculator";
@@ -36,7 +36,12 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
     const endDate = item.endDate ?? addDaysIso(startDate, Math.max(1, item.rentalDays) - 1);
     return hasConflict(product.id, startDate, endDate);
   });
-  const canPrepareRental = selectedProducts.length > 0 && !hasAnyConflict;
+  const hasNonOperationalEndpoints = selectedProducts.some(({ item }) => {
+    const startDate = item.startDate ?? todayIso();
+    const endDate = item.endDate ?? addDaysIso(startDate, Math.max(1, item.rentalDays) - 1);
+    return !hasOperationalEndpoints(startDate, endDate);
+  });
+  const canPrepareRental = selectedProducts.length > 0 && !hasAnyConflict && !hasNonOperationalEndpoints;
 
   return (
     <aside className="space-y-4">
@@ -68,6 +73,7 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
               const startDate = item.startDate ?? todayIso();
               const endDate = item.endDate ?? addDaysIso(startDate, Math.max(1, item.rentalDays) - 1);
               const conflict = hasConflict(product.id, startDate, endDate);
+              const operationalEndpoints = hasOperationalEndpoints(startDate, endDate);
               return (
                 <div key={product.id} className="selected-item-card">
                   <div className="selected-item-main">
@@ -164,12 +170,16 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
                       <p className={`selected-item-status ${conflict ? "is-conflict" : "is-free"}`}>
                         {conflict
                           ? "Estas fechas se pisan con una reserva confirmada."
-                          : `Fechas libres: ${formatDateRange(startDate, endDate)}.`}
+                          : !operationalEndpoints
+                            ? "Retiro y devolución deben ser en días hábiles, sin fines de semana ni feriados."
+                            : `Fechas libres: ${formatDateRange(startDate, endDate)}.`}
                       </p>
 
-                      <p className="selected-item-total">
-                        Estimado: <strong>{formatCurrency(pricing.totalEstimated)}</strong>
-                      </p>
+                      <div className="selected-item-pricing">
+                        <span>Alquiler <strong>{formatCurrency(pricing.rentalTotal)}</strong></span>
+                        <span>Garantía <strong>{formatCurrency(pricing.guaranteeAmount)}</strong></span>
+                        <span>Total <strong>{formatCurrency(pricing.totalEstimated)}</strong></span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -180,9 +190,14 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
                 Para confirmar la reserva necesitás elegir fechas libres para todos los objetos.
               </p>
             )}
+            {hasNonOperationalEndpoints && (
+              <p className="rounded-md border border-gabinete-error/35 bg-gabinete-error/10 px-3 py-2 font-editorial text-sm text-gabinete-error">
+                Cambiá las fechas: no se puede retirar ni devolver fines de semana o feriados.
+              </p>
+            )}
             {showAction && canPrepareRental ? (
               <Link to="/contacto" className="gabinete-button w-full px-4 py-3">
-                Confirmar reserva
+                Registrar pedido
               </Link>
             ) : showAction ? (
               <button

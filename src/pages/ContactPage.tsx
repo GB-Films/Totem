@@ -3,6 +3,13 @@ import { ReservationHistory } from "../components/ReservationHistory";
 import { SelectedProductsPanel } from "../components/SelectedProductsPanel";
 import { useSelection } from "../context/SelectionContext";
 
+const rentalChecklist = [
+  "Elegí fechas libres para cada objeto.",
+  "Completá tus datos y el nombre del proyecto.",
+  "Pagá la seña por Mercado Pago al alias tomiboe.",
+  "Enviá el comprobante y coordinamos retiro, devolución y persona autorizada.",
+];
+
 export function ContactPage() {
   const { selection } = useSelection();
 
@@ -21,7 +28,26 @@ export function ContactPage() {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
         <SelectedProductsPanel showAction={false} />
-        <ContactForm selection={selection} />
+        <div className="space-y-5">
+          <ContactForm selection={selection} />
+          <section className="self-service-card">
+            <p className="eyebrow">Retiro y devolución</p>
+            <h2>Información operativa</h2>
+            <p>
+              Al confirmar, dejamos preparado el resumen de piezas, fechas, garantía reintegrable y datos necesarios
+              para coordinar la entrega o retiro.
+            </p>
+            <ul>
+              {rentalChecklist.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+            <div className="self-service-note">
+              <strong>Para retirar:</strong> los objetos se retiran desde las 8:00 del primer día de reserva.
+              Si necesitás el día previo, dejá la solicitud marcada. No hay retiro ni devolución fines de semana o feriados.
+            </div>
+          </section>
+        </div>
       </div>
       <div className="mt-8">
         <ReservationHistory />

@@ -9,6 +9,15 @@ export type Category =
 
 export type ProductStatus = "Excelente" | "Muy bueno" | "Bueno" | "Delicado";
 export type Availability = "Disponible" | "Consultar" | "Reservado";
+export type ReservationStatus =
+  | "request_sent"
+  | "payment_pending"
+  | "confirmed"
+  | "ready_for_pickup"
+  | "active"
+  | "returned"
+  | "cancelled"
+  | "pending";
 
 export interface ProductVisual {
   tone: "brass" | "green" | "red" | "blue" | "paper" | "copper";
@@ -64,11 +73,16 @@ export interface ReservationRange {
   startDate: string;
   endDate: string;
   source: "mock" | "local" | "firebase";
-  status?: "pending" | "confirmed" | "cancelled";
+  status?: ReservationStatus;
   note?: string;
   customerName?: string;
   customerEmail?: string;
   createdByUid?: string;
+  paymentAlias?: string;
+  pickupOption?: "reservation_day" | "previous_day_requested";
+  reserveDeposit?: number;
+  guaranteeAmount?: number;
+  totalEstimated?: number;
 }
 
 export interface UserProfile {
