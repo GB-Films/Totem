@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Product } from "../types";
 
 interface ObjectImageProps {
@@ -38,7 +39,10 @@ function ProductIllustration({ id, sigil }: { id: string; sigil: string }) {
 }
 
 export function ObjectImage({ product, compact = false, showLabel = true }: ObjectImageProps) {
-  const uploadedImage = product.images.find((image) => /^https?:\/\//.test(image));
+  const [failed, setFailed] = useState(false);
+  const uploadedImage = product.images.find((image) => image.trim().length > 0);
+  const imageSrc = uploadedImage?.startsWith("/") ? `${import.meta.env.BASE_URL.replace(/\/$/, "")}${uploadedImage}` : uploadedImage;
+  const showPhoto = Boolean(imageSrc && !failed);
 
   return (
     <div
@@ -46,8 +50,13 @@ export function ObjectImage({ product, compact = false, showLabel = true }: Obje
       aria-label={`Imagen de referencia de ${product.name}`}
       role="img"
     >
-      {uploadedImage ? (
-        <img className="object-photo" src={uploadedImage} alt="" />
+      {showPhoto ? (
+        <img
+          className="object-photo"
+          src={imageSrc}
+          alt={product.name}
+          onError={() => setFailed(true)}
+        />
       ) : (
         <>
           <div className="object-wall" />

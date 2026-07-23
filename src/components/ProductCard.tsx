@@ -1,4 +1,4 @@
-import { Heart, ShoppingCart } from "lucide-react";
+import { ArrowUpRight, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useFavorites } from "../context/FavoritesContext";
 import { useSelection } from "../context/SelectionContext";
@@ -23,27 +23,28 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <article className={`product-card ${selected ? "is-selected" : ""}`}>
-      <Link to={`/producto/${product.id}`} className="product-media" aria-label={`Ver ficha de ${product.name}`}>
-        <ObjectImage product={product} compact showLabel={false} />
-        {specialBadges[product.id] && <span className="product-badge">{specialBadges[product.id]}</span>}
+      <div className="product-media">
+        <Link to={`/producto/${product.id}`} aria-label={`Ver ficha de ${product.name}`}>
+          <ObjectImage product={product} compact showLabel={false} />
+          {specialBadges[product.id] && <span className="product-badge">{specialBadges[product.id]}</span>}
+        </Link>
         <button
           type="button"
-          aria-label={`Marcar ${product.name} como favorito`}
+          aria-label={favorite ? `Quitar ${product.name} de favoritos` : `Guardar ${product.name} en favoritos`}
           className={`favorite-btn ${favorite ? "is-favorite" : ""}`}
-          onClick={(event) => {
-            event.preventDefault();
-            toggleFavorite(product.id);
-          }}
+          onClick={() => toggleFavorite(product.id)}
         >
           <Heart size={22} strokeWidth={1.8} fill={favorite ? "currentColor" : "none"} />
         </button>
-      </Link>
+      </div>
 
       <div className="product-info">
-        <Link to={`/producto/${product.id}`} className="product-title">
-          {product.name}
-        </Link>
-        <p className="product-category">{product.category}</p>
+        <div className="product-heading">
+          <p className="product-category">{product.category} · {product.id}</p>
+          <Link to={`/producto/${product.id}`} className="product-title">
+            {product.name}
+          </Link>
+        </div>
         <p className="product-description">{product.description}</p>
         <p className="product-measures">{product.measurements}</p>
 
@@ -55,16 +56,8 @@ export function ProductCard({ product }: ProductCardProps) {
           <span className={`product-status status-${product.availability.toLowerCase()}`}>
             {product.availability}
           </span>
-          <Link
-            to={`/producto/${product.id}`}
-            className="add-mini"
-            aria-label={`Elegir fechas y sumar ${product.name} al carrito`}
-            title="Elegir fechas"
-          >
-            <ShoppingCart size={16} />
-          </Link>
           <Link to={`/producto/${product.id}`} className="detail-btn">
-            Ver detalle
+            Ver ficha <ArrowUpRight size={14} />
           </Link>
         </div>
       </div>

@@ -64,7 +64,7 @@ export function CatalogPage() {
       if (filters.sort === "priceDesc") return b.rentalPricePerDay - a.rentalPricePerDay;
       return b.featuredScore - a.featuredScore;
     });
-  }, [filters]);
+  }, [filters, products]);
 
   const toggleChip = (tag: string) => {
     setFilters((current) => ({
@@ -93,9 +93,9 @@ export function CatalogPage() {
 
       <section className="catalog-intro-v3">
         <div className="catalog-title-block-v3">
+          <p className="eyebrow">Archivo disponible</p>
           <h1>Catálogo de props</h1>
-          <div className="title-separator"><span>✶</span></div>
-          <p>Objetos únicos para cine, TV, publicidad, teatro y creación de contenido.</p>
+          <p>Filtrá por tipo, estilo, uso, precio o disponibilidad. Cada ficha incluye medidas, estado y calendario.</p>
         </div>
 
         <div className="catalog-search-block-v3">
@@ -192,7 +192,7 @@ export function CatalogPage() {
         <section className="catalog-results-v3">
           <div className="catalog-results-head-v3">
             <p>
-              <strong>{filteredProducts.length}</strong> objetos encontrados
+              <strong>{filteredProducts.length}</strong> {filteredProducts.length === 1 ? "objeto encontrado" : "objetos encontrados"}
             </p>
 
             <label>

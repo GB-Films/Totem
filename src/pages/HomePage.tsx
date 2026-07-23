@@ -6,18 +6,18 @@ import { useCatalog } from "../context/CatalogContext";
 
 const useCases = [
   {
-    title: "Necesito algo puntual",
-    text: "Buscá por nombre, categoría o estilo. Ideal cuando ya sabés qué objeto falta en arte.",
+    title: "Ya sé qué necesito",
+    text: "Buscá por nombre, categoría, estilo o disponibilidad y pasá directo a elegir fechas.",
     href: "/catalogo",
   },
   {
-    title: "Estoy armando un universo",
-    text: "Entrá por colecciones y encontrá piezas que dialogan entre sí sin tener que revolver todo el archivo.",
+    title: "Estoy armando el universo",
+    text: "Explorá colecciones de piezas que funcionan juntas para construir una misma atmósfera.",
     href: "/colecciones",
   },
   {
-    title: "Quiero guardar para después",
-    text: "Marcá favoritos y dejá una selección a mano para volver cuando el proyecto tome forma.",
+    title: "Quiero armar una preselección",
+    text: "Guardá favoritos, compará opciones y volvé cuando el proyecto tenga fechas definidas.",
     href: "/cuenta",
   },
 ];
@@ -38,11 +38,10 @@ export function HomePage() {
 
       <section className="home-flow-section">
         <div className="home-section-heading">
-          <p className="eyebrow">Después de buscar</p>
-          <h2>Elegí cómo querés entrar al gabinete.</h2>
+          <p className="eyebrow">Encontrá más rápido</p>
+          <h2>Una entrada para cada etapa del proyecto.</h2>
           <p>
-            La web tiene que servirle tanto a quien llega con una lista cerrada como a quien todavía está encontrando
-            el tono visual del proyecto.
+            Desde una lista cerrada hasta una primera búsqueda visual: empezá por donde te resulte más útil.
           </p>
         </div>
 
@@ -63,8 +62,8 @@ export function HomePage() {
       <section className="home-featured-section">
         <div className="home-section-heading is-inline">
           <div>
-            <p className="eyebrow">Piezas destacadas</p>
-            <h2>Objetos que ya tienen escena.</h2>
+          <p className="eyebrow">Selección del archivo</p>
+          <h2>Piezas listas para entrar en cuadro.</h2>
           </div>
           <Link to="/catalogo" className="gabinete-button px-5 py-3">
             Ver catálogo completo

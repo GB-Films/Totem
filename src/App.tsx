@@ -1,23 +1,24 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Layout } from "./components/Layout";
-import { CatalogPage } from "./pages/CatalogPage";
-import { CollectionsPage } from "./pages/CollectionsPage";
-import { ContactPage } from "./pages/ContactPage";
 import { HomePage } from "./pages/HomePage";
-import { HowItWorksPage } from "./pages/HowItWorksPage";
-import { ProductDetailPage } from "./pages/ProductDetailPage";
-import { AboutPage } from "./pages/AboutPage";
-import { AccountPage } from "./pages/AccountPage";
 
 const basename = import.meta.env.BASE_URL === "/" ? undefined : import.meta.env.BASE_URL.replace(/\/$/, "");
+const CatalogPage = lazy(() => import("./pages/CatalogPage").then((module) => ({ default: module.CatalogPage })));
+const CollectionsPage = lazy(() => import("./pages/CollectionsPage").then((module) => ({ default: module.CollectionsPage })));
+const ContactPage = lazy(() => import("./pages/ContactPage").then((module) => ({ default: module.ContactPage })));
+const HowItWorksPage = lazy(() => import("./pages/HowItWorksPage").then((module) => ({ default: module.HowItWorksPage })));
+const ProductDetailPage = lazy(() => import("./pages/ProductDetailPage").then((module) => ({ default: module.ProductDetailPage })));
+const AboutPage = lazy(() => import("./pages/AboutPage").then((module) => ({ default: module.AboutPage })));
+const AccountPage = lazy(() => import("./pages/AccountPage").then((module) => ({ default: module.AccountPage })));
 const AdminPage = lazy(() => import("./pages/AdminPage").then((module) => ({ default: module.AdminPage })));
 
-function AdminRoute() {
+function PageLoading() {
   return (
-    <Suspense fallback={<div className="admin-page">Cargando panel...</div>}>
-      <AdminPage />
-    </Suspense>
+    <div className="page-loading" role="status" aria-live="polite">
+      <span />
+      Preparando el archivo…
+    </div>
   );
 }
 
@@ -35,13 +36,17 @@ const router = createBrowserRouter(
         { path: "sobre-nosotros", element: <AboutPage /> },
         { path: "cuenta", element: <AccountPage /> },
         { path: "contacto", element: <ContactPage /> },
-        { path: "admin", element: <AdminRoute /> },
+        { path: "admin", element: <AdminPage /> },
       ],
     },
   ],
-  { basename },
+  { basename, future: { v7_relativeSplatPath: true } },
 );
 
 export function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <Suspense fallback={<PageLoading />}>
+      <RouterProvider router={router} future={{ v7_startTransition: true }} />
+    </Suspense>
+  );
 }

@@ -23,7 +23,6 @@ import {
   firebaseEnabled,
   getFirebaseApp,
   getFirebaseDb,
-  publicFirebaseConfig,
 } from "../services/firebase";
 import type { Availability, Product, ProductStatus, ProductVisual, ReservationRange, ReservationStatus, UserProfile } from "../types";
 import { getInclusiveDays, parseIsoDate, rangesOverlap, todayIso, toIsoDate } from "../utils/dates";
@@ -491,6 +490,7 @@ export function AdminPage() {
   const storage = app ? getStorage(app) : null;
   const { user, isAdmin, checkingAdmin, loginWithGoogle, logout, authError } = useAuth();
   const { products, syncMode } = useCatalog();
+  const { reservations } = useAvailability();
   const [imageUrl, setImageUrl] = useState("");
   const [form, setForm] = useState<ProductForm>(emptyForm);
   const [message, setMessage] = useState("");
@@ -654,13 +654,8 @@ export function AdminPage() {
         <form onSubmit={login} className="admin-card admin-login">
           <span className="admin-lock"><Lock size={22} /></span>
           <p className="eyebrow">Admin</p>
-          <h1>Ingresar al catálogo</h1>
-          <p>Usá la cuenta de Google autorizada para editar productos y administrar el catálogo.</p>
-          <div className="admin-auth-debug">
-            <p><strong>Dominio actual:</strong> {window.location.hostname}</p>
-            <p><strong>Auth domain:</strong> {publicFirebaseConfig.authDomain || "sin configurar"}</p>
-            <p><strong>Project ID:</strong> {publicFirebaseConfig.projectId || "sin configurar"}</p>
-          </div>
+          <h1>Ingresar al panel</h1>
+          <p>Usá la cuenta de Google autorizada para gestionar reservas, pagos y catálogo.</p>
           {(message || authError) && <p className="admin-message">{message || authError}</p>}
           <button type="submit" className="gabinete-button">
             <Lock size={17} />
@@ -695,9 +690,9 @@ export function AdminPage() {
     <section className="admin-page">
       <div className="admin-head">
         <div>
-          <p className="eyebrow">Admin</p>
-          <h1>Panel</h1>
-          <p>Fuente actual: {syncMode === "firebase" ? "Firestore" : "catálogo local de respaldo"}</p>
+          <p className="eyebrow">Operaciones</p>
+          <h1>Panel de producción</h1>
+          <p>Reservas, disponibilidad y catálogo en un mismo lugar.</p>
         </div>
         <div className="admin-actions">
           <button type="button" className="gabinete-button-secondary" onClick={seedCatalog} disabled={saving}>
@@ -709,6 +704,29 @@ export function AdminPage() {
             Salir
           </button>
         </div>
+      </div>
+
+      <div className="admin-metrics" aria-label="Resumen operativo">
+        <article>
+          <span>Catálogo</span>
+          <strong>{products.length}</strong>
+          <p>objetos cargados</p>
+        </article>
+        <article>
+          <span>Disponibles</span>
+          <strong>{products.filter((product) => product.availability === "Disponible").length}</strong>
+          <p>listos para reservar</p>
+        </article>
+        <article>
+          <span>Reservas</span>
+          <strong>{reservations.filter((reservation) => reservation.status !== "cancelled").length}</strong>
+          <p>activas o en proceso</p>
+        </article>
+        <article>
+          <span>Sincronización</span>
+          <strong className="admin-metric-word">{syncMode === "firebase" ? "Online" : "Local"}</strong>
+          <p>{syncMode === "firebase" ? "datos actualizados" : "modo de respaldo"}</p>
+        </article>
       </div>
 
       {message && (

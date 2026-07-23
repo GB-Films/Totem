@@ -7,6 +7,7 @@ import { CatalogProvider } from "./context/CatalogContext";
 import { FavoritesProvider } from "./context/FavoritesContext";
 import { SelectionProvider } from "./context/SelectionContext";
 import "./styles/index.css";
+import "./styles/refinement.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

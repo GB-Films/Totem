@@ -39,24 +39,27 @@ export function Hero() {
       </div>
 
       <div className="hero-content">
-        <h1>Encontrá los objetos que dan vida a tus producciones.</h1>
-        <div className="hero-separator"><span>✶</span></div>
-        <p>Utilería, mobiliario, decoración y vestuario para cine, TV, publicidad, teatro y creación de contenido.</p>
+        <p className="hero-kicker">Archivo de utilería · Buenos Aires</p>
+        <h1>Objetos con carácter para historias que se ven.</h1>
+        <p className="hero-lead">
+          Utilería, mobiliario, decoración y vestuario listos para cine, TV, publicidad, teatro y contenido.
+        </p>
 
         <form className="hero-search" onSubmit={submitSearch}>
           <Search size={24} strokeWidth={1.8} />
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="¿Qué estás buscando?"
+            placeholder="Buscá un objeto, estilo o escena"
             aria-label="Buscar objetos"
           />
           <button type="submit" aria-label="Buscar en catálogo">
-            <ArrowRight size={24} />
+            <span>Buscar</span>
+            <ArrowRight size={18} />
           </button>
         </form>
 
-        <div className="hero-categories">
+        <div className="hero-categories" aria-label="Categorías destacadas">
           {categoryPills.map(({ label, icon: Icon }) => (
             <Link key={label} to={`/catalogo?categoria=${encodeURIComponent(label)}`}>
               <Icon size={21} />
@@ -65,7 +68,7 @@ export function Hero() {
           ))}
         </div>
 
-        <div className="hero-benefits">
+        <div className="hero-benefits" aria-label="Beneficios del servicio">
           {benefits.map(({ title, text, icon: Icon }) => (
             <div key={title}>
               <Icon size={29} strokeWidth={1.7} />

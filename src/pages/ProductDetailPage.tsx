@@ -1,4 +1,4 @@
-import { ArrowLeft, MessageCircle, Plus, Sparkles } from "lucide-react";
+import { ArrowLeft, CalendarCheck, Heart, MessageCircle, Plus, ShieldCheck, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { AvailabilityCalendar } from "../components/AvailabilityCalendar";
@@ -8,6 +8,7 @@ import { RentalCalculator } from "../components/RentalCalculator";
 import { TagPill } from "../components/TagPill";
 import { useAvailability } from "../context/AvailabilityContext";
 import { useCatalog } from "../context/CatalogContext";
+import { useFavorites } from "../context/FavoritesContext";
 import { useSelection } from "../context/SelectionContext";
 import type { Availability } from "../types";
 import { getInclusiveDays, hasOperationalEndpoints } from "../utils/dates";
@@ -26,6 +27,7 @@ export function ProductDetailPage() {
   const { products } = useCatalog();
   const product = products.find((candidate) => candidate.id === id);
   const { addProduct } = useSelection();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const { hasConflict } = useAvailability();
   const [selectedDates, setSelectedDates] = useState<{ startDate?: string; endDate?: string }>({});
   const [addedMessage, setAddedMessage] = useState(false);
@@ -75,9 +77,10 @@ export function ProductDetailPage() {
     singleSelection,
   );
   const productPricing = calculateProductPricing(product, singleSelection[0]);
+  const favorite = isFavorite(product.id);
 
   return (
-    <div className="mx-auto w-full max-w-[1520px] px-4 py-10 sm:px-8 lg:px-12">
+    <div className="product-detail-page mx-auto w-full max-w-[1520px] px-4 py-10 sm:px-8 lg:px-12">
       <Link
         to="/catalogo"
         className="inline-flex items-center gap-2 text-sm text-gabinete-muted hover:text-gabinete-darkBrown"
@@ -86,16 +89,9 @@ export function ProductDetailPage() {
         Volver al catálogo
       </Link>
 
-      <div className="mt-8 grid gap-10 lg:grid-cols-[1.05fr_.95fr]">
-        <section>
+      <div className="product-detail-layout mt-8 grid gap-10 lg:grid-cols-[1.05fr_.95fr]">
+        <section className="product-visual-column">
           <ObjectImage product={product} />
-          <div className="mt-4 grid grid-cols-3 gap-3">
-            {[0, 1, 2].map((index) => (
-              <div key={index} className="rounded-[10px] border border-gabinete-line/28 bg-gabinete-paperLight/16 p-2">
-                <ObjectImage product={product} compact />
-              </div>
-            ))}
-          </div>
           <div className="mt-4">
             <AvailabilityCalendar
               product={product}
@@ -106,7 +102,7 @@ export function ProductDetailPage() {
           </div>
         </section>
 
-        <section className="lg:pt-3">
+        <section className="product-summary lg:pt-3">
           <div className="flex flex-wrap items-center gap-3">
             <CategoryBadge category={product.category} />
             <span className={`availability-badge ${availabilityClass[product.availability]}`}>
@@ -116,9 +112,17 @@ export function ProductDetailPage() {
               Estado: {product.status}
             </span>
           </div>
-          <h1 className="mt-5 font-display text-5xl leading-none text-gabinete-darkBrown sm:text-6xl">
-            {product.name}
-          </h1>
+          <div className="product-detail-title-row">
+            <h1>{product.name}</h1>
+            <button
+              type="button"
+              className={`detail-favorite ${favorite ? "is-favorite" : ""}`}
+              onClick={() => toggleFavorite(product.id)}
+              aria-label={favorite ? "Quitar de favoritos" : "Guardar en favoritos"}
+            >
+              <Heart size={21} fill={favorite ? "currentColor" : "none"} />
+            </button>
+          </div>
           <p className="mt-5 font-editorial text-lg leading-8 text-gabinete-muted">
             {product.description}
           </p>
@@ -161,6 +165,11 @@ export function ProductDetailPage() {
             <p className="mt-3 font-editorial text-2xl italic leading-snug text-gabinete-darkBrown">
               {product.curiosities}
             </p>
+          </div>
+
+          <div className="detail-trust-row">
+            <span><CalendarCheck size={17} /> Fechas visibles antes de reservar</span>
+            <span><ShieldCheck size={17} /> Garantía reintegrable</span>
           </div>
 
           <div className="mt-7 grid gap-3 sm:grid-cols-2">
@@ -212,7 +221,7 @@ export function ProductDetailPage() {
         </section>
       </div>
 
-      <div className="mt-12 grid gap-8 lg:grid-cols-[1fr_380px]">
+      <div className="product-detail-meta mt-12 grid gap-8 lg:grid-cols-[1fr_380px]">
         <section className="parchment-panel p-6">
           <h2 className="font-display text-3xl text-gabinete-darkBrown">Ficha del objeto</h2>
           <dl className="mt-6 grid gap-4 sm:grid-cols-2">

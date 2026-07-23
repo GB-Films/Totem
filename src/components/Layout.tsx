@@ -21,9 +21,12 @@ export function Layout() {
 
   return (
     <div className="app-frame">
+      <a className="skip-link" href="#contenido-principal">
+        Saltar al contenido
+      </a>
       <div className="parchment-shell text-gabinete-text">
         <Header />
-        <main>
+        <main id="contenido-principal">
           <Outlet />
         </main>
         <Footer />
