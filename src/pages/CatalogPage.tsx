@@ -6,6 +6,8 @@ import { ProductGrid } from "../components/ProductGrid";
 import { useCatalog } from "../context/CatalogContext";
 import type { Category } from "../types";
 
+const PRODUCTS_PER_PAGE = 24;
+
 function normalize(value: string) {
   return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
@@ -14,6 +16,7 @@ export function CatalogPage() {
   const [searchParams] = useSearchParams();
   const { products, categories, availableTags, loading, error } = useCatalog();
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PRODUCTS_PER_PAGE);
   const initialCategory = searchParams.get("categoria");
   const initialSearch = searchParams.get("q") ?? "";
   const maxCatalogPrice = Math.max(0, ...products.map((product) => product.rentalPricePerDay));
@@ -79,6 +82,19 @@ export function CatalogPage() {
       return b.featuredScore - a.featuredScore;
     });
   }, [filters, products]);
+
+  useEffect(() => {
+    setVisibleCount(PRODUCTS_PER_PAGE);
+  }, [
+    filters.search,
+    filters.category,
+    filters.tags,
+    filters.maxPrice,
+    filters.availability,
+    filters.sort,
+  ]);
+
+  const visibleProducts = filteredProducts.slice(0, visibleCount);
 
   const toggleChip = (tag: string) => {
     setFilters((current) => ({
@@ -237,7 +253,15 @@ export function CatalogPage() {
               <button type="button" onClick={() => window.location.reload()}>Reintentar</button>
             </div>
           ) : (
-            <ProductGrid products={filteredProducts} />
+            <ProductGrid
+              products={visibleProducts}
+              totalCount={filteredProducts.length}
+              onLoadMore={() =>
+                setVisibleCount((current) =>
+                  Math.min(current + PRODUCTS_PER_PAGE, filteredProducts.length),
+                )
+              }
+            />
           )}
         </section>
       </div>

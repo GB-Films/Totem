@@ -63,6 +63,16 @@ function normalizeProduct(id: string, data: Partial<Product>): Product {
     images: Array.isArray(data.images)
       ? data.images.filter((image): image is string => typeof image === "string" && image.length > 0)
       : [],
+    thumbnailImages: Array.isArray(data.thumbnailImages)
+      ? data.thumbnailImages.filter(
+          (image): image is string => typeof image === "string" && image.length > 0,
+        )
+      : [],
+    detailImages: Array.isArray(data.detailImages)
+      ? data.detailImages.filter(
+          (image): image is string => typeof image === "string" && image.length > 0,
+        )
+      : [],
     category,
     tags: Array.isArray(data.tags)
       ? data.tags.filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0)

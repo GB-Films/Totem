@@ -40,11 +40,6 @@ export function ProductCard({ product }: ProductCardProps) {
             {product.name}
           </Link>
         </div>
-        <p className="product-description">
-          {product.description || "Consultanos por detalles, medidas y opciones para tu producción."}
-        </p>
-        {product.measurements && <p className="product-measures">{product.measurements}</p>}
-
         <div className="product-bottom">
           <div className="product-price">
             <strong>{product.rentalPricePerDay > 0 ? formatCurrency(product.rentalPricePerDay) : "Consultar"}</strong>

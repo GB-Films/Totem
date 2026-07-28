@@ -729,7 +729,17 @@ function AdminCatalog({
   const saveProduct = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!db) return;
-    const product = toProduct(form);
+    const editedProduct = toProduct(form);
+    const currentProduct = products.find((candidate) => candidate.id === editedProduct.id);
+    const imagesUnchanged =
+      currentProduct && JSON.stringify(currentProduct.images) === JSON.stringify(editedProduct.images);
+    const product: Product = imagesUnchanged
+      ? {
+          ...editedProduct,
+          thumbnailImages: currentProduct.thumbnailImages,
+          detailImages: currentProduct.detailImages,
+        }
+      : editedProduct;
     if (!product.id || !product.name) {
       onGlobalMessage("Completá ID y nombre antes de guardar.");
       return;

@@ -27,6 +27,8 @@ export interface Product {
   id: string;
   name: string;
   images: string[];
+  thumbnailImages?: string[];
+  detailImages?: string[];
   category: Category;
   tags: string[];
   rentalPricePerDay: number;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Product } from "../types";
 
 interface ObjectImageProps {
@@ -16,10 +16,18 @@ function ProductIllustration({ id, sigil }: { id: string; sigil: string }) {
 }
 
 export function ObjectImage({ product, compact = false, showLabel = true }: ObjectImageProps) {
-  const [failed, setFailed] = useState(false);
-  const uploadedImage = product.images.find((image) => image.trim().length > 0);
+  const [imageIndex, setImageIndex] = useState(0);
+  const preferredImages = compact
+    ? [...(product.thumbnailImages ?? []), ...product.images]
+    : [...(product.detailImages ?? []), ...product.images];
+  const usableImages = preferredImages.filter((image) => image.trim().length > 0);
+  const uploadedImage = usableImages[imageIndex];
   const imageSrc = uploadedImage?.startsWith("/") ? `${import.meta.env.BASE_URL.replace(/\/$/, "")}${uploadedImage}` : uploadedImage;
-  const showPhoto = Boolean(imageSrc && !failed);
+  const showPhoto = Boolean(imageSrc);
+
+  useEffect(() => {
+    setImageIndex(0);
+  }, [compact, product.id, product.thumbnailImages, product.detailImages, product.images]);
 
   return (
     <div
@@ -32,7 +40,11 @@ export function ObjectImage({ product, compact = false, showLabel = true }: Obje
           className="object-photo"
           src={imageSrc}
           alt={product.name}
-          onError={() => setFailed(true)}
+          loading={compact ? "lazy" : "eager"}
+          decoding="async"
+          width={compact ? 640 : 1600}
+          height={compact ? 640 : 1600}
+          onError={() => setImageIndex((current) => current + 1)}
         />
       ) : (
         <>
