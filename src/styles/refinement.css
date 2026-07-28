@@ -855,17 +855,24 @@ a:hover > .object-plate .object-photo,
 }
 
 .product-bottom {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.5rem;
+  display: flex;
+  gap: 0.7rem;
   align-items: center;
-  margin-top: 0.6rem;
+  margin-top: 0.5rem;
   border-top: 1px solid var(--soft-line);
-  padding-top: 0.6rem;
+  padding-top: 0.55rem;
+}
+
+.product-price {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: baseline;
+  gap: 0.25rem;
+  white-space: nowrap;
 }
 
 .product-price strong {
-  display: block;
+  display: inline;
   color: var(--ink);
   font-family: var(--font-display);
   font-size: 1.12rem;
@@ -878,16 +885,15 @@ a:hover > .object-plate .object-photo,
 }
 
 .product-status {
-  grid-row: 2;
-  justify-self: start;
+  flex: 1 1 auto;
   color: var(--available);
   font-size: 0.65rem;
+  white-space: nowrap;
 }
 
 .detail-btn {
-  grid-column: 2;
-  grid-row: 1 / span 2;
   display: inline-flex;
+  flex: 0 0 auto;
   min-height: 34px;
   gap: 0.35rem;
   align-self: center;
@@ -903,6 +909,14 @@ a:hover > .object-plate .object-photo,
   border-color: var(--ink);
   background: var(--ink);
   color: #fff;
+}
+
+body:not(.force-desktop-view) .product-bottom {
+  display: flex;
+}
+
+body:not(.force-desktop-view) .product-status {
+  display: inline-flex;
 }
 
 .product-grid {
@@ -1856,6 +1870,10 @@ a:hover > .object-plate .object-photo,
 }
 
 @media (max-width: 680px) {
+  body:not(.force-desktop-view) .product-grid {
+    grid-template-columns: 1fr;
+  }
+
   .site-header-inner {
     width: calc(100% - 1.25rem);
   }
@@ -2035,6 +2053,15 @@ a:hover > .object-plate .object-photo,
 
   body:not(.force-desktop-view) .product-info {
     min-height: 0;
+  }
+
+  body:not(.force-desktop-view) .product-bottom {
+    display: flex;
+    gap: 0.55rem;
+  }
+
+  body:not(.force-desktop-view) .product-status {
+    display: inline-flex;
   }
 
   .product-detail-page {
