@@ -1,5 +1,5 @@
 import { ArrowRight, Search, SlidersHorizontal, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ProductFilters, type CatalogFilters } from "../components/ProductFilters";
 import { ProductGrid } from "../components/ProductGrid";
@@ -10,15 +10,14 @@ function normalize(value: string) {
   return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
-const quickFilterChips = ["vintage", "estudio", "living", "oficina", "rodaje", "exterior"];
-
 export function CatalogPage() {
   const [searchParams] = useSearchParams();
-  const { products, categories, availableTags } = useCatalog();
+  const { products, categories, availableTags, loading, error } = useCatalog();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const initialCategory = searchParams.get("categoria");
   const initialSearch = searchParams.get("q") ?? "";
-  const maxCatalogPrice = Math.max(...products.map((product) => product.rentalPricePerDay));
+  const maxCatalogPrice = Math.max(0, ...products.map((product) => product.rentalPricePerDay));
+  const quickFilterChips = availableTags.slice(0, 6);
 
   const [filters, setFilters] = useState<CatalogFilters>({
     search: initialSearch,
@@ -31,6 +30,21 @@ export function CatalogPage() {
     availability: "Todas",
     sort: "featured",
   });
+
+  useEffect(() => {
+    if (maxCatalogPrice > 0) {
+      setFilters((current) => ({
+        ...current,
+        maxPrice: current.maxPrice === 0 ? maxCatalogPrice : Math.min(current.maxPrice, maxCatalogPrice),
+      }));
+    }
+  }, [maxCatalogPrice]);
+
+  useEffect(() => {
+    if (initialCategory && categories.includes(initialCategory as Category)) {
+      setFilters((current) => ({ ...current, category: initialCategory as Category }));
+    }
+  }, [categories, initialCategory]);
 
   const filteredProducts = useMemo(() => {
     const query = normalize(filters.search.trim());
@@ -211,7 +225,20 @@ export function CatalogPage() {
             </label>
           </div>
 
-          <ProductGrid products={filteredProducts} />
+          {loading ? (
+            <div className="catalog-loading" role="status">
+              <span />
+              <p>Abriendo el catálogo…</p>
+            </div>
+          ) : error ? (
+            <div className="catalog-error" role="alert">
+              <strong>No pudimos abrir el catálogo.</strong>
+              <p>{error}</p>
+              <button type="button" onClick={() => window.location.reload()}>Reintentar</button>
+            </div>
+          ) : (
+            <ProductGrid products={filteredProducts} />
+          )}
         </section>
       </div>
     </div>

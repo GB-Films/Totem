@@ -21,8 +21,8 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
     removeProduct,
     clearSelection,
   } = useSelection();
-  const { hasConflict } = useAvailability();
-  const { products } = useCatalog();
+  const { hasConflict, loadingAvailability, availabilityError } = useAvailability();
+  const { products, loading } = useCatalog();
   const selectedProducts = selection
     .map((item) => ({
       item,
@@ -34,14 +34,21 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
   const hasAnyConflict = selectedProducts.some(({ item, product }) => {
     const startDate = item.startDate ?? todayIso();
     const endDate = item.endDate ?? addDaysIso(startDate, Math.max(1, item.rentalDays) - 1);
-    return hasConflict(product.id, startDate, endDate);
+    return hasConflict(product.id, startDate, endDate, item.quantity);
   });
   const hasNonOperationalEndpoints = selectedProducts.some(({ item }) => {
     const startDate = item.startDate ?? todayIso();
     const endDate = item.endDate ?? addDaysIso(startDate, Math.max(1, item.rentalDays) - 1);
     return !hasOperationalEndpoints(startDate, endDate);
   });
-  const canPrepareRental = selectedProducts.length > 0 && !hasAnyConflict && !hasNonOperationalEndpoints;
+  const hasUnavailableProducts = selectedProducts.some(
+    ({ product }) => product.availability !== "Disponible" || product.rentalPricePerDay <= 0,
+  );
+  const canPrepareRental = selectedProducts.length > 0
+    && !hasAnyConflict
+    && !hasNonOperationalEndpoints
+    && !hasUnavailableProducts;
+  const availabilityReady = !loadingAvailability && !availabilityError;
 
   return (
     <aside className="space-y-4">
@@ -62,7 +69,11 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
           )}
         </div>
 
-        {selectedProducts.length === 0 ? (
+        {loading && selection.length > 0 ? (
+          <p className="mt-5 rounded-md border border-gabinete-line/25 bg-gabinete-paperLight/24 p-4 font-editorial text-sm leading-6 text-gabinete-muted">
+            Recuperando tu selección…
+          </p>
+        ) : selectedProducts.length === 0 ? (
           <p className="mt-5 rounded-md border border-gabinete-line/25 bg-gabinete-paperLight/24 p-4 font-editorial text-sm leading-6 text-gabinete-muted">
             Todavía no hay objetos en el carrito. Elegí fechas libres desde la ficha de cada objeto.
           </p>
@@ -72,7 +83,7 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
               const pricing = calculateProductPricing(product, item);
               const startDate = item.startDate ?? todayIso();
               const endDate = item.endDate ?? addDaysIso(startDate, Math.max(1, item.rentalDays) - 1);
-              const conflict = hasConflict(product.id, startDate, endDate);
+              const conflict = hasConflict(product.id, startDate, endDate, item.quantity);
               const operationalEndpoints = hasOperationalEndpoints(startDate, endDate);
               return (
                 <div key={product.id} className="selected-item-card">
@@ -109,7 +120,7 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
                             <button
                               type="button"
                               aria-label="Restar cantidad"
-                              onClick={() => updateQuantity(product.id, item.quantity - 1)}
+                              onClick={() => updateQuantity(product.id, item.quantity - 1, product.stock)}
                             >
                               <Minus size={12} />
                             </button>
@@ -117,12 +128,14 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
                               type="number"
                               min={1}
                               value={item.quantity}
-                              onChange={(event) => updateQuantity(product.id, Number(event.target.value))}
+                              max={product.stock}
+                              onChange={(event) => updateQuantity(product.id, Number(event.target.value), product.stock)}
                             />
                             <button
                               type="button"
                               aria-label="Sumar cantidad"
-                              onClick={() => updateQuantity(product.id, item.quantity + 1)}
+                              disabled={item.quantity >= product.stock}
+                              onClick={() => updateQuantity(product.id, item.quantity + 1, product.stock)}
                             >
                               <Plus size={12} />
                             </button>
@@ -174,6 +187,9 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
                             ? "Retiro y devolución deben ser en días hábiles, sin fines de semana ni feriados."
                             : `Fechas libres: ${formatDateRange(startDate, endDate)}.`}
                       </p>
+                      {product.stock > 1 && (
+                        <p className="selected-stock-note">{product.stock} unidades disponibles</p>
+                      )}
 
                       <div className="selected-item-pricing">
                         <span>Alquiler <strong>{formatCurrency(pricing.rentalTotal)}</strong></span>
@@ -195,7 +211,12 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
                 Cambiá las fechas: no se puede retirar ni devolver fines de semana o feriados.
               </p>
             )}
-            {showAction && canPrepareRental ? (
+            {hasUnavailableProducts && (
+              <p className="rounded-md border border-gabinete-line/35 bg-gabinete-paperLight/24 px-3 py-2 font-editorial text-sm text-gabinete-muted">
+                Uno de los objetos requiere consulta de precio o disponibilidad. Podés quitarlo o escribirnos por WhatsApp.
+              </p>
+            )}
+            {showAction && canPrepareRental && availabilityReady ? (
               <Link to="/contacto" className="gabinete-button w-full px-4 py-3">
                 Registrar pedido
               </Link>
@@ -205,7 +226,7 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
                 disabled
                 className="gabinete-button w-full cursor-not-allowed px-4 py-3 opacity-50"
               >
-                Alquiler no disponible
+                {loadingAvailability ? "Verificando disponibilidad…" : "Alquiler no disponible"}
               </button>
             ) : null}
           </div>

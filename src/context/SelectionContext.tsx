@@ -15,7 +15,7 @@ interface SelectionContextValue {
   totalItems: number;
   addProduct: (product: Product, startDate: string, endDate: string) => void;
   removeProduct: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  updateQuantity: (productId: string, quantity: number, maxQuantity?: number) => void;
   updateRentalDays: (productId: string, rentalDays: number) => void;
   updateRentalDates: (productId: string, startDate: string, endDate: string) => void;
   clearSelection: () => void;
@@ -68,8 +68,8 @@ export function SelectionProvider({ children }: PropsWithChildren) {
         return current.map((item) =>
           item.productId === product.id
             ? {
-                ...item,
-                quantity: item.quantity + 1,
+              ...item,
+                quantity: Math.min(product.stock, item.quantity + 1),
                 startDate,
                 endDate,
                 rentalDays: getInclusiveDays(startDate, endDate),
@@ -95,10 +95,12 @@ export function SelectionProvider({ children }: PropsWithChildren) {
     setSelection((current) => current.filter((item) => item.productId !== productId));
   }, []);
 
-  const updateQuantity = useCallback((productId: string, quantity: number) => {
+  const updateQuantity = useCallback((productId: string, quantity: number, maxQuantity = Number.MAX_SAFE_INTEGER) => {
     setSelection((current) =>
       current.map((item) =>
-        item.productId === productId ? { ...item, quantity: Math.max(1, quantity) } : item,
+        item.productId === productId
+          ? { ...item, quantity: Math.min(maxQuantity, Math.max(1, quantity || 1)) }
+          : item,
       ),
     );
   }, []);

@@ -1,68 +1,58 @@
 # TOTEM RENTAL
 
-Aplicación estática en React + Vite + TypeScript + Tailwind CSS para un catálogo de props de producción audiovisual.
+Aplicación web para recorrer el catálogo, guardar favoritos, elegir fechas, registrar pedidos con seña y administrar la operación del rental.
 
-## Comandos
+## Desarrollo
 
 ```bash
 npm install
 npm run dev
 npm run build
-npm run deploy
 ```
 
-## GitHub Pages
+La app está hecha con React, Vite, TypeScript y Firebase. El catálogo y la disponibilidad se actualizan en tiempo real.
 
-La base de Vite está configurada con la variable `VITE_BASE_PATH`.
+## Variables
 
-Para publicar en un repo de usuario u organización, normalmente alcanza con:
+Copiá `.env.example` a `.env.local` y completá:
+
+- `VITE_FIREBASE_*`: configuración de la app web de Firebase.
+- `VITE_WHATSAPP_NUMBER`: número de WhatsApp con código de país, sin `+` ni espacios. Si queda vacío, WhatsApp permite elegir el contacto.
+
+## Datos
+
+- `products`: productos reales cargados desde el panel.
+- `bookings`: pedidos privados, visibles sólo para el cliente correspondiente y administradores.
+- `reservationRanges`: rangos públicos de disponibilidad, sin datos personales.
+- `userProfiles`: datos de contacto de clientes.
+- `adminEmails`: emails habilitados para acceder a `/admin`.
+
+Los productos ficticios ya no forman parte del catálogo local. La app muestra únicamente las piezas cargadas en Firebase.
+
+## Administración
+
+El panel vive en `/admin` y permite:
+
+- ver el resumen de operación;
+- seguir reservas por pedido y actualizar su estado;
+- revisar ocupación en calendario;
+- consultar el directorio de clientes;
+- crear y editar productos, stock, precios e imágenes.
+
+Para que una cuenta sea administradora, creá `adminEmails/{email}` con `{ "active": true }`.
+
+## Publicación
+
+Antes de publicar cambios de datos o reservas, desplegá reglas y hosting:
+
+```bash
+firebase deploy --only firestore:rules,storage,hosting
+```
+
+La publicación alternativa en GitHub Pages sigue disponible con:
 
 ```bash
 npm run deploy
 ```
 
-Para publicar en un repo de proyecto, indicá el nombre del repo como base:
-
-```bash
-VITE_BASE_PATH=/nombre-del-repo/ npm run deploy
-```
-
-En Windows PowerShell:
-
-```powershell
-$env:VITE_BASE_PATH="/nombre-del-repo/"; npm run deploy
-```
-
-La app usa rutas de React Router. La selección de carrito se conserva en `localStorage`.
-
-## Firebase
-
-Las reservas confirmadas pueden sincronizarse en Cloud Firestore. Copiá `.env.example` a `.env` y completá las variables de tu app web de Firebase:
-
-```bash
-VITE_FIREBASE_API_KEY=
-VITE_FIREBASE_AUTH_DOMAIN=
-VITE_FIREBASE_PROJECT_ID=
-VITE_FIREBASE_STORAGE_BUCKET=
-VITE_FIREBASE_MESSAGING_SENDER_ID=
-VITE_FIREBASE_APP_ID=
-```
-
-Colecciones usadas:
-
-- `products`: catálogo sincronizado. Cada documento debe tener la misma forma que los objetos de `src/data/products.ts`; el ID del documento se usa como `product.id`.
-- `adminEmails`: permisos de administración. Cada documento usa como ID el email autorizado y debe tener `{ "active": true }`.
-- `reservations`: reservas confirmadas desde el sitio. Requieren login con Google y bloquean las fechas en el calendario.
-- `userProfiles`: datos de usuarios para gestionar reservas: nombre, apellido, DNI y celular. Cada usuario edita su propio perfil; los admins pueden leerlos desde el panel.
-
-El panel de administración vive en `/admin`. Requiere Firebase Authentication con Google y permisos en `adminEmails/{email}`.
-
-Para desplegar reglas:
-
-```bash
-npx firebase-tools deploy --only firestore,storage
-```
-
-Si las variables no están cargadas, la app usa el catálogo local y almacenamiento local como fallback para desarrollo y GitHub Pages sigue funcionando.
-
-El panel permite subir imágenes a Cloud Storage o pegar URLs públicas de imágenes.
+Para otro nombre de repositorio, configurá `VITE_BASE_PATH`.

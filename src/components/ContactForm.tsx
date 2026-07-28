@@ -5,7 +5,6 @@ import { useAvailability } from "../context/AvailabilityContext";
 import { useAuth } from "../context/AuthContext";
 import { useCatalog } from "../context/CatalogContext";
 import { useSelection } from "../context/SelectionContext";
-import { RESERVATIONS_ENABLED } from "../config/features";
 import { getFirebaseDb } from "../services/firebase";
 import type { SelectionItem, UserProfile } from "../types";
 import { formatCurrency } from "../utils/format";
@@ -31,7 +30,7 @@ const emptyCustomerInfo: CustomerInfo = {
 };
 
 export function ContactForm({ selection }: ContactFormProps) {
-  const { addReservationsFromSelection, hasConflict, syncMode } = useAvailability();
+  const { createBooking, hasConflict, loadingAvailability, availabilityError } = useAvailability();
   const { user, loginWithGoogle, authError: googleAuthError } = useAuth();
   const { products } = useCatalog();
   const { clearSelection } = useSelection();
@@ -39,7 +38,10 @@ export function ContactForm({ selection }: ContactFormProps) {
   const [authError, setAuthError] = useState("");
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>(emptyCustomerInfo);
   const [confirmedWhatsappUrl, setConfirmedWhatsappUrl] = useState("");
+  const [confirmedBookingCode, setConfirmedBookingCode] = useState("");
   const [pickupOption, setPickupOption] = useState<"reservation_day" | "previous_day_requested">("reservation_day");
+  const [projectName, setProjectName] = useState("");
+  const [note, setNote] = useState("");
 
   useEffect(() => {
     const db = getFirebaseDb();
@@ -88,7 +90,7 @@ export function ContactForm({ selection }: ContactFormProps) {
   );
 
   const hasSelectionConflicts = selectedProducts.some(({ item }) =>
-    hasConflict(item.productId, item.startDate, item.endDate),
+    hasConflict(item.productId, item.startDate, item.endDate, item.quantity),
   );
   const hasNonOperationalEndpoints = selectedProducts.some(({ item }) => {
     const startDate = item.startDate ?? todayIso();
@@ -96,16 +98,24 @@ export function ContactForm({ selection }: ContactFormProps) {
     return !hasOperationalEndpoints(startDate, endDate);
   });
   const hasUnavailableProducts = selectedProducts.some(({ product }) => product.availability !== "Disponible");
+  const hasUnpricedProducts = selectedProducts.some(({ product }) => product.rentalPricePerDay <= 0);
   const missingCustomerInfo = !customerInfo.firstName.trim()
     || !customerInfo.lastName.trim()
     || !customerInfo.dni.trim()
     || !customerInfo.phone.trim();
+  const invalidDni = customerInfo.dni.trim().length > 0 && !/^\d{7,9}$/.test(customerInfo.dni.replace(/\D/g, ""));
+  const invalidPhone = customerInfo.phone.trim().length > 0 && customerInfo.phone.replace(/\D/g, "").length < 8;
   const canConfirm = selection.length > 0
     && selectedProducts.length === selection.length
     && !hasSelectionConflicts
     && !hasNonOperationalEndpoints
     && !hasUnavailableProducts
+    && !hasUnpricedProducts
     && !missingCustomerInfo
+    && !invalidDni
+    && !invalidPhone
+    && !loadingAvailability
+    && !availabilityError
     && status !== "saving";
 
   const updateCustomerInfo = (field: keyof CustomerInfo, value: string) => {
@@ -153,10 +163,10 @@ export function ContactForm({ selection }: ContactFormProps) {
             company: "",
             email: reservationUser.email ?? "",
             phone: trimmedInfo.phone,
-            projectName: "",
+            projectName: projectName.trim(),
             projectType: "",
             dates: "",
-            message: `Pago de seña por Mercado Pago al alias ${PAYMENT_ALIAS}. Retiro: ${
+            message: `${note.trim() ? `Nota: ${note.trim()}. ` : ""}Pago de seña por Mercado Pago al alias ${PAYMENT_ALIAS}. Retiro: ${
               pickupOption === "previous_day_requested" ? "solicitan retirar el día previo" : "día de inicio desde las 8:00"
             }.`,
           },
@@ -176,17 +186,15 @@ export function ContactForm({ selection }: ContactFormProps) {
         { merge: true },
       );
 
-      await addReservationsFromSelection(selection, `Pago pendiente por Mercado Pago alias ${PAYMENT_ALIAS}`, {
+      const booking = await createBooking(selection, {
         customerName,
-        customerEmail: reservationUser.email ?? undefined,
+        customerEmail: reservationUser.email ?? "",
         createdByUid: reservationUser.uid,
-        status: "payment_pending",
-        paymentAlias: PAYMENT_ALIAS,
         pickupOption,
-        reserveDeposit: pricing.reserveDeposit,
-        guaranteeAmount: pricing.guaranteeAmount,
-        totalEstimated: pricing.totalEstimated,
+        projectName,
+        note,
       });
+      setConfirmedBookingCode(booking.code);
       setConfirmedWhatsappUrl(whatsappUrl);
       clearSelection();
       setStatus("confirmed");
@@ -207,21 +215,19 @@ export function ContactForm({ selection }: ContactFormProps) {
       <p className="eyebrow">Finalizar</p>
       <h2 className="mt-2 font-display text-3xl text-gabinete-darkBrown">Confirmar pedido</h2>
       <p className="mt-2 font-editorial text-sm leading-6 text-gabinete-muted">
-        Revisá el carrito antes de avanzar. Para terminar de confirmar, pagá la seña por Mercado Pago
-        y enviá el comprobante por WhatsApp.
+        Registramos el pedido y guardamos las fechas durante 24 horas. Para confirmarlas, pagá la seña
+        por Mercado Pago y enviá el comprobante por WhatsApp.
       </p>
       <div className="payment-instructions mt-3">
         <span>Alias Mercado Pago</span>
         <strong>{PAYMENT_ALIAS}</strong>
         <p>Seña para confirmar: {formatCurrency(pricing.reserveDeposit)}.</p>
       </div>
-      <p className="mt-3 rounded-md border border-gabinete-line/25 bg-gabinete-paperLight/24 px-3 py-2 font-editorial text-xs leading-5 text-gabinete-muted">
-        {syncMode === "firebase"
-          ? RESERVATIONS_ENABLED
-            ? " El pedido se sincroniza en Firebase y bloquea esas fechas mientras se valida el pago."
-            : " Modo prueba activo: se pide login, pero no se bloquean fechas."
-          : " Para confirmar con login y bloquear fechas hace falta configurar Firebase."}
-      </p>
+      <ol className="booking-steps" aria-label="Pasos para confirmar">
+        <li><strong>1</strong><span>Completá tus datos</span></li>
+        <li><strong>2</strong><span>Reservamos las fechas</span></li>
+        <li><strong>3</strong><span>Transferí la seña</span></li>
+      </ol>
 
       <fieldset className="pickup-options mt-4">
         <legend>Retiro</legend>
@@ -266,8 +272,10 @@ export function ContactForm({ selection }: ContactFormProps) {
           DNI
           <input
             className="gabinete-input"
+            inputMode="numeric"
+            autoComplete="off"
             value={customerInfo.dni}
-            onChange={(event) => updateCustomerInfo("dni", event.target.value)}
+            onChange={(event) => updateCustomerInfo("dni", event.target.value.replace(/\D/g, "").slice(0, 9))}
             required
           />
         </label>
@@ -275,9 +283,30 @@ export function ContactForm({ selection }: ContactFormProps) {
           Celular
           <input
             className="gabinete-input"
+            type="tel"
+            autoComplete="tel"
             value={customerInfo.phone}
             onChange={(event) => updateCustomerInfo("phone", event.target.value)}
             required
+          />
+        </label>
+        <label className="reservation-customer-wide">
+          Proyecto <span>(opcional)</span>
+          <input
+            className="gabinete-input"
+            value={projectName}
+            onChange={(event) => setProjectName(event.target.value)}
+            placeholder="Ej. Campaña verano"
+          />
+        </label>
+        <label className="reservation-customer-wide">
+          Algo que debamos saber <span>(opcional)</span>
+          <textarea
+            className="gabinete-input"
+            rows={3}
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            placeholder="Horarios, logística o indicaciones del proyecto"
           />
         </label>
       </div>
@@ -285,9 +314,9 @@ export function ContactForm({ selection }: ContactFormProps) {
       {status === "confirmed" && (
         <div className="mt-3 rounded-md border border-gabinete-available/35 bg-gabinete-available/10 px-3 py-3 font-editorial text-sm text-gabinete-available">
           <p>
-            {RESERVATIONS_ENABLED
-              ? `Pedido registrado. Pagá la seña al alias ${PAYMENT_ALIAS} y enviá el comprobante para que quede confirmado.`
-              : "Pedido de prueba registrado. No se bloquearon fechas porque el modo prueba está activo."}
+            Pedido <strong>{confirmedBookingCode}</strong> registrado. Guardamos las fechas durante
+            24 horas. Pagá la seña al alias <strong>{PAYMENT_ALIAS}</strong> y enviá el comprobante
+            para dejarlo confirmado.
           </p>
           {confirmedWhatsappUrl && (
             <a
@@ -329,6 +358,21 @@ export function ContactForm({ selection }: ContactFormProps) {
             Completá nombre, apellido, DNI y celular para confirmar.
           </p>
         )}
+        {(loadingAvailability || availabilityError) && (
+          <p className="rounded-md border border-gabinete-line/25 bg-gabinete-paperLight/24 px-3 py-2 text-sm text-gabinete-muted">
+            {availabilityError || "Estamos verificando la disponibilidad antes de reservar…"}
+          </p>
+        )}
+        {hasUnpricedProducts && (
+          <p className="rounded-md border border-gabinete-error/35 bg-gabinete-error/10 px-3 py-2 text-sm text-gabinete-error">
+            Hay objetos con precio a consultar. Escribinos por WhatsApp y te ayudamos a completar el pedido.
+          </p>
+        )}
+        {(invalidDni || invalidPhone) && (
+          <p className="rounded-md border border-gabinete-error/35 bg-gabinete-error/10 px-3 py-2 text-sm text-gabinete-error">
+            Revisá el DNI y el celular. Usá sólo números para el DNI y un teléfono con código de área.
+          </p>
+        )}
         <button
           type="submit"
           disabled={!canConfirm}
@@ -338,8 +382,8 @@ export function ContactForm({ selection }: ContactFormProps) {
           {status === "saving"
             ? "Registrando..."
             : !user
-              ? "Ingresar con Google y registrar pedido"
-              : "Registrar pedido y pagar seña"}
+              ? "Ingresar con Google y reservar por 24 h"
+              : "Reservar fechas por 24 h"}
         </button>
       </div>
     </form>

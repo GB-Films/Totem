@@ -3,86 +3,73 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  CircleDollarSign,
+  Clock3,
   ImagePlus,
+  LayoutDashboard,
   Lock,
   LogOut,
+  Mail,
+  MessageCircle,
+  PackageCheck,
   Plus,
   Save,
+  Search,
   Trash2,
   UploadCloud,
+  UserRound,
+  UsersRound,
 } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { collection, deleteDoc, doc, getDoc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { getStorage } from "firebase/storage";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  onSnapshot,
+  query,
+  serverTimestamp,
+  setDoc,
+  where,
+  writeBatch,
+} from "firebase/firestore";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { useAuth } from "../context/AuthContext";
 import { useAvailability } from "../context/AvailabilityContext";
 import { useCatalog } from "../context/CatalogContext";
-import { categories as fallbackCategories, products as fallbackProducts } from "../data/products";
+import { categories } from "../data/products";
+import { firebaseEnabled, getFirebaseApp, getFirebaseDb } from "../services/firebase";
+import type {
+  Availability,
+  Booking,
+  Product,
+  ProductStatus,
+  ProductVisual,
+  ReservationStatus,
+  UserProfile,
+} from "../types";
 import {
-  firebaseEnabled,
-  getFirebaseApp,
-  getFirebaseDb,
-} from "../services/firebase";
-import type { Availability, Product, ProductStatus, ProductVisual, ReservationRange, ReservationStatus, UserProfile } from "../types";
-import { getInclusiveDays, parseIsoDate, rangesOverlap, todayIso, toIsoDate } from "../utils/dates";
+  addDaysIso,
+  formatDateRange,
+  parseIsoDate,
+  rangesOverlap,
+  todayIso,
+  toIsoDate,
+} from "../utils/dates";
+import { formatCurrency } from "../utils/format";
 import { getReservationStatusLabel } from "../utils/reservations";
 
-function isUsableImageUrl(image: string) {
-  return /^https?:\/\//.test(image) || /^data:image\//.test(image);
-}
+type AdminTab = "overview" | "bookings" | "calendar" | "customers" | "catalog";
 
-function AdminImagePreview({
-  image,
-  onRemove,
-}: {
-  image: string;
-  onRemove: () => void;
-}) {
-  const [failed, setFailed] = useState(false);
-
-  return (
-    <figure>
-      {failed ? (
-        <div className="admin-image-fallback">Imagen no disponible</div>
-      ) : (
-        <img src={image} alt="" onError={() => setFailed(true)} />
-      )}
-      <button type="button" onClick={onRemove}>
-        Quitar
-      </button>
-    </figure>
-  );
-}
-
-type ProductForm = {
-  id: string;
-  name: string;
-  category: Product["category"];
-  tags: string;
-  rentalPricePerDay: string;
-  rentalPricePerWeek: string;
-  description: string;
-  curiosities: string;
-  status: ProductStatus;
-  measurements: string;
-  material: string;
-  color: string;
-  eraStyle: string;
-  availability: Availability;
-  estimatedValue: string;
-  guaranteePercentage: string;
-  minimumDeposit: string;
-  featuredScore: string;
-  internalNotes: string;
-  images: string[];
-  visualTone: ProductVisual["tone"];
-  visualSigil: string;
-};
-
-const statusOptions: ProductStatus[] = ["Excelente", "Muy bueno", "Bueno", "Delicado"];
-const reservationStatusOptions: ReservationStatus[] = [
+const activeStatuses: ReservationStatus[] = [
   "request_sent",
+  "payment_pending",
+  "confirmed",
+  "ready_for_pickup",
+  "active",
+  "pending",
+];
+const reservationStatusOptions: ReservationStatus[] = [
   "payment_pending",
   "confirmed",
   "ready_for_pickup",
@@ -90,123 +77,42 @@ const reservationStatusOptions: ReservationStatus[] = [
   "returned",
   "cancelled",
 ];
+const productStatusOptions: ProductStatus[] = ["Excelente", "Muy bueno", "Bueno", "Delicado"];
 const availabilityOptions: Availability[] = ["Disponible", "Consultar", "Reservado"];
 const toneOptions: ProductVisual["tone"][] = ["brass", "green", "red", "blue", "paper", "copper"];
-
-const emptyForm: ProductForm = {
-  id: "",
-  name: "",
-  category: "Utilería",
-  tags: "",
-  rentalPricePerDay: "",
-  rentalPricePerWeek: "",
-  description: "",
-  curiosities: "",
-  status: "Excelente",
-  measurements: "",
-  material: "",
-  color: "",
-  eraStyle: "",
-  availability: "Disponible",
-  estimatedValue: "",
-  guaranteePercentage: "0.3",
-  minimumDeposit: "",
-  featuredScore: "50",
-  internalNotes: "",
-  images: [],
-  visualTone: "paper",
-  visualSigil: "✶",
-};
-
-function toForm(product: Product): ProductForm {
-  return {
-    id: product.id,
-    name: product.name,
-    category: product.category,
-    tags: product.tags.join(", "),
-    rentalPricePerDay: String(product.rentalPricePerDay),
-    rentalPricePerWeek: product.rentalPricePerWeek ? String(product.rentalPricePerWeek) : "",
-    description: product.description,
-    curiosities: product.curiosities,
-    status: product.status,
-    measurements: product.measurements,
-    material: product.material,
-    color: product.color,
-    eraStyle: product.eraStyle,
-    availability: product.availability,
-    estimatedValue: String(product.estimatedValue),
-    guaranteePercentage: String(product.guaranteePercentage),
-    minimumDeposit: String(product.minimumDeposit),
-    featuredScore: String(product.featuredScore),
-    internalNotes: product.internalNotes ?? "",
-    images: product.images.filter(isUsableImageUrl),
-    visualTone: product.visual.tone,
-    visualSigil: product.visual.sigil,
-  };
-}
-
-function toNumber(value: string, fallback = 0) {
-  const number = Number(value);
-  return Number.isFinite(number) ? number : fallback;
-}
-
-function toProduct(form: ProductForm): Product {
-  const weeklyPrice = form.rentalPricePerWeek.trim();
-  const internalNotes = form.internalNotes.trim();
-  const product: Product = {
-    id: form.id.trim(),
-    name: form.name.trim(),
-    category: form.category,
-    tags: form.tags
-      .split(",")
-      .map((tag) => tag.trim())
-      .filter(Boolean),
-    rentalPricePerDay: toNumber(form.rentalPricePerDay),
-    description: form.description.trim(),
-    curiosities: form.curiosities.trim(),
-    status: form.status,
-    measurements: form.measurements.trim(),
-    material: form.material.trim(),
-    color: form.color.trim(),
-    eraStyle: form.eraStyle.trim(),
-    availability: form.availability,
-    estimatedValue: toNumber(form.estimatedValue),
-    guaranteePercentage: toNumber(form.guaranteePercentage, 0.3),
-    minimumDeposit: toNumber(form.minimumDeposit),
-    featuredScore: toNumber(form.featuredScore, 50),
-    images: form.images.filter(isUsableImageUrl),
-    visual: {
-      tone: form.visualTone,
-      sigil: form.visualSigil.trim() || "✶",
-    },
-  };
-
-  if (weeklyPrice) {
-    product.rentalPricePerWeek = toNumber(weeklyPrice);
-  }
-
-  if (internalNotes) {
-    product.internalNotes = internalNotes;
-  }
-
-  return product;
-}
-
-function slugify(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
-function fileSafeName(name: string) {
-  return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]+/g, "-");
-}
-
 const adminWeekdays = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+function isActiveBooking(booking: Booking) {
+  return activeStatuses.includes(booking.status);
+}
+
+function isExpiredHold(booking: Booking) {
+  return booking.status === "payment_pending"
+    && Boolean(booking.holdExpiresAt)
+    && booking.holdExpiresAt! < new Date().toISOString();
+}
+
+function bookingStart(booking: Booking) {
+  return booking.items.reduce(
+    (earliest, item) => (!earliest || item.startDate < earliest ? item.startDate : earliest),
+    "",
+  );
+}
+
+function bookingEnd(booking: Booking) {
+  return booking.items.reduce(
+    (latest, item) => (!latest || item.endDate > latest ? item.endDate : latest),
+    "",
+  );
+}
+
+function customerWhatsappUrl(phone: string, booking: Booking) {
+  const number = phone.replace(/\D/g, "");
+  const text = encodeURIComponent(
+    `Hola ${booking.customerName || ""}, te escribimos de Totem Rental por tu pedido ${booking.code}.`,
+  );
+  return `https://wa.me/${number}?text=${text}`;
+}
 
 function monthStart(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), 1);
@@ -239,111 +145,198 @@ function formatMonth(date: Date) {
   }).format(date);
 }
 
-function ReservationAdminRow({
-  reservation,
-  productName,
+function formatHold(value?: string) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function AdminOverview({
+  bookings,
+  products,
+  profiles,
+  onOpenTab,
+}: {
+  bookings: Booking[];
+  products: Product[];
+  profiles: UserProfile[];
+  onOpenTab: (tab: AdminTab) => void;
+}) {
+  const today = todayIso();
+  const nextWeek = addDaysIso(today, 7);
+  const activeBookings = bookings.filter(isActiveBooking);
+  const pendingPayments = activeBookings.filter((booking) => booking.status === "payment_pending");
+  const upcomingPickups = activeBookings.filter((booking) => {
+    const start = bookingStart(booking);
+    return start >= today && start <= nextWeek;
+  });
+  const nextBookings = activeBookings
+    .filter((booking) => bookingEnd(booking) >= today)
+    .sort((a, b) => bookingStart(a).localeCompare(bookingStart(b)))
+    .slice(0, 5);
+
+  return (
+    <div className="admin-overview">
+      <div className="admin-metrics" aria-label="Resumen operativo">
+        <article>
+          <span>Señas pendientes</span>
+          <strong>{pendingPayments.length}</strong>
+          <p>{pendingPayments.filter(isExpiredHold).length} retenciones vencidas</p>
+        </article>
+        <article>
+          <span>Próximos 7 días</span>
+          <strong>{upcomingPickups.length}</strong>
+          <p>retiros por preparar</p>
+        </article>
+        <article>
+          <span>Clientes</span>
+          <strong>{profiles.length}</strong>
+          <p>perfiles registrados</p>
+        </article>
+        <article>
+          <span>Catálogo</span>
+          <strong>{products.length}</strong>
+          <p>{products.filter((product) => product.availability === "Disponible").length} disponibles</p>
+        </article>
+      </div>
+
+      <section className="admin-focus-card">
+        <div className="admin-section-heading">
+          <div>
+            <p className="eyebrow">Próximos movimientos</p>
+            <h2>Lo que requiere atención</h2>
+          </div>
+          <button type="button" onClick={() => onOpenTab("bookings")}>Ver todas las reservas</button>
+        </div>
+        {nextBookings.length === 0 ? (
+          <p className="admin-empty-reservations">No hay retiros o alquileres próximos.</p>
+        ) : (
+          <div className="admin-upcoming-list">
+            {nextBookings.map((booking) => (
+              <button key={booking.id} type="button" onClick={() => onOpenTab("bookings")}>
+                <span className={`admin-status-dot status-${booking.status}`} />
+                <strong>{booking.code}</strong>
+                <span>{booking.customerName}</span>
+                <span>{formatDateRange(bookingStart(booking), bookingEnd(booking))}</span>
+                <em>{getReservationStatusLabel(booking.status)}</em>
+              </button>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function BookingAdminCard({
+  booking,
   profile,
   onMessage,
 }: {
-  reservation: ReservationRange;
-  productName: string;
+  booking: Booking;
   profile?: UserProfile;
   onMessage: (message: string) => void;
 }) {
   const db = getFirebaseDb();
-  const [startDate, setStartDate] = useState(reservation.startDate);
-  const [endDate, setEndDate] = useState(reservation.endDate);
-  const [quantity, setQuantity] = useState(String(reservation.quantity ?? 1));
-  const [note, setNote] = useState(reservation.note ?? "");
-  const [status, setStatus] = useState<ReservationStatus>(reservation.status ?? "confirmed");
+  const [status, setStatus] = useState<ReservationStatus>(booking.status);
+  const [note, setNote] = useState(booking.note ?? "");
   const [saving, setSaving] = useState(false);
 
-  const saveReservation = async () => {
-    if (!db || reservation.source !== "firebase") {
-      onMessage("Esta reserva no se puede editar desde el panel porque no viene de Firestore.");
-      return;
-    }
+  useEffect(() => {
+    setStatus(booking.status);
+    setNote(booking.note ?? "");
+  }, [booking.note, booking.status]);
 
-    if (!startDate || !endDate || endDate < startDate) {
-      onMessage("Revisá las fechas de la reserva antes de guardar.");
-      return;
-    }
+  const saveBooking = async () => {
+    if (!db) return;
 
     try {
       setSaving(true);
-      await updateDoc(doc(db, "reservations", reservation.id), {
-        startDate,
-        endDate,
-        quantity: Math.max(1, Number(quantity) || 1),
-        rentalDays: getInclusiveDays(startDate, endDate),
-        note: note.trim(),
+      const rangesSnapshot = await getDocs(
+        query(collection(db, "reservationRanges"), where("bookingId", "==", booking.id)),
+      );
+      const batch = writeBatch(db);
+      batch.update(doc(db, "bookings", booking.id), {
         status,
+        note: note.trim(),
+        updatedAt: serverTimestamp(),
       });
-      onMessage(`Reserva actualizada: ${productName}`);
+      rangesSnapshot.docs.forEach((rangeDoc) => {
+        batch.update(rangeDoc.ref, { status });
+      });
+      await batch.commit();
+      onMessage(`Pedido ${booking.code} actualizado.`);
     } catch (error) {
       console.error(error);
-      const firebaseError = error as { code?: string; message?: string };
-      onMessage(
-        `No se pudo actualizar la reserva (${firebaseError.code ?? "error desconocido"}). ${
-          firebaseError.message ?? "Revisá tus permisos de admin."
-        }`,
-      );
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const removeReservation = async () => {
-    if (!db || reservation.source !== "firebase") {
-      onMessage("Esta reserva no se puede borrar desde el panel porque no viene de Firestore.");
-      return;
-    }
-
-    if (!window.confirm(`¿Borrar la reserva de ${productName}?`)) {
-      return;
-    }
-
-    try {
-      setSaving(true);
-      await deleteDoc(doc(db, "reservations", reservation.id));
-      onMessage(`Reserva borrada: ${productName}`);
-    } catch (error) {
-      console.error(error);
-      const firebaseError = error as { code?: string; message?: string };
-      onMessage(
-        `No se pudo borrar la reserva (${firebaseError.code ?? "error desconocido"}). ${
-          firebaseError.message ?? "Revisá tus permisos de admin."
-        }`,
-      );
+      onMessage("No se pudo actualizar el pedido. Revisá la conexión y los permisos.");
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <article className="admin-reservation-row">
-      <div>
-        <strong>{productName}</strong>
-        <span>{profile ? `${profile.firstName} ${profile.lastName}` : reservation.customerName || reservation.customerEmail || "Cliente sin datos visibles"}</span>
-        {profile && <span>DNI: {profile.dni}</span>}
-        {profile && <span>Celular: {profile.phone}</span>}
-        {profile?.email && <span>{profile.email}</span>}
-        {reservation.paymentAlias && <span>Pago: Mercado Pago alias {reservation.paymentAlias}</span>}
-        {typeof reservation.reserveDeposit === "number" && <span>Seña: ${reservation.reserveDeposit.toLocaleString("es-AR")}</span>}
+    <article className="admin-booking-card">
+      <header>
+        <div>
+          <span className="booking-code">{booking.code}</span>
+          <h3>{booking.customerName || booking.customerEmail}</h3>
+          <p>{booking.projectName || "Sin nombre de proyecto"} · {formatDateRange(bookingStart(booking), bookingEnd(booking))}</p>
+        </div>
+        <span className={`booking-status status-${booking.status}`}>
+          {getReservationStatusLabel(booking.status)}
+        </span>
+      </header>
+
+      <div className="admin-booking-body">
+        <div className="admin-booking-items">
+          {booking.items.map((item) => (
+            <div key={`${booking.id}-${item.productId}`}>
+              <span><strong>{item.quantity}×</strong> {item.productName}</span>
+              <span>{formatDateRange(item.startDate, item.endDate)}</span>
+              <em>{formatCurrency(item.rentalTotal)}</em>
+            </div>
+          ))}
+        </div>
+
+        <aside className="admin-customer-summary">
+          <strong>Contacto</strong>
+          <span>{booking.customerEmail}</span>
+          {profile?.dni && <span>DNI {profile.dni}</span>}
+          {profile?.phone && <span>{profile.phone}</span>}
+          <div>
+            <a href={`mailto:${booking.customerEmail}`} aria-label="Enviar email"><Mail size={16} /></a>
+            {profile?.phone && (
+              <a
+                href={customerWhatsappUrl(profile.phone, booking)}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Escribir por WhatsApp"
+              >
+                <MessageCircle size={16} />
+              </a>
+            )}
+          </div>
+        </aside>
       </div>
-      <div className="admin-reservation-fields">
-        <label>
-          Desde
-          <input className="gabinete-input" type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
-        </label>
-        <label>
-          Hasta
-          <input className="gabinete-input" type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
-        </label>
-        <label>
-          Cant.
-          <input className="gabinete-input" type="number" min="1" value={quantity} onChange={(event) => setQuantity(event.target.value)} />
-        </label>
+
+      <div className="admin-booking-finance">
+        <span>Alquiler <strong>{formatCurrency(booking.rentalTotal)}</strong></span>
+        <span>Seña <strong>{formatCurrency(booking.reserveDeposit)}</strong></span>
+        <span>Garantía <strong>{formatCurrency(booking.guaranteeAmount)}</strong></span>
+        {booking.status === "payment_pending" && booking.holdExpiresAt && (
+          <span className={isExpiredHold(booking) ? "is-expired" : ""}>
+            <Clock3 size={14} /> Retención hasta {formatHold(booking.holdExpiresAt)}
+          </span>
+        )}
+      </div>
+
+      <div className="admin-booking-controls">
         <label>
           Estado
           <select className="gabinete-input" value={status} onChange={(event) => setStatus(event.target.value as ReservationStatus)}>
@@ -352,160 +345,562 @@ function ReservationAdminRow({
             ))}
           </select>
         </label>
-      </div>
-      <label className="admin-reservation-note">
-        Nota
-        <input className="gabinete-input" value={note} onChange={(event) => setNote(event.target.value)} />
-      </label>
-      <div className="admin-reservation-actions">
-        <button type="button" className="gabinete-button-secondary" onClick={removeReservation} disabled={saving}>
-          <Trash2 size={16} />
-          Borrar
-        </button>
-        <button type="button" className="gabinete-button" onClick={saveReservation} disabled={saving}>
+        <label>
+          Nota interna / logística
+          <input className="gabinete-input" value={note} onChange={(event) => setNote(event.target.value)} />
+        </label>
+        <button type="button" className="gabinete-button" onClick={saveBooking} disabled={saving}>
           <Save size={16} />
-          {saving ? "Guardando..." : "Guardar"}
+          {saving ? "Guardando…" : "Guardar cambios"}
         </button>
       </div>
     </article>
   );
 }
 
-function AdminReservationsCalendar({ products }: { products: Product[] }) {
-  const { reservations, syncMode } = useAvailability();
+function AdminBookings({
+  bookings,
+  profiles,
+}: {
+  bookings: Booking[];
+  profiles: UserProfile[];
+}) {
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | ReservationStatus>("active");
   const [message, setMessage] = useState("");
-  const [profiles, setProfiles] = useState<UserProfile[]>([]);
+  const profilesByUid = useMemo(
+    () => new Map(profiles.map((profile) => [profile.uid, profile])),
+    [profiles],
+  );
+  const normalizedSearch = search.trim().toLocaleLowerCase("es");
+  const filteredBookings = bookings
+    .filter((booking) => {
+      if (statusFilter === "active" && !isActiveBooking(booking)) return false;
+      if (statusFilter !== "all" && statusFilter !== "active" && booking.status !== statusFilter) return false;
+      if (!normalizedSearch) return true;
+      return [
+        booking.code,
+        booking.customerName,
+        booking.customerEmail,
+        booking.projectName,
+        ...booking.items.map((item) => `${item.productName} ${item.productId}`),
+      ].some((value) => value?.toLocaleLowerCase("es").includes(normalizedSearch));
+    })
+    .sort((a, b) => {
+      const aActive = isActiveBooking(a) ? 0 : 1;
+      const bActive = isActiveBooking(b) ? 0 : 1;
+      return aActive - bActive || bookingStart(a).localeCompare(bookingStart(b));
+    });
+
+  return (
+    <section className="admin-bookings-section">
+      <div className="admin-section-heading">
+        <div>
+          <p className="eyebrow">Reservas</p>
+          <h2>Seguimiento de pedidos</h2>
+          <p>Cada tarjeta reúne cliente, piezas, fechas, seña y estado.</p>
+        </div>
+      </div>
+
+      <div className="admin-filter-bar">
+        <label>
+          <Search size={17} />
+          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Código, cliente, proyecto u objeto" />
+        </label>
+        <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}>
+          <option value="active">Activas y en proceso</option>
+          <option value="all">Todas</option>
+          {reservationStatusOptions.map((status) => (
+            <option key={status} value={status}>{getReservationStatusLabel(status)}</option>
+          ))}
+        </select>
+      </div>
+
+      {message && <p className="admin-message"><CheckCircle2 size={16} />{message}</p>}
+      {filteredBookings.length === 0 ? (
+        <p className="admin-empty-reservations">No hay reservas que coincidan con la búsqueda.</p>
+      ) : (
+        <div className="admin-booking-list">
+          {filteredBookings.map((booking) => (
+            <BookingAdminCard
+              key={booking.id}
+              booking={booking}
+              profile={profilesByUid.get(booking.createdByUid)}
+              onMessage={setMessage}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function AdminCalendar({ bookings }: { bookings: Booking[] }) {
   const [visibleMonth, setVisibleMonth] = useState(() => monthStart(parseIsoDate(todayIso())));
   const days = useMemo(() => buildMonthDays(visibleMonth), [visibleMonth]);
-  const productsById = useMemo(() => new Map(products.map((product) => [product.id, product])), [products]);
-  const profilesByUid = useMemo(() => new Map(profiles.map((profile) => [profile.uid, profile])), [profiles]);
-  const monthStartIso = toIsoDate(monthStart(visibleMonth));
-  const monthEndIso = toIsoDate(new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 0));
-  const monthReservations = useMemo(
-    () =>
-      reservations
-        .filter((reservation) => rangesOverlap(monthStartIso, monthEndIso, reservation.startDate, reservation.endDate))
-        .sort((a, b) => a.startDate.localeCompare(b.startDate) || a.productId.localeCompare(b.productId)),
-    [monthEndIso, monthStartIso, reservations],
+  const visibleItems = bookings.flatMap((booking) =>
+    isActiveBooking(booking)
+      ? booking.items.map((item) => ({ booking, item }))
+      : [],
   );
-
-  useEffect(() => {
-    const db = getFirebaseDb();
-    if (!db) {
-      return;
-    }
-
-    return onSnapshot(collection(db, "userProfiles"), (snapshot) => {
-      setProfiles(snapshot.docs.map((profileDoc) => profileDoc.data() as UserProfile));
-    });
-  }, []);
 
   return (
     <section className="admin-reservations parchment-panel">
       <div className="admin-reservations-head">
         <div>
-          <p className="eyebrow flex items-center gap-2">
-            <CalendarDays size={15} />
-            Calendario admin
-          </p>
-          <h2>Pedidos y alquileres por fecha</h2>
-          <p>
-            Fuente de reservas: {syncMode === "firebase" ? "Firestore" : "local"}. Cada marca bloquea el objeto para futuros clientes.
-          </p>
+          <p className="eyebrow flex items-center gap-2"><CalendarDays size={15} />Calendario</p>
+          <h2>Ocupación y movimientos</h2>
+          <p>Reservas activas, retiros y devoluciones en una sola vista.</p>
         </div>
         <div className="calendar-month-bar admin-calendar-nav">
-          <button type="button" onClick={() => setVisibleMonth((current) => addMonths(current, -1))}>
-            <ChevronLeft size={18} />
-          </button>
+          <button type="button" onClick={() => setVisibleMonth((current) => addMonths(current, -1))}><ChevronLeft size={18} /></button>
           <strong>{formatMonth(visibleMonth)}</strong>
-          <button type="button" onClick={() => setVisibleMonth((current) => addMonths(current, 1))}>
-            <ChevronRight size={18} />
-          </button>
+          <button type="button" onClick={() => setVisibleMonth((current) => addMonths(current, 1))}><ChevronRight size={18} /></button>
         </div>
       </div>
 
       <div className="admin-calendar-grid">
-        {adminWeekdays.map((day) => (
-          <span key={day} className="calendar-weekday">
-            {day}
-          </span>
-        ))}
+        {adminWeekdays.map((day) => <span key={day} className="calendar-weekday">{day}</span>)}
         {days.map(({ iso, inMonth }) => {
-          const dayReservations = reservations.filter((reservation) =>
-            rangesOverlap(iso, iso, reservation.startDate, reservation.endDate),
+          const dayItems = visibleItems.filter(({ item }) =>
+            rangesOverlap(iso, iso, item.startDate, item.endDate),
           );
           return (
-            <div
-              key={iso}
-              className={`admin-calendar-day ${inMonth ? "" : "is-outside"} ${dayReservations.length > 0 ? "has-reservations" : ""}`}
-            >
+            <div key={iso} className={`admin-calendar-day ${inMonth ? "" : "is-outside"} ${dayItems.length ? "has-reservations" : ""}`}>
               <span className="admin-calendar-number">{Number(iso.slice(-2))}</span>
-              {dayReservations.slice(0, 2).map((reservation) => {
-                const product = productsById.get(reservation.productId);
-                return (
-                  <span
-                    key={reservation.id}
-                    className={`admin-calendar-chip status-${reservation.status ?? "confirmed"}`}
-                    title={`${product?.name ?? reservation.productId} · ${getReservationStatusLabel(reservation.status)}`}
-                  >
-                    {product?.name ?? reservation.productId}
-                  </span>
-                );
-              })}
-              {dayReservations.length > 2 && (
-                <span className="admin-calendar-more">+{dayReservations.length - 2}</span>
-              )}
+              {dayItems.slice(0, 3).map(({ booking, item }) => (
+                <span
+                  key={`${booking.id}-${item.productId}`}
+                  className={`admin-calendar-chip status-${booking.status}`}
+                  title={`${booking.code} · ${item.productName} · ${booking.customerName}`}
+                >
+                  {item.productName}
+                </span>
+              ))}
+              {dayItems.length > 3 && <span className="admin-calendar-more">+{dayItems.length - 3}</span>}
             </div>
           );
         })}
-      </div>
-
-      <div className="admin-reservation-list">
-        <p className="eyebrow">Reservas del mes</p>
-        {message && <p className="admin-message">{message}</p>}
-        {monthReservations.length === 0 ? (
-          <p className="admin-empty-reservations">No hay objetos alquilados o pedidos para este mes.</p>
-        ) : (
-          monthReservations.map((reservation) => {
-            const product = productsById.get(reservation.productId);
-            return (
-              <ReservationAdminRow
-                key={reservation.id}
-                reservation={reservation}
-                productName={product?.name ?? reservation.productId}
-                profile={reservation.createdByUid ? profilesByUid.get(reservation.createdByUid) : undefined}
-                onMessage={setMessage}
-              />
-            );
-          })
-        )}
       </div>
     </section>
   );
 }
 
-export function AdminPage() {
+function AdminCustomers({
+  profiles,
+  bookings,
+}: {
+  profiles: UserProfile[];
+  bookings: Booking[];
+}) {
+  const [search, setSearch] = useState("");
+  const queryText = search.trim().toLocaleLowerCase("es");
+  const filteredProfiles = profiles
+    .filter((profile) =>
+      !queryText
+      || [profile.firstName, profile.lastName, profile.email, profile.dni, profile.phone]
+        .some((value) => value?.toLocaleLowerCase("es").includes(queryText)),
+    )
+    .sort((a, b) => `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`));
+
+  return (
+    <section className="admin-customers">
+      <div className="admin-section-heading">
+        <div>
+          <p className="eyebrow">Clientes</p>
+          <h2>Directorio simple</h2>
+          <p>Datos de contacto e historial de pedidos, sin planillas paralelas.</p>
+        </div>
+      </div>
+      <div className="admin-filter-bar">
+        <label>
+          <Search size={17} />
+          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nombre, email, DNI o celular" />
+        </label>
+      </div>
+      {filteredProfiles.length === 0 ? (
+        <p className="admin-empty-reservations">No hay clientes que coincidan con la búsqueda.</p>
+      ) : (
+        <div className="admin-customer-list">
+          {filteredProfiles.map((profile) => {
+            const customerBookings = bookings.filter((booking) => booking.createdByUid === profile.uid);
+            const activeCount = customerBookings.filter(isActiveBooking).length;
+            return (
+              <article key={profile.uid}>
+                <div className="admin-customer-avatar"><UserRound size={19} /></div>
+                <div>
+                  <strong>{`${profile.firstName} ${profile.lastName}`.trim() || "Sin nombre"}</strong>
+                  <span>{profile.email}</span>
+                </div>
+                <div>
+                  <span>DNI {profile.dni || "—"}</span>
+                  <span>{profile.phone || "Sin celular"}</span>
+                </div>
+                <div>
+                  <strong>{customerBookings.length}</strong>
+                  <span>{activeCount} activos</span>
+                </div>
+                <div className="admin-customer-actions">
+                  <a href={`mailto:${profile.email}`}><Mail size={16} /> Email</a>
+                  {profile.phone && (
+                    <a href={`https://wa.me/${profile.phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer">
+                      <MessageCircle size={16} /> WhatsApp
+                    </a>
+                  )}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function isUsableImageUrl(image: string) {
+  return /^https?:\/\//.test(image) || /^data:image\//.test(image);
+}
+
+function AdminImagePreview({ image, onRemove }: { image: string; onRemove: () => void }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <figure>
+      {failed
+        ? <div className="admin-image-fallback">Imagen no disponible</div>
+        : <img src={image} alt="" onError={() => setFailed(true)} />}
+      <button type="button" onClick={onRemove}>Quitar</button>
+    </figure>
+  );
+}
+
+type ProductForm = {
+  id: string;
+  name: string;
+  category: Product["category"];
+  tags: string;
+  rentalPricePerDay: string;
+  rentalPricePerWeek: string;
+  description: string;
+  curiosities: string;
+  status: ProductStatus;
+  measurements: string;
+  material: string;
+  color: string;
+  eraStyle: string;
+  availability: Availability;
+  estimatedValue: string;
+  guaranteePercentage: string;
+  minimumDeposit: string;
+  featuredScore: string;
+  stock: string;
+  internalNotes: string;
+  images: string[];
+  visualTone: ProductVisual["tone"];
+  visualSigil: string;
+};
+
+const emptyForm: ProductForm = {
+  id: "",
+  name: "",
+  category: "Utilería",
+  tags: "",
+  rentalPricePerDay: "",
+  rentalPricePerWeek: "",
+  description: "",
+  curiosities: "",
+  status: "Excelente",
+  measurements: "",
+  material: "",
+  color: "",
+  eraStyle: "",
+  availability: "Disponible",
+  estimatedValue: "",
+  guaranteePercentage: "30",
+  minimumDeposit: "",
+  featuredScore: "50",
+  stock: "1",
+  internalNotes: "",
+  images: [],
+  visualTone: "paper",
+  visualSigil: "✶",
+};
+
+function toNumber(value: string, fallback = 0) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+
+function toForm(product: Product): ProductForm {
+  return {
+    id: product.id,
+    name: product.name,
+    category: product.category,
+    tags: product.tags.join(", "),
+    rentalPricePerDay: String(product.rentalPricePerDay),
+    rentalPricePerWeek: product.rentalPricePerWeek ? String(product.rentalPricePerWeek) : "",
+    description: product.description,
+    curiosities: product.curiosities,
+    status: product.status,
+    measurements: product.measurements,
+    material: product.material,
+    color: product.color,
+    eraStyle: product.eraStyle,
+    availability: product.availability,
+    estimatedValue: String(product.estimatedValue),
+    guaranteePercentage: String(Math.round(product.guaranteePercentage * 100)),
+    minimumDeposit: String(product.minimumDeposit),
+    featuredScore: String(product.featuredScore),
+    stock: String(product.stock),
+    internalNotes: product.internalNotes ?? "",
+    images: product.images.filter(isUsableImageUrl),
+    visualTone: product.visual.tone,
+    visualSigil: product.visual.sigil,
+  };
+}
+
+function toProduct(form: ProductForm): Product {
+  const product: Product = {
+    id: form.id.trim(),
+    name: form.name.trim(),
+    category: form.category,
+    tags: form.tags.split(",").map((tag) => tag.trim()).filter(Boolean),
+    rentalPricePerDay: Math.max(0, toNumber(form.rentalPricePerDay)),
+    description: form.description.trim(),
+    curiosities: form.curiosities.trim(),
+    status: form.status,
+    measurements: form.measurements.trim(),
+    material: form.material.trim(),
+    color: form.color.trim(),
+    eraStyle: form.eraStyle.trim(),
+    availability: form.availability,
+    estimatedValue: Math.max(0, toNumber(form.estimatedValue)),
+    guaranteePercentage: Math.min(1, Math.max(0, toNumber(form.guaranteePercentage, 30) / 100)),
+    minimumDeposit: Math.max(0, toNumber(form.minimumDeposit)),
+    featuredScore: toNumber(form.featuredScore, 50),
+    stock: Math.max(1, Math.floor(toNumber(form.stock, 1))),
+    images: form.images.filter(isUsableImageUrl),
+    visual: { tone: form.visualTone, sigil: form.visualSigil.trim() || "✶" },
+  };
+  if (form.rentalPricePerWeek.trim()) product.rentalPricePerWeek = Math.max(0, toNumber(form.rentalPricePerWeek));
+  if (form.internalNotes.trim()) product.internalNotes = form.internalNotes.trim();
+  return product;
+}
+
+function fileSafeName(name: string) {
+  return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]+/g, "-");
+}
+
+function getNextProductId(products: Product[]) {
+  const highest = products.reduce((max, product) => {
+    const numericId = Number(product.id.replace(/\D/g, ""));
+    return Number.isFinite(numericId) ? Math.max(max, numericId) : max;
+  }, 0);
+  return String(highest + 1).padStart(3, "0");
+}
+
+function AdminCatalog({
+  products,
+  bookings,
+  onGlobalMessage,
+}: {
+  products: Product[];
+  bookings: Booking[];
+  onGlobalMessage: (message: string) => void;
+}) {
   const app = getFirebaseApp();
   const db = getFirebaseDb();
   const storage = app ? getStorage(app) : null;
-  const { user, isAdmin, checkingAdmin, loginWithGoogle, logout, authError } = useAuth();
-  const { products, syncMode } = useCatalog();
-  const { reservations } = useAvailability();
-  const [imageUrl, setImageUrl] = useState("");
   const [form, setForm] = useState<ProductForm>(emptyForm);
-  const [message, setMessage] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"reservations" | "catalog">("reservations");
-
-  const sortedProducts = useMemo(
-    () => [...products].sort((a, b) => a.name.localeCompare(b.name)),
-    [products],
-  );
+  const sortedProducts = useMemo(() => [...products].sort((a, b) => a.name.localeCompare(b.name)), [products]);
 
   const updateField = <K extends keyof ProductForm>(field: K, value: ProductForm[K]) => {
     setForm((current) => ({ ...current, [field]: value }));
   };
+
+  const newProduct = () => {
+    setForm({ ...emptyForm, id: getNextProductId(products) });
+    setImageUrl("");
+    onGlobalMessage("");
+  };
+
+  const saveProduct = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!db) return;
+    const product = toProduct(form);
+    if (!product.id || !product.name) {
+      onGlobalMessage("Completá ID y nombre antes de guardar.");
+      return;
+    }
+    if (toNumber(form.guaranteePercentage) < 0 || toNumber(form.guaranteePercentage) > 100) {
+      onGlobalMessage("La garantía debe estar entre 0% y 100%.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      await setDoc(doc(db, "products", product.id), product);
+      setForm(toForm(product));
+      onGlobalMessage(`Producto guardado: ${product.name}.`);
+    } catch (error) {
+      console.error(error);
+      onGlobalMessage("No se pudo guardar el producto. Revisá la conexión y los permisos.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const removeProduct = async () => {
+    if (!db || !form.id) return;
+    const usedByActiveBooking = bookings.some(
+      (booking) => isActiveBooking(booking) && booking.items.some((item) => item.productId === form.id),
+    );
+    if (usedByActiveBooking) {
+      onGlobalMessage("No se puede eliminar: el producto forma parte de una reserva activa.");
+      return;
+    }
+    if (!window.confirm(`¿Eliminar ${form.name || form.id} del catálogo?`)) return;
+
+    try {
+      setSaving(true);
+      await deleteDoc(doc(db, "products", form.id));
+      setForm(emptyForm);
+      onGlobalMessage("Producto eliminado del catálogo.");
+    } catch (error) {
+      console.error(error);
+      onGlobalMessage("No se pudo eliminar el producto.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const addImageUrl = () => {
+    const url = imageUrl.trim();
+    if (!/^https?:\/\//.test(url)) {
+      onGlobalMessage("Pegá una URL pública que empiece con http o https.");
+      return;
+    }
+    updateField("images", [url, ...form.images]);
+    setImageUrl("");
+    onGlobalMessage("Imagen agregada. Guardá el producto para conservarla.");
+  };
+
+  const uploadImage = async (file?: File) => {
+    if (!file || !storage || !form.id) {
+      onGlobalMessage("Completá el ID antes de subir imágenes.");
+      return;
+    }
+    if (!file.type.startsWith("image/") || file.size >= 10 * 1024 * 1024) {
+      onGlobalMessage("Elegí una imagen JPG, PNG o WebP de menos de 10 MB.");
+      return;
+    }
+    try {
+      setUploading(true);
+      const imageRef = ref(storage, `products/${form.id}/${Date.now()}-${fileSafeName(file.name)}`);
+      await uploadBytes(imageRef, file, { contentType: file.type });
+      const url = await getDownloadURL(imageRef);
+      updateField("images", [url, ...form.images]);
+      onGlobalMessage("Imagen subida. Guardá el producto para conservarla.");
+    } catch (error) {
+      console.error(error);
+      onGlobalMessage("No se pudo subir la imagen.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="admin-layout">
+      <aside className="admin-list">
+        <button type="button" className="admin-new-button" onClick={newProduct}><Plus size={16} />Nuevo producto</button>
+        {sortedProducts.map((product) => (
+          <button key={product.id} type="button" className={form.id === product.id ? "is-active" : ""} onClick={() => setForm(toForm(product))}>
+            <strong>{product.name}</strong>
+            <span>{product.id} · {product.category}</span>
+          </button>
+        ))}
+      </aside>
+
+      <form onSubmit={saveProduct} className="admin-editor">
+        <div className="admin-editor-title">
+          <div><p className="eyebrow">Ficha editable</p><h2>{form.name || "Producto nuevo"}</h2></div>
+          <div className="admin-actions">
+            <button type="button" className="gabinete-button-secondary" onClick={removeProduct} disabled={!form.id || saving}><Trash2 size={17} />Eliminar</button>
+            <button type="submit" className="gabinete-button" disabled={saving}><Save size={17} />{saving ? "Guardando…" : "Guardar"}</button>
+          </div>
+        </div>
+
+        <div className="admin-grid">
+          <label>ID<input className="gabinete-input" value={form.id} onChange={(event) => updateField("id", event.target.value.trim().toUpperCase())} /></label>
+          <label>Nombre<input className="gabinete-input" value={form.name} onChange={(event) => updateField("name", event.target.value)} /></label>
+          <label>Categoría<select className="gabinete-input" value={form.category} onChange={(event) => updateField("category", event.target.value as Product["category"])}>{categories.map((category) => <option key={category}>{category}</option>)}</select></label>
+          <label>Estado<select className="gabinete-input" value={form.status} onChange={(event) => updateField("status", event.target.value as ProductStatus)}>{productStatusOptions.map((status) => <option key={status}>{status}</option>)}</select></label>
+          <label>Disponibilidad<select className="gabinete-input" value={form.availability} onChange={(event) => updateField("availability", event.target.value as Availability)}>{availabilityOptions.map((availability) => <option key={availability}>{availability}</option>)}</select></label>
+          <label>Unidades disponibles<input className="gabinete-input" type="number" min="1" value={form.stock} onChange={(event) => updateField("stock", event.target.value)} /></label>
+          <label>Precio diario<input className="gabinete-input" type="number" min="0" value={form.rentalPricePerDay} onChange={(event) => updateField("rentalPricePerDay", event.target.value)} /></label>
+          <label>Precio semanal<input className="gabinete-input" type="number" min="0" value={form.rentalPricePerWeek} onChange={(event) => updateField("rentalPricePerWeek", event.target.value)} /></label>
+          <label>Valor estimado<input className="gabinete-input" type="number" min="0" value={form.estimatedValue} onChange={(event) => updateField("estimatedValue", event.target.value)} /></label>
+          <label>Garantía (%)<input className="gabinete-input" type="number" min="0" max="100" value={form.guaranteePercentage} onChange={(event) => updateField("guaranteePercentage", event.target.value)} /></label>
+          <label>Depósito mínimo<input className="gabinete-input" type="number" min="0" value={form.minimumDeposit} onChange={(event) => updateField("minimumDeposit", event.target.value)} /></label>
+          <label>Prioridad en catálogo<input className="gabinete-input" type="number" value={form.featuredScore} onChange={(event) => updateField("featuredScore", event.target.value)} /></label>
+          <label>Etiquetas<input className="gabinete-input" value={form.tags} onChange={(event) => updateField("tags", event.target.value)} placeholder="vintage, cocina, exterior" /></label>
+          <label>Medidas<input className="gabinete-input" value={form.measurements} onChange={(event) => updateField("measurements", event.target.value)} /></label>
+          <label>Material<input className="gabinete-input" value={form.material} onChange={(event) => updateField("material", event.target.value)} /></label>
+          <label>Color<input className="gabinete-input" value={form.color} onChange={(event) => updateField("color", event.target.value)} /></label>
+          <label>Época / estilo<input className="gabinete-input" value={form.eraStyle} onChange={(event) => updateField("eraStyle", event.target.value)} /></label>
+          <label>Tono visual<select className="gabinete-input" value={form.visualTone} onChange={(event) => updateField("visualTone", event.target.value as ProductVisual["tone"])}>{toneOptions.map((tone) => <option key={tone}>{tone}</option>)}</select></label>
+          <label>Símbolo<input className="gabinete-input" value={form.visualSigil} onChange={(event) => updateField("visualSigil", event.target.value)} /></label>
+        </div>
+
+        <label className="admin-wide">Descripción<textarea className="gabinete-input" rows={4} value={form.description} onChange={(event) => updateField("description", event.target.value)} /></label>
+        <label className="admin-wide">Curiosidades<textarea className="gabinete-input" rows={3} value={form.curiosities} onChange={(event) => updateField("curiosities", event.target.value)} /></label>
+        <label className="admin-wide">Notas internas<textarea className="gabinete-input" rows={3} value={form.internalNotes} onChange={(event) => updateField("internalNotes", event.target.value)} /></label>
+
+        <div className="admin-images">
+          <label className="admin-upload">
+            <ImagePlus size={18} />{uploading ? "Subiendo…" : "Subir imagen"}
+            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => uploadImage(event.target.files?.[0])} />
+          </label>
+          <div className="admin-image-url">
+            <label>URL pública<input className="gabinete-input" value={imageUrl} onChange={(event) => setImageUrl(event.target.value)} placeholder="https://…" /></label>
+            <button type="button" className="admin-upload" onClick={addImageUrl}><ImagePlus size={18} />Agregar</button>
+          </div>
+          <div className="admin-image-grid">
+            {form.images.map((image) => (
+              <AdminImagePreview key={image} image={image} onRemove={() => updateField("images", form.images.filter((candidate) => candidate !== image))} />
+            ))}
+          </div>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+export function AdminPage() {
+  const db = getFirebaseDb();
+  const { user, isAdmin, checkingAdmin, loginWithGoogle, logout, authError } = useAuth();
+  const { products, syncMode } = useCatalog();
+  const { bookings, loadingBookings } = useAvailability();
+  const [profiles, setProfiles] = useState<UserProfile[]>([]);
+  const [message, setMessage] = useState("");
+  const [activeTab, setActiveTab] = useState<AdminTab>("overview");
+
+  useEffect(() => {
+    if (!db || !isAdmin) {
+      setProfiles([]);
+      return;
+    }
+    return onSnapshot(
+      collection(db, "userProfiles"),
+      (snapshot) => setProfiles(snapshot.docs.map((profileDoc) => profileDoc.data() as UserProfile)),
+      (error) => {
+        console.error(error);
+        setMessage("No se pudo cargar el directorio de clientes.");
+      },
+    );
+  }, [db, isAdmin]);
 
   const login = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -513,348 +908,89 @@ export function AdminPage() {
     await loginWithGoogle();
   };
 
-  const newProduct = () => {
-    setForm({ ...emptyForm, id: `EG-${String(products.length + 1).padStart(3, "0")}` });
-    setMessage("");
-  };
-
-  const saveProduct = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!db || !isAdmin) return;
-
-    const product = toProduct(form);
-    if (!product.id || !product.name) {
-      setMessage("Completá ID y nombre antes de guardar.");
-      return;
-    }
-
-    try {
-      setSaving(true);
-      await setDoc(doc(db, "products", product.id), product);
-      setMessage(`Producto guardado: ${product.name}`);
-    } catch (error) {
-      console.error(error);
-      const firebaseError = error as { code?: string; message?: string };
-      setMessage(
-        `No se pudo guardar el producto (${firebaseError.code ?? "error desconocido"}). ${
-          firebaseError.message ?? "Revisá los datos cargados y tus permisos de admin."
-        }`,
-      );
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const removeProduct = async () => {
-    if (!db || !isAdmin || !form.id || !window.confirm(`¿Eliminar ${form.name || form.id}?`)) {
-      return;
-    }
-
-    setSaving(true);
-    await deleteDoc(doc(db, "products", form.id));
-    setSaving(false);
-    setForm(emptyForm);
-    setMessage("Producto eliminado.");
-  };
-
-  const addImageUrl = () => {
-    const url = imageUrl.trim();
-    if (!/^https?:\/\//.test(url)) {
-      setMessage("Pegá una URL pública de imagen que empiece con http o https.");
-      return;
-    }
-
-    updateField("images", [url, ...form.images]);
-    setImageUrl("");
-    setMessage("Imagen agregada. Guardá el producto para conservarla en el catálogo.");
-  };
-
-  const uploadImage = async (file: File | undefined) => {
-    if (!file || !storage || !form.id) {
-      setMessage("Completá el ID antes de subir imágenes.");
-      return;
-    }
-
-    try {
-      setUploading(true);
-      const imageRef = ref(storage, `products/${form.id}/${Date.now()}-${fileSafeName(file.name)}`);
-      await uploadBytes(imageRef, file, { contentType: file.type });
-      const url = await getDownloadURL(imageRef);
-      updateField("images", [url, ...form.images]);
-      setMessage("Imagen subida. Guardá el producto para conservarla en el catálogo.");
-    } catch (error) {
-      console.error(error);
-      const firebaseError = error as { code?: string; message?: string };
-      setMessage(
-        `No se pudo subir la imagen (${firebaseError.code ?? "error desconocido"}). ${
-          firebaseError.message ?? "Revisá las reglas de Storage y tus permisos de admin."
-        }`,
-      );
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const seedCatalog = async () => {
-    if (!db || !isAdmin || !window.confirm("¿Restaurar en Firestore los productos base que falten? No se pisan productos ya editados.")) {
-      return;
-    }
-
-    try {
-      setSaving(true);
-      let created = 0;
-
-      await Promise.all(
-        fallbackProducts.map(async (product) => {
-          const productRef = doc(db, "products", product.id);
-          const existingProduct = await getDoc(productRef);
-
-          if (existingProduct.exists()) {
-            return;
-          }
-
-          await setDoc(productRef, product);
-          created += 1;
-        }),
-      );
-
-      setMessage(
-        created > 0
-          ? `Catálogo base restaurado. Se agregaron ${created} productos.`
-          : "Firestore ya tenía todos los productos base.",
-      );
-    } catch (error) {
-      console.error(error);
-      const firebaseError = error as { code?: string; message?: string };
-      setMessage(
-        `No se pudo restaurar el catálogo base (${firebaseError.code ?? "error desconocido"}). ${
-          firebaseError.message ?? "Revisá tus permisos de admin."
-        }`,
-      );
-    } finally {
-      setSaving(false);
-    }
-  };
-
   if (!firebaseEnabled || !db) {
-    return (
-      <section className="admin-page">
-        <div className="admin-card">
-          <p className="eyebrow">Admin</p>
-          <h1>Firebase no está configurado</h1>
-          <p>Cargá las variables de Firebase para habilitar el panel.</p>
-        </div>
-      </section>
-    );
+    return <section className="admin-page"><div className="admin-card"><h1>Panel no disponible</h1><p>No se pudo conectar con Firebase.</p></div></section>;
   }
-
   if (!user) {
     return (
       <section className="admin-page">
         <form onSubmit={login} className="admin-card admin-login">
           <span className="admin-lock"><Lock size={22} /></span>
-          <p className="eyebrow">Admin</p>
+          <p className="eyebrow">Administración</p>
           <h1>Ingresar al panel</h1>
-          <p>Usá la cuenta de Google autorizada para gestionar reservas, pagos y catálogo.</p>
+          <p>Usá la cuenta de Google autorizada para gestionar reservas, clientes y catálogo.</p>
           {(message || authError) && <p className="admin-message">{message || authError}</p>}
-          <button type="submit" className="gabinete-button">
-            <Lock size={17} />
-            Entrar con Google
-          </button>
+          <button type="submit" className="gabinete-button"><Lock size={17} />Entrar con Google</button>
         </form>
       </section>
     );
   }
-
   if (checkingAdmin) {
-    return <section className="admin-page"><div className="admin-card">Verificando permisos...</div></section>;
+    return <section className="admin-page"><div className="admin-card">Verificando permisos…</div></section>;
   }
-
   if (!isAdmin) {
     return (
       <section className="admin-page">
         <div className="admin-card">
           <p className="eyebrow">Sin permiso</p>
           <h1>Tu usuario no es administrador</h1>
-          <p>Pedí que agreguen este email en Firestore: <strong>{user.email}</strong></p>
-          <button type="button" className="gabinete-button-secondary" onClick={logout}>
-            <LogOut size={17} />
-            Salir
-          </button>
+          <p>Pedí que autoricen <strong>{user.email}</strong> para acceder.</p>
+          <button type="button" className="gabinete-button-secondary" onClick={logout}><LogOut size={17} />Salir</button>
         </div>
       </section>
     );
   }
+
+  const tabs: Array<{ id: AdminTab; label: string; icon: typeof LayoutDashboard }> = [
+    { id: "overview", label: "Resumen", icon: LayoutDashboard },
+    { id: "bookings", label: "Reservas", icon: PackageCheck },
+    { id: "calendar", label: "Calendario", icon: CalendarDays },
+    { id: "customers", label: "Clientes", icon: UsersRound },
+    { id: "catalog", label: "Catálogo", icon: UploadCloud },
+  ];
 
   return (
     <section className="admin-page">
       <div className="admin-head">
         <div>
           <p className="eyebrow">Operaciones</p>
-          <h1>Panel de producción</h1>
-          <p>Reservas, disponibilidad y catálogo en un mismo lugar.</p>
+          <h1>Panel del rental</h1>
+          <p>Lo importante de hoy, reservas, clientes, calendario y catálogo.</p>
         </div>
         <div className="admin-actions">
-          <button type="button" className="gabinete-button-secondary" onClick={seedCatalog} disabled={saving}>
-            <UploadCloud size={17} />
-            Restaurar catálogo base
-          </button>
-          <button type="button" className="gabinete-button-secondary" onClick={logout}>
-            <LogOut size={17} />
-            Salir
-          </button>
+          <span className="admin-online-status"><span />{syncMode === "firebase" ? "Datos online" : "Modo local"}</span>
+          <button type="button" className="gabinete-button-secondary" onClick={logout}><LogOut size={17} />Salir</button>
         </div>
       </div>
 
-      <div className="admin-metrics" aria-label="Resumen operativo">
-        <article>
-          <span>Catálogo</span>
-          <strong>{products.length}</strong>
-          <p>objetos cargados</p>
-        </article>
-        <article>
-          <span>Disponibles</span>
-          <strong>{products.filter((product) => product.availability === "Disponible").length}</strong>
-          <p>listos para reservar</p>
-        </article>
-        <article>
-          <span>Reservas</span>
-          <strong>{reservations.filter((reservation) => reservation.status !== "cancelled").length}</strong>
-          <p>activas o en proceso</p>
-        </article>
-        <article>
-          <span>Sincronización</span>
-          <strong className="admin-metric-word">{syncMode === "firebase" ? "Online" : "Local"}</strong>
-          <p>{syncMode === "firebase" ? "datos actualizados" : "modo de respaldo"}</p>
-        </article>
-      </div>
-
-      {message && (
-        <p className="admin-message">
-          <CheckCircle2 size={16} />
-          {message}
-        </p>
-      )}
+      {message && <p className="admin-message"><CheckCircle2 size={16} />{message}</p>}
 
       <div className="admin-tabs" role="tablist" aria-label="Secciones del panel">
-        <button
-          type="button"
-          className={activeTab === "reservations" ? "is-active" : ""}
-          onClick={() => setActiveTab("reservations")}
-        >
-          <CalendarDays size={16} />
-          Calendario y reservas
-        </button>
-        <button
-          type="button"
-          className={activeTab === "catalog" ? "is-active" : ""}
-          onClick={() => setActiveTab("catalog")}
-        >
-          <UploadCloud size={16} />
-          Actualización del catálogo
-        </button>
+        {tabs.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === id}
+            className={activeTab === id ? "is-active" : ""}
+            onClick={() => setActiveTab(id)}
+          >
+            <Icon size={16} />{label}
+          </button>
+        ))}
       </div>
 
-      {activeTab === "reservations" && <AdminReservationsCalendar products={products} />}
-
-      {activeTab === "catalog" && <div className="admin-layout">
-        <aside className="admin-list">
-          <button type="button" className="admin-new-button" onClick={newProduct}>
-            <Plus size={16} />
-            Nuevo producto
-          </button>
-          {sortedProducts.map((product) => (
-            <button
-              key={product.id}
-              type="button"
-              className={form.id === product.id ? "is-active" : ""}
-              onClick={() => setForm(toForm(product))}
-            >
-              <strong>{product.name}</strong>
-              <span>{product.id} · {product.category}</span>
-            </button>
-          ))}
-        </aside>
-
-        <form onSubmit={saveProduct} className="admin-editor">
-          <div className="admin-editor-title">
-            <div>
-              <p className="eyebrow">Ficha editable</p>
-              <h2>{form.name || "Producto nuevo"}</h2>
-            </div>
-            <div className="admin-actions">
-              <button type="button" className="gabinete-button-secondary" onClick={removeProduct} disabled={!form.id || saving}>
-                <Trash2 size={17} />
-                Eliminar
-              </button>
-              <button type="submit" className="gabinete-button" disabled={saving}>
-                <Save size={17} />
-                {saving ? "Guardando..." : "Guardar"}
-              </button>
-            </div>
-          </div>
-
-          <div className="admin-grid">
-            <label>ID<input className="gabinete-input" value={form.id} onChange={(event) => updateField("id", slugify(event.target.value).toUpperCase())} /></label>
-            <label>Nombre<input className="gabinete-input" value={form.name} onChange={(event) => updateField("name", event.target.value)} /></label>
-            <label>Categoría<select className="gabinete-input" value={form.category} onChange={(event) => updateField("category", event.target.value as Product["category"])}>{fallbackCategories.map((category) => <option key={category}>{category}</option>)}</select></label>
-            <label>Estado<select className="gabinete-input" value={form.status} onChange={(event) => updateField("status", event.target.value as ProductStatus)}>{statusOptions.map((status) => <option key={status}>{status}</option>)}</select></label>
-            <label>Disponibilidad<select className="gabinete-input" value={form.availability} onChange={(event) => updateField("availability", event.target.value as Availability)}>{availabilityOptions.map((availability) => <option key={availability}>{availability}</option>)}</select></label>
-            <label>Precio diario<input className="gabinete-input" type="number" value={form.rentalPricePerDay} onChange={(event) => updateField("rentalPricePerDay", event.target.value)} /></label>
-            <label>Precio semanal<input className="gabinete-input" type="number" value={form.rentalPricePerWeek} onChange={(event) => updateField("rentalPricePerWeek", event.target.value)} /></label>
-            <label>Valor estimado<input className="gabinete-input" type="number" value={form.estimatedValue} onChange={(event) => updateField("estimatedValue", event.target.value)} /></label>
-            <label>Garantía %<input className="gabinete-input" type="number" step="0.01" value={form.guaranteePercentage} onChange={(event) => updateField("guaranteePercentage", event.target.value)} /></label>
-            <label>Depósito mínimo<input className="gabinete-input" type="number" value={form.minimumDeposit} onChange={(event) => updateField("minimumDeposit", event.target.value)} /></label>
-            <label>Destacado<input className="gabinete-input" type="number" value={form.featuredScore} onChange={(event) => updateField("featuredScore", event.target.value)} /></label>
-            <label>Tags<input className="gabinete-input" value={form.tags} onChange={(event) => updateField("tags", event.target.value)} placeholder="vintage, cine, oficina" /></label>
-            <label>Medidas<input className="gabinete-input" value={form.measurements} onChange={(event) => updateField("measurements", event.target.value)} /></label>
-            <label>Material<input className="gabinete-input" value={form.material} onChange={(event) => updateField("material", event.target.value)} /></label>
-            <label>Color<input className="gabinete-input" value={form.color} onChange={(event) => updateField("color", event.target.value)} /></label>
-            <label>Época / estilo<input className="gabinete-input" value={form.eraStyle} onChange={(event) => updateField("eraStyle", event.target.value)} /></label>
-            <label>Tono visual<select className="gabinete-input" value={form.visualTone} onChange={(event) => updateField("visualTone", event.target.value as ProductVisual["tone"])}>{toneOptions.map((tone) => <option key={tone}>{tone}</option>)}</select></label>
-            <label>Símbolo<input className="gabinete-input" value={form.visualSigil} onChange={(event) => updateField("visualSigil", event.target.value)} /></label>
-          </div>
-
-          <label className="admin-wide">Descripción<textarea className="gabinete-input" rows={4} value={form.description} onChange={(event) => updateField("description", event.target.value)} /></label>
-          <label className="admin-wide">Curiosidades<textarea className="gabinete-input" rows={3} value={form.curiosities} onChange={(event) => updateField("curiosities", event.target.value)} /></label>
-          <label className="admin-wide">Notas internas<textarea className="gabinete-input" rows={3} value={form.internalNotes} onChange={(event) => updateField("internalNotes", event.target.value)} /></label>
-
-          <div className="admin-images">
-            <label className="admin-upload">
-              <ImagePlus size={18} />
-              {uploading ? "Subiendo..." : "Subir archivo"}
-              <input type="file" accept="image/*" onChange={(event) => uploadImage(event.target.files?.[0])} />
-            </label>
-            <div className="admin-image-url">
-              <label>
-                URL pública de imagen
-                <input
-                  className="gabinete-input"
-                  value={imageUrl}
-                  onChange={(event) => setImageUrl(event.target.value)}
-                  placeholder="https://..."
-                />
-              </label>
-              <button type="button" className="admin-upload" onClick={addImageUrl}>
-                <ImagePlus size={18} />
-                Agregar imagen
-              </button>
-            </div>
-            <div className="admin-image-grid">
-              {form.images.map((image) => (
-                <AdminImagePreview
-                  key={image}
-                  image={image}
-                  onRemove={() => updateField("images", form.images.filter((candidate) => candidate !== image))}
-                />
-              ))}
-            </div>
-          </div>
-        </form>
-      </div>}
+      {loadingBookings && activeTab !== "catalog" ? (
+        <div className="admin-loading" role="status">Actualizando el rental…</div>
+      ) : (
+        <>
+          {activeTab === "overview" && <AdminOverview bookings={bookings} products={products} profiles={profiles} onOpenTab={setActiveTab} />}
+          {activeTab === "bookings" && <AdminBookings bookings={bookings} profiles={profiles} />}
+          {activeTab === "calendar" && <AdminCalendar bookings={bookings} />}
+          {activeTab === "customers" && <AdminCustomers profiles={profiles} bookings={bookings} />}
+          {activeTab === "catalog" && <AdminCatalog products={products} bookings={bookings} onGlobalMessage={setMessage} />}
+        </>
+      )}
     </section>
   );
 }
-
-
-

@@ -9,8 +9,8 @@ export function ProductGrid({ products }: ProductGridProps) {
   if (products.length === 0) {
     return (
       <div className="empty-catalog">
-        <p>Ese cajón está vacío.</p>
-        <span>Probá limpiar filtros o buscar con una palabra más amplia.</span>
+        <p>No encontramos objetos con esos filtros.</p>
+        <span>Probá limpiar la búsqueda o elegir una categoría más amplia.</span>
       </div>
     );
   }

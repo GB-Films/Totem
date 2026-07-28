@@ -45,6 +45,14 @@ export function buildContactMessage(
           "Datos de contacto:",
           ...(values.name ? [`Nombre: ${values.name}`] : []),
           ...(values.email ? [`Email: ${values.email}`] : []),
+          ...(values.phone ? [`Celular: ${values.phone}`] : []),
+          "",
+        ]
+      : []),
+    ...(values.projectName
+      ? [
+          `Proyecto: ${values.projectName}`,
+          ...(values.projectType ? [`Tipo: ${values.projectType}`] : []),
           "",
         ]
       : []),
@@ -56,6 +64,7 @@ export function buildContactMessage(
     `Seña estimada 20%: ${formatCurrency(pricing.reserveDeposit)}`,
     `Garantía reintegrable estimada: ${formatCurrency(pricing.guaranteeAmount)}`,
     `Total estimado general: ${formatCurrency(pricing.totalEstimated)}`,
+    ...(values.message ? ["", `Nota: ${values.message}`] : []),
   ].join("\n");
 }
 
@@ -66,5 +75,6 @@ export function buildMailtoUrl(message: string) {
 }
 
 export function buildWhatsappUrl(message: string) {
-  return `https://wa.me/?text=${encodeURIComponent(message)}`;
+  const configuredNumber = String(import.meta.env.VITE_WHATSAPP_NUMBER ?? "").replace(/\D/g, "");
+  return `https://wa.me/${configuredNumber}?text=${encodeURIComponent(message)}`;
 }

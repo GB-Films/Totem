@@ -8,34 +8,11 @@ interface ObjectImageProps {
 }
 
 function ProductIllustration({ id, sigil }: { id: string; sigil: string }) {
-  switch (id) {
-    case "EG-001":
-      return <div className="prop prop-sofa" aria-hidden="true"><span /><i /><b /></div>;
-    case "EG-002":
-      return <div className="prop prop-chair" aria-hidden="true"><span>DIRECTOR</span><i /><b /></div>;
-    case "EG-003":
-      return <div className="prop prop-spotlight" aria-hidden="true"><span /><i /><b /></div>;
-    case "EG-004":
-      return <div className="prop prop-clapper" aria-hidden="true"><span /><i /><b /></div>;
-    case "EG-005":
-      return <div className="prop prop-suitcase" aria-hidden="true"><span /><i /><b /></div>;
-    case "EG-006":
-      return <div className="prop prop-bust" aria-hidden="true"><span /><i /><b /></div>;
-    case "EG-007":
-      return <div className="prop prop-typewriter" aria-hidden="true"><span /><i /><b /></div>;
-    case "EG-008":
-      return <div className="prop prop-coatrack" aria-hidden="true"><span /><i /><b /></div>;
-    case "EG-009":
-      return <div className="prop prop-lamp" aria-hidden="true"><span /><i /><b /></div>;
-    case "EG-010":
-      return <div className="prop prop-screen" aria-hidden="true"><span /><i /><b /></div>;
-    case "EG-011":
-      return <div className="prop prop-globe" aria-hidden="true"><span /><i /><b /></div>;
-    case "EG-012":
-      return <div className="prop prop-hat" aria-hidden="true"><span /><i /><b /></div>;
-    default:
-      return <div className="prop prop-generic" aria-hidden="true"><span>{sigil}</span></div>;
-  }
+  return (
+    <div className="prop prop-generic" aria-hidden="true">
+      <span>{sigil || id.slice(0, 2)}</span>
+    </div>
+  );
 }
 
 export function ObjectImage({ product, compact = false, showLabel = true }: ObjectImageProps) {

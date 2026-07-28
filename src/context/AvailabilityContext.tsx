@@ -7,104 +7,199 @@ import {
   useMemo,
   useState,
 } from "react";
-import { addDoc, collection, onSnapshot, serverTimestamp } from "firebase/firestore";
-import { RESERVATIONS_ENABLED } from "../config/features";
-import { getSeedReservations } from "../data/availability";
-import { firebaseEnabled, getFirebaseDb } from "../services/firebase";
-import type { ReservationRange, SelectionItem } from "../types";
-import { getInclusiveDays, rangesOverlap } from "../utils/dates";
+import {
+  collection,
+  doc,
+  onSnapshot,
+  query,
+  serverTimestamp,
+  where,
+  writeBatch,
+} from "firebase/firestore";
+import { getFirebaseDb } from "../services/firebase";
+import type {
+  Booking,
+  BookingItem,
+  ReservationRange,
+  ReservationStatus,
+  SelectionItem,
+} from "../types";
+import { rangesOverlap } from "../utils/dates";
+import { calculateProductPricing, calculateSelectionPricing } from "../utils/pricing";
+import { PAYMENT_ALIAS } from "../utils/reservations";
+import { useAuth } from "./AuthContext";
+import { useCatalog } from "./CatalogContext";
 
-interface ReservationMeta {
-  customerName?: string;
-  customerEmail?: string;
-  createdByUid?: string;
-  status?: ReservationRange["status"];
-  paymentAlias?: string;
-  pickupOption?: ReservationRange["pickupOption"];
-  reserveDeposit?: number;
-  guaranteeAmount?: number;
-  totalEstimated?: number;
+interface BookingMeta {
+  customerName: string;
+  customerEmail: string;
+  createdByUid: string;
+  pickupOption: Booking["pickupOption"];
+  projectName?: string;
+  note?: string;
 }
 
 interface AvailabilityContextValue {
   reservations: ReservationRange[];
+  bookings: Booking[];
+  loadingAvailability: boolean;
+  loadingBookings: boolean;
+  availabilityError: string;
   getProductReservations: (productId: string) => ReservationRange[];
-  hasConflict: (productId: string, startDate?: string, endDate?: string) => boolean;
-  addReservationsFromSelection: (selection: SelectionItem[], note?: string, meta?: ReservationMeta) => Promise<void>;
-  syncMode: "firebase" | "local";
+  hasConflict: (
+    productId: string,
+    startDate?: string,
+    endDate?: string,
+    requestedQuantity?: number,
+  ) => boolean;
+  createBooking: (selection: SelectionItem[], meta: BookingMeta) => Promise<Booking>;
+  syncMode: "firebase";
 }
 
-const STORAGE_KEY = "el-gabinete-local-reservations";
 const AvailabilityContext = createContext<AvailabilityContextValue | undefined>(undefined);
+const HOLD_HOURS = 24;
+
+function isBlockingStatus(status?: ReservationStatus) {
+  return !status
+    || ["request_sent", "payment_pending", "confirmed", "ready_for_pickup", "active", "pending"].includes(status);
+}
 
 function blocksAvailability(reservation: ReservationRange) {
-  return reservation.status !== "cancelled" && reservation.status !== "returned";
-}
-
-function readLocalReservations(): ReservationRange[] {
-  if (typeof window === "undefined") {
-    return [];
+  if (!isBlockingStatus(reservation.status)) {
+    return false;
   }
 
-  try {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (!stored) {
-      return [];
-    }
-    const parsed = JSON.parse(stored) as ReservationRange[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
+  if (
+    reservation.status === "payment_pending"
+    && reservation.holdExpiresAt
+    && reservation.holdExpiresAt <= new Date().toISOString()
+  ) {
+    return false;
   }
+
+  return true;
 }
 
-function writeLocalReservations(reservations: ReservationRange[]) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(reservations));
+function createBookingCode() {
+  const date = new Date();
+  const compactDate = [
+    String(date.getFullYear()).slice(-2),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0"),
+  ].join("");
+  const random = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `TR-${compactDate}-${random}`;
+}
+
+function createHoldExpiration() {
+  return new Date(Date.now() + HOLD_HOURS * 60 * 60 * 1000).toISOString();
+}
+
+function toBooking(id: string, data: Omit<Booking, "id">): Booking {
+  return {
+    id,
+    code: data.code || id.slice(0, 8).toUpperCase(),
+    items: Array.isArray(data.items) ? data.items : [],
+    status: data.status ?? "payment_pending",
+    customerName: data.customerName ?? "",
+    customerEmail: data.customerEmail ?? "",
+    createdByUid: data.createdByUid ?? "",
+    paymentAlias: data.paymentAlias ?? PAYMENT_ALIAS,
+    pickupOption: data.pickupOption ?? "reservation_day",
+    projectName: data.projectName,
+    note: data.note,
+    reserveDeposit: Number(data.reserveDeposit) || 0,
+    guaranteeAmount: Number(data.guaranteeAmount) || 0,
+    rentalTotal: Number(data.rentalTotal) || 0,
+    totalEstimated: Number(data.totalEstimated) || 0,
+    holdExpiresAt: data.holdExpiresAt,
+    createdAt: data.createdAt,
+    updatedAt: data.updatedAt,
+  };
 }
 
 export function AvailabilityProvider({ children }: PropsWithChildren) {
-  const seedReservations = useMemo(() => getSeedReservations(), []);
-  const [localReservations, setLocalReservations] = useState<ReservationRange[]>(readLocalReservations);
-  const [firebaseReservations, setFirebaseReservations] = useState<ReservationRange[]>([]);
+  const db = getFirebaseDb();
+  const { user, isAdmin } = useAuth();
+  const { products } = useCatalog();
+  const [reservations, setReservations] = useState<ReservationRange[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loadingAvailability, setLoadingAvailability] = useState(true);
+  const [loadingBookings, setLoadingBookings] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState("");
 
   useEffect(() => {
-    const db = getFirebaseDb();
     if (!db) {
+      setLoadingAvailability(false);
+      setAvailabilityError("No se pudo conectar con la disponibilidad.");
       return;
     }
 
-    return onSnapshot(collection(db, "reservations"), (snapshot) => {
-      setFirebaseReservations(
-        snapshot.docs.map((doc) => {
-          const data = doc.data() as Omit<ReservationRange, "id" | "source">;
-          return {
-            id: doc.id,
-            productId: data.productId,
-            startDate: data.startDate,
-            endDate: data.endDate,
-            note: data.note,
-            quantity: data.quantity,
-            rentalDays: data.rentalDays,
-            status: data.status,
-            customerName: data.customerName,
-            customerEmail: data.customerEmail,
-            createdByUid: data.createdByUid,
-            paymentAlias: data.paymentAlias,
-            pickupOption: data.pickupOption,
-            reserveDeposit: data.reserveDeposit,
-            guaranteeAmount: data.guaranteeAmount,
-            totalEstimated: data.totalEstimated,
-            source: "firebase",
-          };
-        }),
-      );
-    });
-  }, []);
+    return onSnapshot(
+      collection(db, "reservationRanges"),
+      (snapshot) => {
+        setReservations(
+          snapshot.docs.map((rangeDoc) => {
+            const data = rangeDoc.data() as Omit<ReservationRange, "id" | "source">;
+            return {
+              id: rangeDoc.id,
+              bookingId: data.bookingId,
+              productId: data.productId,
+              startDate: data.startDate,
+              endDate: data.endDate,
+              quantity: Math.max(1, Number(data.quantity) || 1),
+              status: data.status,
+              holdExpiresAt: data.holdExpiresAt,
+              source: "firebase",
+            };
+          }),
+        );
+        setLoadingAvailability(false);
+        setAvailabilityError("");
+      },
+      (snapshotError) => {
+        console.error(snapshotError);
+        setLoadingAvailability(false);
+        setAvailabilityError("No pudimos actualizar la disponibilidad.");
+      },
+    );
+  }, [db]);
 
-  const reservations = useMemo(
-    () => (firebaseEnabled ? firebaseReservations : RESERVATIONS_ENABLED ? [...seedReservations, ...localReservations] : []),
-    [firebaseReservations, localReservations, seedReservations],
-  );
+  useEffect(() => {
+    if (!db || !user) {
+      setBookings([]);
+      setLoadingBookings(false);
+      return;
+    }
+
+    setLoadingBookings(true);
+    const bookingsQuery = isAdmin
+      ? collection(db, "bookings")
+      : query(collection(db, "bookings"), where("createdByUid", "==", user.uid));
+
+    return onSnapshot(
+      bookingsQuery,
+      (snapshot) => {
+        setBookings(
+          snapshot.docs
+            .map((bookingDoc) => toBooking(
+              bookingDoc.id,
+              bookingDoc.data() as Omit<Booking, "id">,
+            ))
+            .sort((a, b) => {
+              const aDate = a.items[0]?.startDate ?? "";
+              const bDate = b.items[0]?.startDate ?? "";
+              return bDate.localeCompare(aDate);
+            }),
+        );
+        setLoadingBookings(false);
+      },
+      (snapshotError) => {
+        console.error(snapshotError);
+        setLoadingBookings(false);
+      },
+    );
+  }, [db, isAdmin, user]);
 
   const getProductReservations = useCallback(
     (productId: string) =>
@@ -115,115 +210,140 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
   );
 
   const hasConflict = useCallback(
-    (productId: string, startDate?: string, endDate?: string) =>
-      getProductReservations(productId).some((reservation) =>
-        rangesOverlap(startDate, endDate, reservation.startDate, reservation.endDate),
-      ),
-    [getProductReservations],
+    (productId: string, startDate?: string, endDate?: string, requestedQuantity = 1) => {
+      if (!startDate || !endDate) {
+        return false;
+      }
+
+      const product = products.find((candidate) => candidate.id === productId);
+      const stock = product?.stock ?? 1;
+      const overlappingQuantity = getProductReservations(productId)
+        .filter((reservation) =>
+          rangesOverlap(startDate, endDate, reservation.startDate, reservation.endDate),
+        )
+        .reduce((total, reservation) => total + Math.max(1, reservation.quantity ?? 1), 0);
+      return overlappingQuantity + Math.max(1, requestedQuantity) > stock;
+    },
+    [getProductReservations, products],
   );
 
-  const addReservationsFromSelection = useCallback(
-    async (selection: SelectionItem[], note = "Reserva pendiente de pago", meta: ReservationMeta = {}) => {
-      if (!RESERVATIONS_ENABLED) {
-        return;
+  const createBooking = useCallback(
+    async (selection: SelectionItem[], meta: BookingMeta) => {
+      if (!db) {
+        throw new Error("No se pudo conectar con la base de datos.");
+      }
+      if (loadingAvailability) {
+        throw new Error("La disponibilidad todavía se está actualizando. Probá de nuevo en unos segundos.");
       }
 
-      const datedSelection = selection.filter((item) => item.startDate && item.endDate);
-      if (datedSelection.length === 0) {
-        return;
-      }
+      const items = selection.map<BookingItem>((item) => {
+        const product = products.find((candidate) => candidate.id === item.productId);
+        if (!product || !item.startDate || !item.endDate) {
+          throw new Error("La selección contiene un objeto o fechas que ya no están disponibles.");
+        }
+        if (product.availability !== "Disponible") {
+          throw new Error(`${product.name} requiere consulta antes de reservar.`);
+        }
+        if (product.rentalPricePerDay <= 0) {
+          throw new Error(`${product.name} todavía no tiene un precio publicado.`);
+        }
+        if (item.quantity > product.stock) {
+          throw new Error(`Sólo hay ${product.stock} unidad${product.stock === 1 ? "" : "es"} de ${product.name}.`);
+        }
+        if (hasConflict(product.id, item.startDate, item.endDate, item.quantity)) {
+          throw new Error(`Las fechas elegidas para ${product.name} ya no están disponibles.`);
+        }
 
-      const db = getFirebaseDb();
-      if (db) {
-        await Promise.all(
-          datedSelection.map((item) => {
-            const payload: Omit<ReservationRange, "id" | "source"> & { createdAt: ReturnType<typeof serverTimestamp> } = {
-              productId: item.productId,
-              quantity: Math.max(1, item.quantity),
-              rentalDays: getInclusiveDays(item.startDate, item.endDate),
-              startDate: item.startDate!,
-              endDate: item.endDate!,
-              note,
-              status: meta.status ?? "payment_pending",
-              createdAt: serverTimestamp(),
-            };
-
-            if (meta.customerName) {
-              payload.customerName = meta.customerName;
-            }
-
-            if (meta.customerEmail) {
-              payload.customerEmail = meta.customerEmail;
-            }
-
-            if (meta.createdByUid) {
-              payload.createdByUid = meta.createdByUid;
-            }
-
-            if (meta.paymentAlias) {
-              payload.paymentAlias = meta.paymentAlias;
-            }
-
-            if (meta.pickupOption) {
-              payload.pickupOption = meta.pickupOption;
-            }
-
-            if (typeof meta.reserveDeposit === "number") {
-              payload.reserveDeposit = meta.reserveDeposit;
-            }
-
-            if (typeof meta.guaranteeAmount === "number") {
-              payload.guaranteeAmount = meta.guaranteeAmount;
-            }
-
-            if (typeof meta.totalEstimated === "number") {
-              payload.totalEstimated = meta.totalEstimated;
-            }
-
-            return addDoc(collection(db, "reservations"), payload);
-          }),
-        );
-        return;
-      }
-
-      setLocalReservations((current) => {
-        const timestamp = Date.now();
-        const nextReservations = datedSelection.map<ReservationRange>((item, index) => ({
-          id: `local-${timestamp}-${index}-${item.productId}`,
-          productId: item.productId,
-          quantity: Math.max(1, item.quantity),
-          rentalDays: getInclusiveDays(item.startDate, item.endDate),
-          startDate: item.startDate!,
-          endDate: item.endDate!,
-          source: "local",
-          status: meta.status ?? "payment_pending",
-          note,
-          customerName: meta.customerName,
-          customerEmail: meta.customerEmail,
-          createdByUid: meta.createdByUid,
-          paymentAlias: meta.paymentAlias,
-          pickupOption: meta.pickupOption,
-          reserveDeposit: meta.reserveDeposit,
-          guaranteeAmount: meta.guaranteeAmount,
-          totalEstimated: meta.totalEstimated,
-        }));
-        const next = [...current, ...nextReservations];
-        writeLocalReservations(next);
-        return next;
+        const pricing = calculateProductPricing(product, item);
+        return {
+          productId: product.id,
+          productName: product.name,
+          quantity: item.quantity,
+          rentalDays: item.rentalDays,
+          startDate: item.startDate,
+          endDate: item.endDate,
+          ...pricing,
+        };
       });
+
+      if (items.length === 0) {
+        throw new Error("No hay objetos para reservar.");
+      }
+
+      const pricing = calculateSelectionPricing(products, selection);
+      const bookingRef = doc(collection(db, "bookings"));
+      const code = createBookingCode();
+      const holdExpiresAt = createHoldExpiration();
+      const booking: Booking = {
+        id: bookingRef.id,
+        code,
+        items,
+        status: "payment_pending",
+        customerName: meta.customerName,
+        customerEmail: meta.customerEmail,
+        createdByUid: meta.createdByUid,
+        paymentAlias: PAYMENT_ALIAS,
+        pickupOption: meta.pickupOption,
+        ...(meta.projectName?.trim() ? { projectName: meta.projectName.trim() } : {}),
+        ...(meta.note?.trim() ? { note: meta.note.trim() } : {}),
+        reserveDeposit: pricing.reserveDeposit,
+        guaranteeAmount: pricing.guaranteeAmount,
+        rentalTotal: pricing.rentalTotal,
+        totalEstimated: pricing.totalEstimated,
+        holdExpiresAt,
+      };
+
+      const batch = writeBatch(db);
+      const { id: bookingId, ...bookingData } = booking;
+      void bookingId;
+      batch.set(bookingRef, {
+        ...bookingData,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
+      items.forEach((item) => {
+        const rangeRef = doc(collection(db, "reservationRanges"));
+        batch.set(rangeRef, {
+          bookingId: bookingRef.id,
+          productId: item.productId,
+          quantity: item.quantity,
+          startDate: item.startDate,
+          endDate: item.endDate,
+          status: booking.status,
+          holdExpiresAt,
+          createdAt: serverTimestamp(),
+        });
+      });
+
+      await batch.commit();
+      return booking;
     },
-    [],
+    [db, hasConflict, loadingAvailability, products],
   );
 
   const value = useMemo(
     () => ({
       reservations,
+      bookings,
+      loadingAvailability,
+      loadingBookings,
+      availabilityError,
       getProductReservations,
       hasConflict,
-      addReservationsFromSelection,
-      syncMode: firebaseEnabled ? "firebase" as const : "local" as const,
+      createBooking,
+      syncMode: "firebase" as const,
     }),
-    [addReservationsFromSelection, getProductReservations, hasConflict, reservations],
+    [
+      availabilityError,
+      bookings,
+      createBooking,
+      getProductReservations,
+      hasConflict,
+      loadingAvailability,
+      loadingBookings,
+      reservations,
+    ],
   );
 
   return <AvailabilityContext.Provider value={value}>{children}</AvailabilityContext.Provider>;

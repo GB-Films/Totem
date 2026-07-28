@@ -1,24 +1,27 @@
 import { ArrowRight, CalendarDays, CheckCircle2, Palette, Truck, Armchair, Sofa, Shirt, Search } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useCatalog } from "../context/CatalogContext";
+import type { Category } from "../types";
 
-const categoryPills = [
-  { label: "Utilería", icon: Armchair },
-  { label: "Mobiliario", icon: Sofa },
-  { label: "Vestuario", icon: Shirt },
-  { label: "Decoración", icon: Palette },
-  { label: "Arte", icon: Palette },
-];
+const categoryIcons: Partial<Record<Category, typeof Armchair>> = {
+  "Utilería": Armchair,
+  "Mobiliario": Sofa,
+  "Vestuario": Shirt,
+  "Decoración": Palette,
+  "Arte": Palette,
+};
 
 const benefits = [
   { title: "Alquiler flexible", text: "Por día o por período", icon: CalendarDays },
-  { title: "Entrega y retiro", text: "A todo el país", icon: Truck },
+  { title: "Entrega y retiro", text: "Coordinado para tu proyecto", icon: Truck },
   { title: "Atención personalizada", text: "Para cada proyecto", icon: CheckCircle2 },
 ];
 
 export function Hero() {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
+  const { categories } = useCatalog();
 
   const submitSearch = (event: FormEvent) => {
     event.preventDefault();
@@ -60,12 +63,15 @@ export function Hero() {
         </form>
 
         <div className="hero-categories" aria-label="Categorías destacadas">
-          {categoryPills.map(({ label, icon: Icon }) => (
-            <Link key={label} to={`/catalogo?categoria=${encodeURIComponent(label)}`}>
+          {categories.slice(0, 5).map((category) => {
+            const Icon = categoryIcons[category] ?? Armchair;
+            return (
+            <Link key={category} to={`/catalogo?categoria=${encodeURIComponent(category)}`}>
               <Icon size={21} />
-              {label}
+              {category}
             </Link>
-          ))}
+            );
+          })}
         </div>
 
         <div className="hero-benefits" aria-label="Beneficios del servicio">

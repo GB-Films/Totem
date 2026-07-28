@@ -44,6 +44,7 @@ export interface Product {
   guaranteePercentage: number;
   minimumDeposit: number;
   featuredScore: number;
+  stock: number;
   internalNotes?: string;
   visual: ProductVisual;
 }
@@ -67,12 +68,13 @@ export interface PricingBreakdown {
 
 export interface ReservationRange {
   id: string;
+  bookingId?: string;
   productId: string;
   quantity?: number;
   rentalDays?: number;
   startDate: string;
   endDate: string;
-  source: "mock" | "local" | "firebase";
+  source: "firebase";
   status?: ReservationStatus;
   note?: string;
   customerName?: string;
@@ -83,6 +85,43 @@ export interface ReservationRange {
   reserveDeposit?: number;
   guaranteeAmount?: number;
   totalEstimated?: number;
+  holdExpiresAt?: string;
+}
+
+export interface BookingItem {
+  productId: string;
+  productName: string;
+  quantity: number;
+  rentalDays: number;
+  startDate: string;
+  endDate: string;
+  rentalSubtotal: number;
+  rentalDiscount: number;
+  rentalTotal: number;
+  guaranteeAmount: number;
+  reserveDeposit: number;
+  totalEstimated: number;
+}
+
+export interface Booking {
+  id: string;
+  code: string;
+  items: BookingItem[];
+  status: ReservationStatus;
+  customerName: string;
+  customerEmail: string;
+  createdByUid: string;
+  paymentAlias: string;
+  pickupOption: "reservation_day" | "previous_day_requested";
+  projectName?: string;
+  note?: string;
+  reserveDeposit: number;
+  guaranteeAmount: number;
+  rentalTotal: number;
+  totalEstimated: number;
+  holdExpiresAt?: string;
+  createdAt?: unknown;
+  updatedAt?: unknown;
 }
 
 export interface UserProfile {

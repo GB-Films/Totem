@@ -30,9 +30,6 @@ const categoryIcons: Record<Category, typeof Armchair> = {
   "Oficina": BadgeCheck,
 };
 
-const styleTags = ["vintage", "clásico", "industrial", "minimalista", "rústico"];
-const usageTags = ["cine", "teatro", "publicidad", "época", "hero prop", "background prop"];
-
 export function ProductFilters({
   filters,
   maxCatalogPrice,
@@ -42,6 +39,8 @@ export function ProductFilters({
   categories,
   availableTags,
 }: ProductFiltersProps) {
+  const primaryTags = availableTags.slice(0, 7);
+  const secondaryTags = availableTags.slice(7, 14);
   const clearFilters = () => {
     onChange({
       search: "",
@@ -101,11 +100,11 @@ export function ProductFilters({
 
       <div className="filter-section-v3">
         <div className="filter-section-title-v3">
-          <strong>Estilo</strong>
+          <strong>Etiquetas</strong>
           <Minus size={15} />
         </div>
         <div className="checkbox-list-v3">
-          {styleTags.map((tag) => (
+          {primaryTags.map((tag) => (
             <label key={tag}>
               <input
                 type="checkbox"
@@ -119,21 +118,23 @@ export function ProductFilters({
         </div>
       </div>
 
-      <div className="filter-section-v3">
-        <div className="filter-section-title-v3">
-          <strong>Uso / clima</strong>
-          <span>+</span>
+      {secondaryTags.length > 0 && (
+        <div className="filter-section-v3">
+          <div className="filter-section-title-v3">
+            <strong>Más etiquetas</strong>
+            <span>+</span>
+          </div>
+          <div className="checkbox-list-v3">
+            {secondaryTags.map((tag) => (
+              <label key={tag}>
+                <input type="checkbox" checked={filters.tags.includes(tag)} onChange={() => toggleTag(tag)} />
+                <span>{tag}</span>
+                <em>({countByTag(tag)})</em>
+              </label>
+            ))}
+          </div>
         </div>
-        <div className="checkbox-list-v3">
-          {usageTags.map((tag) => (
-            <label key={tag}>
-              <input type="checkbox" checked={filters.tags.includes(tag)} onChange={() => toggleTag(tag)} />
-              <span>{tag}</span>
-              <em>({countByTag(tag)})</em>
-            </label>
-          ))}
-        </div>
-      </div>
+      )}
 
       <div className="filter-section-v3">
         <div className="filter-section-title-v3">
@@ -143,7 +144,7 @@ export function ProductFilters({
         <input
           type="range"
           min={0}
-          max={maxCatalogPrice}
+          max={Math.max(500, maxCatalogPrice)}
           step={500}
           value={filters.maxPrice}
           onChange={(event) => onChange({ ...filters, maxPrice: Number(event.target.value) })}

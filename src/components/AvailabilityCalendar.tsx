@@ -1,6 +1,5 @@
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
-import { RESERVATIONS_ENABLED } from "../config/features";
 import { useAvailability } from "../context/AvailabilityContext";
 import type { Product } from "../types";
 import {
@@ -62,7 +61,12 @@ export function AvailabilityCalendar({
   compact = false,
   onRangeChange,
 }: AvailabilityCalendarProps) {
-  const { getProductReservations } = useAvailability();
+  const {
+    getProductReservations,
+    hasConflict,
+    loadingAvailability,
+    availabilityError,
+  } = useAvailability();
   const reservations = getProductReservations(product.id);
   const today = todayIso();
   const [visibleMonth, setVisibleMonth] = useState(() =>
@@ -70,12 +74,10 @@ export function AvailabilityCalendar({
   );
   const days = useMemo(() => buildMonthDays(visibleMonth), [visibleMonth]);
   const hasSelectedRange = Boolean(startDate && endDate);
-  const interactive = Boolean(onRangeChange);
+  const interactive = Boolean(onRangeChange) && !loadingAvailability && !availabilityError;
 
   const rangeHasReservation = (rangeStart: string, rangeEnd: string) =>
-    reservations.some((reservation) =>
-      rangesOverlap(rangeStart, rangeEnd, reservation.startDate, reservation.endDate),
-    );
+    hasConflict(product.id, rangeStart, rangeEnd, 1);
 
   const selectDay = (day: string) => {
     if (!onRangeChange || day < today || !isOperationalDate(day) || rangeHasReservation(day, day)) {
@@ -129,15 +131,13 @@ export function AvailabilityCalendar({
           </span>
         ))}
         {days.map(({ iso, inMonth }) => {
-          const reserved = reservations.some((reservation) =>
-            rangesOverlap(iso, iso, reservation.startDate, reservation.endDate),
-          );
+          const reserved = hasConflict(product.id, iso, iso, 1);
           const selected = hasSelectedRange && rangesOverlap(iso, iso, startDate, endDate);
           const selectedStart = selected && iso === startDate;
           const selectedEnd = selected && iso === endDate;
           const past = iso < today;
           const nonOperational = !isOperationalDate(iso);
-          const disabled = reserved || past || nonOperational;
+          const disabled = loadingAvailability || Boolean(availabilityError) || reserved || past || nonOperational;
           const reason = getNonOperationalReason(iso);
 
           const dayClass = [
@@ -193,7 +193,7 @@ export function AvailabilityCalendar({
       {reservations.length > 0 && (
         <div className="mt-5 border-t border-gabinete-line/24 pt-4">
           <p className="font-display text-xs uppercase tracking-[0.14em] text-gabinete-brown">
-            Fechas ya solicitadas
+            Períodos no disponibles
           </p>
           <div className="mt-3 space-y-2">
             {reservations.map((reservation) => (
@@ -205,7 +205,6 @@ export function AvailabilityCalendar({
                   {formatDateRange(reservation.startDate, reservation.endDate)}
                 </span>
                 <span> · {getReservationStatusLabel(reservation.status)}</span>
-                {reservation.note && <span> · {reservation.note}</span>}
               </div>
             ))}
           </div>
@@ -213,8 +212,10 @@ export function AvailabilityCalendar({
       )}
 
       <p className="mt-4 font-editorial text-xs leading-5 text-gabinete-muted">
-        {!RESERVATIONS_ENABLED
-          ? "Modo prueba activo: no se graban nuevas reservas al confirmar. Los días no disponibles vienen de la nube."
+        {availabilityError
+          ? availabilityError
+          : loadingAvailability
+          ? "Estamos actualizando las fechas disponibles…"
           : interactive
           ? "Tocá una fecha de inicio y luego una de cierre. No se puede retirar ni devolver fines de semana o feriados."
           : "Las fechas confirmadas se sincronizan con Firebase cuando la nube está configurada."}

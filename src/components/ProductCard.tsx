@@ -10,11 +10,6 @@ interface ProductCardProps {
   product: Product;
 }
 
-const specialBadges: Record<string, string> = {
-  "EG-001": "Más pedido",
-  "EG-003": "Nuevo",
-};
-
 export function ProductCard({ product }: ProductCardProps) {
   const { isSelected } = useSelection();
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -26,7 +21,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <div className="product-media">
         <Link to={`/producto/${product.id}`} aria-label={`Ver ficha de ${product.name}`}>
           <ObjectImage product={product} compact showLabel={false} />
-          {specialBadges[product.id] && <span className="product-badge">{specialBadges[product.id]}</span>}
+          {product.featuredScore >= 90 && <span className="product-badge">Destacado</span>}
         </Link>
         <button
           type="button"
@@ -45,13 +40,15 @@ export function ProductCard({ product }: ProductCardProps) {
             {product.name}
           </Link>
         </div>
-        <p className="product-description">{product.description}</p>
-        <p className="product-measures">{product.measurements}</p>
+        <p className="product-description">
+          {product.description || "Consultanos por detalles, medidas y opciones para tu producción."}
+        </p>
+        {product.measurements && <p className="product-measures">{product.measurements}</p>}
 
         <div className="product-bottom">
           <div className="product-price">
-            <strong>{formatCurrency(product.rentalPricePerDay)}</strong>
-            <span>/día</span>
+            <strong>{product.rentalPricePerDay > 0 ? formatCurrency(product.rentalPricePerDay) : "Consultar"}</strong>
+            {product.rentalPricePerDay > 0 && <span>/día</span>}
           </div>
           <span className={`product-status status-${product.availability.toLowerCase()}`}>
             {product.availability}

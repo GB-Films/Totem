@@ -29,8 +29,8 @@ const benefits = [
 ];
 
 export function HomePage() {
-  const { products } = useCatalog();
-  const featured = [products[0], products[2], products[5], products[6]].filter(Boolean);
+  const { products, loading } = useCatalog();
+  const featured = products.slice(0, 4);
 
   return (
     <>
@@ -71,13 +71,19 @@ export function HomePage() {
         </div>
 
         <div className="home-featured-grid">
+          {loading && <div className="home-featured-loading">Cargando piezas del catálogo…</div>}
+          {!loading && featured.length === 0 && (
+            <div className="home-featured-loading">
+              Estamos preparando el catálogo. Escribinos y te ayudamos a encontrar una pieza.
+            </div>
+          )}
           {featured.map((product) => (
             <Link key={product.id} to={`/producto/${product.id}`} className="home-featured-card">
               <ObjectImage product={product} compact showLabel={false} />
               <div>
                 <span>{product.category}</span>
                 <h3>{product.name}</h3>
-                <p>{product.description}</p>
+                <p>{product.description || "Consultá medidas, disponibilidad y detalles de esta pieza."}</p>
               </div>
             </Link>
           ))}

@@ -34,7 +34,19 @@ export function FavoritesProvider({ children }: PropsWithChildren) {
   const [favoriteIds, setFavoriteIds] = useState<string[]>(() => readFavorites(user?.uid));
 
   useEffect(() => {
-    setFavoriteIds(readFavorites(user?.uid));
+    if (!user?.uid) {
+      setFavoriteIds(readFavorites());
+      return;
+    }
+
+    const accountFavorites = readFavorites(user.uid);
+    const guestFavorites = readFavorites();
+    const merged = Array.from(new Set([...accountFavorites, ...guestFavorites]));
+    setFavoriteIds(merged);
+    window.localStorage.setItem(getStorageKey(user.uid), JSON.stringify(merged));
+    if (guestFavorites.length > 0) {
+      window.localStorage.removeItem(getStorageKey());
+    }
   }, [user?.uid]);
 
   useEffect(() => {

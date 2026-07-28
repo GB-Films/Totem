@@ -24,19 +24,23 @@ const availabilityClass: Record<Availability, string> = {
 
 export function ProductDetailPage() {
   const { id } = useParams();
-  const { products } = useCatalog();
+  const { products, loading, error } = useCatalog();
   const product = products.find((candidate) => candidate.id === id);
   const { addProduct } = useSelection();
   const { isFavorite, toggleFavorite } = useFavorites();
-  const { hasConflict } = useAvailability();
+  const { hasConflict, loadingAvailability, availabilityError } = useAvailability();
   const [selectedDates, setSelectedDates] = useState<{ startDate?: string; endDate?: string }>({});
   const [addedMessage, setAddedMessage] = useState(false);
+
+  if (loading) {
+    return <div className="product-detail-loading" role="status">Cargando la ficha del objeto…</div>;
+  }
 
   if (!product) {
     return (
       <div className="mx-auto w-full max-w-[1520px] px-4 py-24 text-center sm:px-8 lg:px-12">
         <p className="font-display text-5xl text-gabinete-darkBrown">
-          Ese objeto no figura en el archivo.
+          {error ? "No pudimos abrir esta ficha." : "Ese objeto no figura en el catálogo."}
         </p>
         <Link to="/catalogo" className="gabinete-button mt-8 px-5 py-3">
           Volver al catálogo
@@ -50,6 +54,7 @@ export function ProductDetailPage() {
     ? hasConflict(product.id, selectedDates.startDate, selectedDates.endDate)
     : false;
   const selectedDatesAreOperational = hasOperationalEndpoints(selectedDates.startDate, selectedDates.endDate);
+  const canBookProduct = product.availability === "Disponible" && product.rentalPricePerDay > 0;
   const singleSelection = [
     {
       productId: product.id,
@@ -131,7 +136,7 @@ export function ProductDetailPage() {
             <div className="parchment-panel p-4">
               <p className="eyebrow">Alquiler diario</p>
               <p className="mt-2 font-display text-2xl font-semibold text-gabinete-darkBrown">
-                {formatCurrency(product.rentalPricePerDay)}
+                {product.rentalPricePerDay > 0 ? formatCurrency(product.rentalPricePerDay) : "Consultar"}
               </p>
             </div>
             <div className="parchment-panel p-4">
@@ -143,7 +148,7 @@ export function ProductDetailPage() {
             <div className="parchment-panel p-4">
               <p className="eyebrow">Garantía final</p>
               <p className="mt-2 font-display text-2xl font-semibold text-gabinete-darkBrown">
-                {formatCurrency(productPricing.guaranteeAmount)}
+                {productPricing.guaranteeAmount > 0 ? formatCurrency(productPricing.guaranteeAmount) : "Sin depósito"}
               </p>
               <p className="mt-1 font-editorial text-xs leading-5 text-gabinete-muted">
                 Reintegrable al devolver la pieza en buen estado.
@@ -157,7 +162,7 @@ export function ProductDetailPage() {
             ))}
           </div>
 
-          <div className="curiosity-box mt-7 p-5">
+          {product.curiosities && <div className="curiosity-box mt-7 p-5">
             <p className="eyebrow flex items-center gap-2">
               <Sparkles size={15} />
               Curiosidades
@@ -165,7 +170,7 @@ export function ProductDetailPage() {
             <p className="mt-3 font-editorial text-2xl italic leading-snug text-gabinete-darkBrown">
               {product.curiosities}
             </p>
-          </div>
+          </div>}
 
           <div className="detail-trust-row">
             <span><CalendarCheck size={17} /> Fechas visibles antes de reservar</span>
@@ -176,6 +181,11 @@ export function ProductDetailPage() {
             {!hasSelectedDates && (
               <p className="rounded-md border border-gabinete-line/25 bg-gabinete-paperLight/24 px-3 py-2 font-editorial text-sm text-gabinete-muted sm:col-span-2">
                 Elegí los días en el calendario para poder sumar este objeto al carrito.
+              </p>
+            )}
+            {!canBookProduct && (
+              <p className="rounded-md border border-gabinete-line/35 bg-gabinete-paperLight/24 px-3 py-2 font-editorial text-sm text-gabinete-muted sm:col-span-2">
+                Esta pieza requiere consulta de precio o disponibilidad. Escribinos y la revisamos con vos.
               </p>
             )}
             {selectedDateConflict && (
@@ -190,7 +200,7 @@ export function ProductDetailPage() {
             )}
             <button
               type="button"
-              disabled={!hasSelectedDates || selectedDateConflict || !selectedDatesAreOperational}
+              disabled={loadingAvailability || Boolean(availabilityError) || !canBookProduct || !hasSelectedDates || selectedDateConflict || !selectedDatesAreOperational}
               onClick={() => {
                 if (selectedDates.startDate && selectedDates.endDate) {
                   addProduct(product, selectedDates.startDate, selectedDates.endDate);
@@ -201,7 +211,7 @@ export function ProductDetailPage() {
               className="gabinete-button px-4 py-3 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Plus size={18} />
-              Sumar al carrito
+              {canBookProduct ? "Sumar al carrito" : "Disponible a consulta"}
             </button>
             <a
               href={buildWhatsappUrl(quickMessage)}
@@ -232,7 +242,7 @@ export function ProductDetailPage() {
               ["Color", product.color],
               ["Época / estilo", product.eraStyle],
               ["Disponibilidad", product.availability],
-            ].map(([label, value]) => (
+            ].filter(([, value]) => Boolean(value)).map(([label, value]) => (
               <div key={label} className="rounded-md border border-gabinete-line/24 bg-gabinete-paperLight/18 p-4">
                 <dt className="font-display text-xs uppercase tracking-[0.16em] text-gabinete-faint">
                   {label}

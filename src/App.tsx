@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Link, RouterProvider } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { HomePage } from "./pages/HomePage";
 
@@ -22,6 +22,17 @@ function PageLoading() {
   );
 }
 
+function NotFoundPage() {
+  return (
+    <section className="not-found-page">
+      <p className="eyebrow">404</p>
+      <h1>Ese cajón no existe.</h1>
+      <p>La página pudo haberse movido. Volvé al catálogo para seguir explorando.</p>
+      <Link to="/catalogo" className="gabinete-button">Ir al catálogo</Link>
+    </section>
+  );
+}
+
 const router = createBrowserRouter(
   [
     {
@@ -37,16 +48,17 @@ const router = createBrowserRouter(
         { path: "cuenta", element: <AccountPage /> },
         { path: "contacto", element: <ContactPage /> },
         { path: "admin", element: <AdminPage /> },
+        { path: "*", element: <NotFoundPage /> },
       ],
     },
   ],
-  { basename, future: { v7_relativeSplatPath: true } },
+  { basename },
 );
 
 export function App() {
   return (
     <Suspense fallback={<PageLoading />}>
-      <RouterProvider router={router} future={{ v7_startTransition: true }} />
+      <RouterProvider router={router} />
     </Suspense>
   );
 }
