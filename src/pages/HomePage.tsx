@@ -1,4 +1,4 @@
-import { ArrowRight, CalendarDays, CheckCircle2, Sparkles, Truck } from "lucide-react";
+import { ArrowRight, CalendarDays, CheckCircle2, Truck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Hero } from "../components/Hero";
 import { ObjectImage } from "../components/ObjectImage";
@@ -39,7 +39,7 @@ export function HomePage() {
       <section className="home-flow-section">
         <div className="home-section-heading">
           <p className="eyebrow">Encontrá más rápido</p>
-          <h2>Elegí como buscar tu utilería ideal</h2>
+          <h2>Elegí cómo buscar tu utilería ideal</h2>
           <p>
             Desde una lista cerrada hasta una primera búsqueda visual: empezá por donde te resulte más útil.
           </p>
@@ -100,7 +100,6 @@ export function HomePage() {
             </span>
           </div>
         ))}
-        <Sparkles className="home-benefit-mark" size={22} />
       </section>
     </>
   );

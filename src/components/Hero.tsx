@@ -1,8 +1,9 @@
-import { ArrowRight, CalendarDays, CheckCircle2, Palette, Truck, Armchair, Sofa, Shirt, Search } from "lucide-react";
+import { ArrowRight, Palette, Armchair, Sofa, Shirt, Search } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCatalog } from "../context/CatalogContext";
 import type { Category } from "../types";
+import totemLogoLight from "../assets/brand/totem-logo-light.png";
 
 const categoryIcons: Partial<Record<Category, typeof Armchair>> = {
   "Utilería": Armchair,
@@ -10,12 +11,6 @@ const categoryIcons: Partial<Record<Category, typeof Armchair>> = {
   "Vestuario": Shirt,
   "Arte": Palette,
 };
-
-const benefits = [
-  { title: "Alquiler flexible", text: "Por día o por período", icon: CalendarDays },
-  { title: "Entrega y retiro", text: "Coordinado para tu proyecto", icon: Truck },
-  { title: "Atención personalizada", text: "Para cada proyecto", icon: CheckCircle2 },
-];
 
 export function Hero() {
   const [query, setQuery] = useState("");
@@ -30,21 +25,20 @@ export function Hero() {
 
   return (
     <section className="hero-scene">
-      <div className="hero-blueprint" aria-hidden="true">
-        <i />
-        <span />
-      </div>
-      <div className="hero-stage" aria-hidden="true">
-        <div className="stage-light"><span /><i /><b /></div>
-        <div className="stage-trunk"><i /><b /></div>
-        <div className="stage-bust"><i /><b /></div>
-      </div>
+      <img
+        className="hero-media"
+        src={`${import.meta.env.BASE_URL}og.png`}
+        alt=""
+        aria-hidden="true"
+      />
 
       <div className="hero-content">
-        <p className="hero-kicker">Archivo de utilería · Buenos Aires</p>
-        <h1>Objetos con carácter para historias que se ven.</h1>
+        <img className="hero-brand-mark" src={totemLogoLight} alt="Totem" />
+        <p className="hero-kicker">Rental de utilería · Buenos Aires</p>
+        <h1>Alquiler de utilería para historias que se ven.</h1>
         <p className="hero-lead">
-          Utilería, mobiliario y vestuario listos para cine, TV, publicidad, teatro y contenido.
+          Objetos con pasado, listos para entrar en una nueva escena. Buscá, revisá fechas y armá
+          una selección para tu producción.
         </p>
 
         <form className="hero-search" onSubmit={submitSearch}>
@@ -65,24 +59,12 @@ export function Hero() {
           {categories.slice(0, 5).map((category) => {
             const Icon = categoryIcons[category] ?? Armchair;
             return (
-            <Link key={category} to={`/catalogo?categoria=${encodeURIComponent(category)}`}>
-              <Icon size={21} />
-              {category}
-            </Link>
+              <Link key={category} to={`/catalogo?categoria=${encodeURIComponent(category)}`}>
+                <Icon size={21} />
+                {category}
+              </Link>
             );
           })}
-        </div>
-
-        <div className="hero-benefits" aria-label="Beneficios del servicio">
-          {benefits.map(({ title, text, icon: Icon }) => (
-            <div key={title}>
-              <Icon size={29} strokeWidth={1.7} />
-              <span>
-                <strong>{title}</strong>
-                <em>{text}</em>
-              </span>
-            </div>
-          ))}
         </div>
       </div>
     </section>

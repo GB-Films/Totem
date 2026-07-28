@@ -1,15 +1,16 @@
 import { ArrowUpRight, Instagram } from "lucide-react";
 import { Link } from "react-router-dom";
+import totemLogoLight from "../assets/brand/totem-logo-light.png";
 
 export function Footer() {
   return (
     <footer className="site-footer">
       <div className="footer-main">
         <div className="footer-brand">
-          <p className="footer-logo">TOTEM RENTAL</p>
+          <img className="footer-logo-image" src={totemLogoLight} alt="Totem" />
           <p>
-            Cada objeto tiene un pasado. Vos decidís su próxima historia. Utilería, mobiliario,
-            vestuario y piezas especiales para cine, TV, publicidad, teatro y contenidos.
+            Objetos que sostienen historias. Utilería, mobiliario, vestuario y piezas especiales
+            para cine, TV, publicidad, teatro y contenidos.
           </p>
           <Link to="/catalogo" className="footer-cta">
             Explorar el catálogo <ArrowUpRight size={16} />

@@ -4,6 +4,7 @@ import { NavLink, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useFavorites } from "../context/FavoritesContext";
 import { useSelection } from "../context/SelectionContext";
+import totemLogoDark from "../assets/brand/totem-logo-dark.png";
 
 const navItems = [
   { to: "/catalogo", label: "Catálogo" },
@@ -15,13 +16,8 @@ const navItems = [
 function CabinetLogo() {
   return (
     <span className="brand-logo" aria-hidden="true">
-      <span className="brand-cabinet">
-        <i />
-        <b />
-      </span>
-      <span className="brand-wordmark brand-wordmark-single">
-        <strong>TOTEM RENTAL</strong>
-      </span>
+      <img className="brand-wordmark-image" src={totemLogoDark} alt="" />
+      <span className="brand-descriptor">rental de objetos</span>
     </span>
   );
 }
