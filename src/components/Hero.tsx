@@ -3,7 +3,7 @@ import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCatalog } from "../context/CatalogContext";
 import type { Category } from "../types";
-import totemLogoLight from "../assets/brand/totem-logo-light.png";
+import totemIsologotipo from "../assets/brand/totem-isologotipo.webp";
 
 const categoryIcons: Partial<Record<Category, typeof Armchair>> = {
   "Utilería": Armchair,
@@ -15,7 +15,7 @@ const categoryIcons: Partial<Record<Category, typeof Armchair>> = {
 export function Hero() {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
-  const { categories } = useCatalog();
+  const { categories, products } = useCatalog();
 
   const submitSearch = (event: FormEvent) => {
     event.preventDefault();
@@ -32,13 +32,26 @@ export function Hero() {
         aria-hidden="true"
       />
 
+      <div className="hero-isologo-collage" aria-hidden="true">
+        <span className="hero-collage-tape" />
+        <img src={totemIsologotipo} alt="" />
+        <span className="hero-collage-note">Objetos con pasado</span>
+      </div>
+
       <div className="hero-content">
-        <img className="hero-brand-mark" src={totemLogoLight} alt="Totem" />
-        <p className="hero-kicker">Rental de utilería · Buenos Aires</p>
-        <h1>Alquiler de utilería para historias que se ven.</h1>
+        <div className="hero-archive-line">
+          <span>Archivo 01</span>
+          <span>Buenos Aires</span>
+          <span>{products.length || "—"} piezas</span>
+        </div>
+        <p className="hero-kicker">Rental de utilería para producción</p>
+        <h1>
+          <span>Objetos con pasado.</span>
+          Historias por venir.
+        </h1>
         <p className="hero-lead">
-          Objetos con pasado, listos para entrar en una nueva escena. Buscá, revisá fechas y armá
-          una selección para tu producción.
+          Un archivo de piezas curiosas, domésticas y extraordinarias. Buscá, revisá fechas y armá
+          una selección lista para entrar en cuadro.
         </p>
 
         <form className="hero-search" onSubmit={submitSearch}>

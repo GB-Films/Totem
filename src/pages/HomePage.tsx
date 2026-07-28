@@ -6,24 +6,24 @@ import { useCatalog } from "../context/CatalogContext";
 
 const useCases = [
   {
-    title: "Ya sé qué necesito",
+    title: "Tengo una pista",
     text: "Buscá por nombre, categoría, estilo o disponibilidad y pasá directo a elegir fechas.",
     href: "/catalogo",
   },
   {
-    title: "Estoy armando el universo",
+    title: "Estoy armando un mundo",
     text: "Explorá colecciones de piezas que funcionan juntas para construir una misma atmósfera.",
     href: "/colecciones",
   },
   {
-    title: "Quiero armar una preselección",
+    title: "Vine a curiosear",
     text: "Guardá favoritos, compará opciones y volvé cuando el proyecto tenga fechas definidas.",
     href: "/cuenta",
   },
 ];
 
 const benefits = [
-  { title: "Alquiler flexible", text: "Por día o por período", icon: CalendarDays },
+  { title: "Alquiler flexible", text: "Desde una semana", icon: CalendarDays },
   { title: "Entrega y retiro", text: "Coordinado según proyecto", icon: Truck },
   { title: "Selección curada", text: "Te ayudamos a elegir", icon: CheckCircle2 },
 ];
@@ -38,17 +38,17 @@ export function HomePage() {
 
       <section className="home-flow-section">
         <div className="home-section-heading">
-          <p className="eyebrow">Encontrá más rápido</p>
-          <h2>Elegí cómo buscar tu utilería ideal</h2>
+          <p className="eyebrow">Tres puertas al archivo</p>
+          <h2>Cada historia empieza buscando distinto.</h2>
           <p>
-            Desde una lista cerrada hasta una primera búsqueda visual: empezá por donde te resulte más útil.
+            Desde una lista cerrada hasta una búsqueda visual: entrá por donde te resulte más útil.
           </p>
         </div>
 
         <div className="home-use-grid">
-          {useCases.map((item) => (
+          {useCases.map((item, index) => (
             <Link key={item.title} to={item.href} className="home-use-card">
-              <span className="home-use-star">✶</span>
+              <span className="home-use-star">{String(index + 1).padStart(2, "0")}</span>
               <h3>{item.title}</h3>
               <p>{item.text}</p>
               <em>
@@ -62,8 +62,8 @@ export function HomePage() {
       <section className="home-featured-section">
         <div className="home-section-heading is-inline">
           <div>
-          <p className="eyebrow">Selección del archivo</p>
-          <h2>Piezas listas para entrar en cuadro.</h2>
+          <p className="eyebrow">Hallazgos de esta semana</p>
+          <h2>Cuatro piezas pidiendo una escena.</h2>
           </div>
           <Link to="/catalogo" className="gabinete-button px-5 py-3">
             Ver catálogo completo
@@ -81,7 +81,7 @@ export function HomePage() {
             <Link key={product.id} to={`/producto/${product.id}`} className="home-featured-card">
               <ObjectImage product={product} compact showLabel={false} />
               <div>
-                <span>{product.category}</span>
+                <span>{product.category} · Archivo {product.id}</span>
                 <h3>{product.name}</h3>
                 <p>{product.description || "Consultá medidas, disponibilidad y detalles de esta pieza."}</p>
               </div>

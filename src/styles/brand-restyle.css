@@ -950,3 +950,1631 @@ body.force-desktop-view .filter-summary-v3 {
     width: calc(100% - 2rem);
   }
 }
+
+/* Totem archive collage - museum editorial system */
+
+:root {
+  --font-display: "Bodoni MT", Didot, Georgia, ui-serif, serif;
+  --font-serif: "Bodoni MT", Didot, Georgia, ui-serif, serif;
+  --font-body: "Helvetica Neue", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Arial Narrow", "Franklin Gothic Medium", "Segoe UI", sans-serif;
+  --ink: #292522;
+  --paper: #efe7d6;
+  --panel: #f8f2e4;
+  --line: #b9a98b;
+  --soft-line: rgba(41, 37, 34, 0.18);
+  --muted: #554b43;
+  --faint: #80736a;
+  --accent: #9b3e27;
+  --terracotta: #9b3e27;
+  --museum-blue: #173f52;
+  --mustard: #d2b457;
+  --sage: #708a83;
+  --gold: #d2b457;
+  --available: #456f62;
+  --consult: #a66b2d;
+  --error: #a64034;
+  --shadow-sm: 5px 6px 0 rgba(23, 63, 82, 0.18);
+  --shadow: 11px 13px 0 rgba(23, 63, 82, 0.2);
+  color-scheme: light;
+}
+
+html,
+body,
+.parchment-shell {
+  background: var(--paper);
+}
+
+body {
+  color: var(--ink);
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: block;
+  background-image: url("../assets/brand/brand-texture.jpg");
+  background-position: center;
+  background-size: cover;
+  content: "";
+  mix-blend-mode: multiply;
+  opacity: 0.035;
+  pointer-events: none;
+}
+
+::selection {
+  background: var(--mustard);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--museum-blue);
+  outline-offset: 3px;
+}
+
+.eyebrow {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.67rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.eyebrow::before {
+  height: 2px;
+  background: currentColor;
+}
+
+.parchment-panel,
+.self-service-card,
+.admin-card,
+.admin-editor,
+.admin-list,
+.availability-calendar,
+.rental-calculator,
+.selected-products-panel,
+.contact-form {
+  border: 1px solid rgba(41, 37, 34, 0.28);
+  border-radius: 3px;
+  background: rgba(248, 242, 228, 0.94);
+  box-shadow: 5px 6px 0 rgba(23, 63, 82, 0.1);
+}
+
+.gabinete-button,
+.gabinete-button-secondary {
+  min-height: 44px;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.71rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+.gabinete-button {
+  border: 1px solid var(--museum-blue);
+  background: var(--museum-blue);
+  color: #fff9ec;
+  box-shadow: 4px 4px 0 var(--mustard);
+}
+
+.gabinete-button:hover {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: 2px 2px 0 var(--mustard);
+  transform: translate(2px, 2px);
+}
+
+.gabinete-button-secondary {
+  border: 1px solid var(--museum-blue);
+  background: rgba(255, 249, 236, 0.7);
+  color: var(--museum-blue);
+}
+
+.gabinete-button-secondary:hover {
+  border-color: var(--accent);
+  background: var(--mustard);
+  color: var(--ink);
+}
+
+.gabinete-input,
+.catalog-results-head-v3 select,
+.admin-filter-bar select {
+  border: 1px solid rgba(23, 63, 82, 0.42);
+  border-radius: 2px;
+  background: #fff9ec;
+  color: var(--ink);
+}
+
+.gabinete-input:focus,
+.gabinete-input:focus-within,
+.catalog-search-v3:focus-within {
+  border-color: var(--museum-blue);
+  box-shadow: 0 0 0 3px rgba(23, 63, 82, 0.13);
+}
+
+/* Museum header */
+
+.site-header {
+  border-bottom: 1px solid rgba(41, 37, 34, 0.28);
+  background: rgba(239, 231, 214, 0.94);
+  backdrop-filter: blur(14px);
+}
+
+.site-header-inner {
+  width: min(1500px, calc(100% - 2.5rem));
+  min-height: 74px;
+}
+
+.brand-wordmark-image {
+  width: clamp(105px, 9vw, 136px);
+}
+
+.brand-descriptor {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.site-nav-link {
+  padding: 1.65rem 0;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.67rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.site-nav-link:hover,
+.site-nav-link.is-active {
+  color: var(--museum-blue);
+}
+
+.site-nav-link::after {
+  bottom: 1rem;
+  height: 3px;
+  background: var(--accent);
+}
+
+.site-actions .action-link,
+.site-actions .menu-toggle {
+  width: 40px;
+  height: 40px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  color: var(--museum-blue);
+}
+
+.site-actions .action-link:hover,
+.site-actions .menu-toggle:hover,
+.site-actions .action-link.is-active {
+  border-color: var(--museum-blue);
+  background: var(--mustard);
+  color: var(--ink);
+}
+
+.cart-action span,
+.favorite-count {
+  border-color: var(--paper);
+  background: var(--accent);
+  color: #fff9ec;
+}
+
+/* Poster hero */
+
+.hero-scene {
+  position: relative;
+  display: flex;
+  min-height: min(570px, calc(100svh - 160px));
+  align-items: center;
+  overflow: hidden;
+  border-bottom: 2px solid var(--museum-blue);
+  background: var(--paper);
+  padding: clamp(3.3rem, 6vw, 5.5rem) clamp(1.5rem, 6vw, 6rem);
+  color: var(--ink);
+  isolation: isolate;
+}
+
+.hero-scene::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: rgba(239, 231, 214, 0.78);
+  background-image: url("../assets/brand/brand-texture.jpg");
+  background-position: center;
+  background-size: cover;
+  content: "";
+  mix-blend-mode: screen;
+}
+
+.hero-media {
+  position: absolute;
+  right: -7%;
+  bottom: -12%;
+  z-index: -2;
+  width: 68%;
+  height: 118%;
+  object-fit: cover;
+  object-position: center;
+  filter: grayscale(0.42) sepia(0.25) contrast(0.9);
+  mix-blend-mode: multiply;
+  opacity: 0.22;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  width: min(780px, 61vw);
+  margin: 0;
+  text-align: left;
+}
+
+.hero-archive-line {
+  display: flex;
+  width: min(620px, 100%);
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.15rem;
+  border-top: 1px solid var(--museum-blue);
+  border-bottom: 1px solid var(--museum-blue);
+  padding: 0.52rem 0;
+  color: var(--museum-blue);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.hero-kicker {
+  margin: 0 0 0.85rem !important;
+  color: var(--accent) !important;
+  font-family: var(--font-mono);
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  text-transform: uppercase;
+}
+
+.hero-content h1 {
+  max-width: 790px;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 7vw, 7.4rem);
+  font-weight: 700;
+  line-height: 0.84;
+  text-wrap: balance;
+}
+
+.hero-content h1 span {
+  display: block;
+  color: var(--museum-blue);
+}
+
+.hero-lead {
+  max-width: 620px !important;
+  margin-top: 1.4rem !important;
+  color: var(--muted) !important;
+  font-size: clamp(0.96rem, 1.15vw, 1.08rem) !important;
+  line-height: 1.55 !important;
+}
+
+.hero-isologo-collage {
+  position: absolute;
+  top: 50%;
+  right: clamp(1.5rem, 5vw, 5rem);
+  z-index: 1;
+  width: clamp(280px, 31vw, 490px);
+  transform: translateY(-50%) rotate(2deg);
+}
+
+.hero-isologo-collage img {
+  display: block;
+  width: 100%;
+  border: 1px solid rgba(41, 37, 34, 0.32);
+  box-shadow: 12px 14px 0 var(--museum-blue);
+}
+
+.hero-collage-tape {
+  position: absolute;
+  top: -12px;
+  left: 37%;
+  z-index: 2;
+  width: 96px;
+  height: 26px;
+  background: rgba(210, 180, 87, 0.88);
+  transform: rotate(-4deg);
+}
+
+.hero-collage-note {
+  position: absolute;
+  right: -1.5rem;
+  bottom: 8%;
+  border: 1px solid var(--ink);
+  background: #fff9ec;
+  padding: 0.62rem 0.8rem;
+  color: var(--museum-blue);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-style: italic;
+  transform: rotate(-5deg);
+}
+
+.hero-search {
+  grid-template-columns: auto 1fr auto;
+  width: min(660px, 100%);
+  min-height: 60px;
+  margin-top: 1.5rem;
+  border: 2px solid var(--museum-blue);
+  border-radius: 2px;
+  background: #fff9ec;
+  box-shadow: 7px 8px 0 var(--mustard);
+  color: var(--ink);
+}
+
+.hero-search:focus-within {
+  border-color: var(--accent);
+  box-shadow: 7px 8px 0 var(--mustard);
+}
+
+.hero-search input {
+  color: var(--ink);
+}
+
+.hero-search button {
+  height: 46px;
+  border-radius: 1px;
+  background: var(--accent);
+  color: #fff9ec;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+
+.hero-search button:hover {
+  background: var(--museum-blue);
+}
+
+.hero-categories {
+  justify-content: flex-start;
+  gap: 0.45rem;
+  margin-top: 1rem;
+}
+
+.hero-categories a {
+  border: 1px solid rgba(23, 63, 82, 0.5);
+  border-radius: 2px;
+  background: rgba(255, 249, 236, 0.76);
+  color: var(--museum-blue);
+  box-shadow: none;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.hero-categories a:nth-child(even) {
+  transform: rotate(1deg);
+}
+
+.hero-categories a:hover {
+  border-color: var(--ink);
+  background: var(--mustard);
+  color: var(--ink);
+  transform: translateY(-2px) rotate(0);
+}
+
+.hero-categories a svg {
+  color: var(--accent) !important;
+}
+
+.hero-brand-mark,
+.hero-blueprint,
+.hero-stage,
+.hero-benefits {
+  display: none;
+}
+
+/* Home collage */
+
+.home-flow-section,
+.home-featured-section,
+.home-benefit-strip {
+  width: min(1420px, calc(100% - clamp(2rem, 8vw, 7rem)));
+}
+
+.home-flow-section,
+.home-featured-section {
+  padding: clamp(4.5rem, 8vw, 7.5rem) 0;
+}
+
+.home-flow-section {
+  padding-top: clamp(2.5rem, 4vw, 4rem);
+}
+
+.home-section-heading {
+  max-width: 920px;
+}
+
+.home-section-heading h2 {
+  color: var(--museum-blue);
+  font-family: var(--font-display);
+  font-size: clamp(3.2rem, 5.7vw, 6.3rem);
+  font-weight: 700;
+  line-height: 0.9;
+  text-wrap: balance;
+}
+
+.home-section-heading > p:last-child,
+.home-use-card p,
+.home-featured-card p {
+  color: var(--muted);
+}
+
+.home-use-grid {
+  gap: clamp(1.2rem, 2.4vw, 2.4rem);
+  margin-top: 3rem;
+}
+
+.home-use-card {
+  min-height: 330px;
+  border: 2px solid var(--museum-blue);
+  border-radius: 2px;
+  background: #f8f2e4;
+  padding: clamp(1.4rem, 2.5vw, 2.2rem);
+  box-shadow: 8px 9px 0 var(--mustard);
+  transform: rotate(-0.7deg);
+}
+
+.home-use-card:nth-child(2) {
+  background: #e6dfcd;
+  box-shadow: 8px 9px 0 var(--accent);
+  transform: translateY(1.4rem) rotate(0.8deg);
+}
+
+.home-use-card:nth-child(3) {
+  box-shadow: 8px 9px 0 var(--sage);
+  transform: rotate(-0.3deg);
+}
+
+.home-use-card:hover {
+  border-color: var(--ink);
+  background: #fff9ec;
+  box-shadow: 3px 4px 0 var(--mustard);
+  transform: translate(4px, 5px) rotate(0);
+}
+
+.home-use-card::before {
+  display: none;
+}
+
+.home-use-star {
+  display: block;
+  width: auto;
+  height: auto;
+  border: 0;
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 3.5rem;
+  line-height: 1;
+}
+
+.home-use-card h3,
+.home-featured-card h3 {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.home-use-card h3 {
+  margin-top: 2rem;
+  font-size: clamp(2rem, 3vw, 3rem);
+  line-height: 0.95;
+}
+
+.home-use-card em {
+  color: var(--museum-blue);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.home-featured-section {
+  position: relative;
+  border: 0;
+  background: var(--museum-blue);
+  box-shadow: 0 0 0 100vmax var(--museum-blue);
+  color: #fff9ec;
+  clip-path: inset(0 -100vmax);
+}
+
+.home-featured-section .home-section-heading h2 {
+  color: #fff9ec;
+}
+
+.home-featured-section .eyebrow {
+  color: var(--mustard);
+}
+
+.home-featured-grid {
+  gap: clamp(1rem, 2vw, 1.8rem);
+  margin-top: 3rem;
+}
+
+.home-featured-card,
+.product-card,
+.collections-page-mobile > section:last-child > a {
+  overflow: visible;
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+  background: #f8f2e4;
+  box-shadow: 7px 8px 0 var(--accent);
+}
+
+.home-featured-card:nth-child(even),
+.product-card:nth-child(3n + 2) {
+  transform: rotate(0.45deg);
+}
+
+.home-featured-card:nth-child(3n),
+.product-card:nth-child(3n) {
+  transform: rotate(-0.35deg);
+}
+
+.home-featured-card:hover,
+.product-card:hover,
+.collections-page-mobile > section:last-child > a:hover {
+  border-color: var(--ink);
+  box-shadow: 3px 4px 0 var(--mustard);
+  transform: translate(3px, 4px) rotate(0);
+}
+
+.home-featured-card .object-plate {
+  border: 0;
+  border-bottom: 2px solid var(--ink);
+  border-radius: 0;
+}
+
+.home-featured-card > div:last-child {
+  background: #f8f2e4;
+}
+
+.home-featured-card span,
+.product-category {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.home-benefit-strip {
+  margin-block: clamp(3rem, 6vw, 5rem);
+  overflow: hidden;
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+  background: var(--accent);
+  color: #fff9ec;
+  box-shadow: 8px 9px 0 var(--mustard);
+}
+
+.home-benefit-strip div {
+  border-color: rgba(255, 249, 236, 0.28);
+}
+
+.home-benefit-strip svg {
+  color: var(--mustard);
+}
+
+.home-benefit-strip strong,
+.home-benefit-strip em {
+  color: inherit;
+}
+
+.home-benefit-strip strong {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+
+/* Catalog as archive index */
+
+.catalog-page-v3 {
+  width: min(1500px, calc(100% - clamp(2rem, 6vw, 5rem)));
+}
+
+.catalog-breadcrumb-v3 {
+  color: var(--faint);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+
+.catalog-intro-v3 {
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid var(--museum-blue);
+  border-bottom: 2px solid var(--museum-blue);
+}
+
+.catalog-intro-v3::after {
+  position: absolute;
+  top: 0.5rem;
+  right: 0;
+  z-index: -1;
+  color: rgba(23, 63, 82, 0.08);
+  content: "ARCHIVO / 01";
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 10vw, 10rem);
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.catalog-title-block-v3 h1 {
+  color: var(--museum-blue);
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 7vw, 7.6rem);
+  font-weight: 700;
+  line-height: 0.84;
+}
+
+.catalog-title-block-v3 > p:last-child,
+.catalog-results-head-v3 p {
+  color: var(--muted);
+}
+
+.catalog-search-v3 {
+  border: 2px solid var(--museum-blue);
+  border-radius: 2px;
+  background: #fff9ec;
+  box-shadow: 6px 7px 0 var(--mustard);
+}
+
+.catalog-search-v3 svg {
+  color: var(--accent);
+}
+
+.catalog-filter-button-v3,
+.catalog-chip-v3,
+.mobile-category-strip-v3 button {
+  border: 1px solid rgba(23, 63, 82, 0.44);
+  border-radius: 2px;
+  color: var(--museum-blue);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.catalog-filter-button-v3:hover,
+.catalog-chip-v3:hover,
+.catalog-chip-v3.is-active,
+.mobile-category-strip-v3 button.is-active {
+  border-color: var(--ink);
+  background: var(--mustard);
+  color: var(--ink);
+}
+
+.catalog-sidebar-v3,
+body.force-desktop-view .catalog-sidebar-v3 {
+  overflow: hidden;
+  border: 2px solid var(--museum-blue);
+  border-radius: 2px;
+  background: rgba(248, 242, 228, 0.92);
+  box-shadow: 6px 7px 0 rgba(155, 62, 39, 0.8);
+}
+
+.filter-summary-v3 {
+  border-bottom-color: rgba(23, 63, 82, 0.3);
+  background: rgba(210, 180, 87, 0.2);
+}
+
+.filter-summary-v3 strong {
+  color: var(--museum-blue);
+  font-family: var(--font-display);
+}
+
+.category-list-v3 button {
+  border-radius: 2px;
+}
+
+.category-list-v3 button:hover {
+  border-color: rgba(23, 63, 82, 0.22);
+  background: rgba(255, 249, 236, 0.66);
+}
+
+.category-list-v3 button.is-active {
+  border-color: var(--museum-blue);
+  background: #fff9ec;
+  box-shadow: inset 4px 0 0 var(--accent);
+}
+
+.filter-section-v3,
+.category-list-v3,
+.catalog-results-head-v3 {
+  border-color: rgba(23, 63, 82, 0.24);
+}
+
+.filter-section-title-v3 strong {
+  color: var(--museum-blue);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+
+.product-card {
+  background: #f8f2e4;
+}
+
+.product-card .object-plate {
+  border-bottom: 2px solid var(--ink);
+}
+
+.object-plate {
+  border-color: rgba(23, 63, 82, 0.3);
+  border-radius: 2px;
+  background: #d9d6c5;
+}
+
+.favorite-btn,
+.detail-favorite {
+  border: 1px solid var(--museum-blue);
+  border-radius: 2px;
+  background: #fff9ec;
+  color: var(--museum-blue);
+}
+
+.favorite-btn:hover,
+.favorite-btn.is-favorite,
+.detail-favorite:hover,
+.detail-favorite.is-favorite {
+  border-color: var(--accent);
+  background: var(--mustard);
+  color: var(--accent);
+}
+
+.product-badge {
+  border-radius: 1px;
+  background: var(--accent);
+  color: #fff9ec;
+  font-family: var(--font-mono);
+}
+
+.product-title,
+.product-price strong,
+.product-detail-title-row h1,
+.filter-summary-v3 strong {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.product-title {
+  font-size: 1.55rem;
+  line-height: 0.98;
+}
+
+.detail-btn {
+  border-color: var(--museum-blue);
+  border-radius: 2px;
+  color: var(--museum-blue);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+
+.detail-btn:hover {
+  border-color: var(--museum-blue);
+  background: var(--museum-blue);
+  color: #fff9ec;
+}
+
+.catalog-results-head-v3 select {
+  border-radius: 2px;
+  background: #fff9ec;
+}
+
+/* Product, booking and account surfaces */
+
+.product-detail-page,
+.simple-page,
+.user-page {
+  width: min(1500px, calc(100% - clamp(2rem, 6vw, 5rem)));
+}
+
+.product-detail-layout {
+  gap: clamp(2rem, 5vw, 5.5rem);
+}
+
+.product-visual-column > .object-plate {
+  border: 2px solid var(--museum-blue);
+  border-radius: 2px;
+  box-shadow: 10px 11px 0 var(--mustard);
+}
+
+.product-summary {
+  position: sticky;
+  top: 104px;
+}
+
+.product-detail-title-row h1 {
+  color: var(--museum-blue);
+  font-size: clamp(3.5rem, 6.2vw, 6.8rem);
+  line-height: 0.84;
+}
+
+.product-summary .parchment-panel,
+.curiosity-box,
+.selected-item-card,
+.selected-item-image,
+.minimal-process-card {
+  border-radius: 2px;
+}
+
+.product-summary .parchment-panel {
+  border-color: rgba(23, 63, 82, 0.32);
+  background: #f8f2e4;
+  box-shadow: 4px 5px 0 rgba(23, 63, 82, 0.12);
+}
+
+.product-summary .parchment-panel:nth-child(2) {
+  background: rgba(210, 180, 87, 0.16);
+}
+
+.curiosity-box,
+.payment-instructions,
+.self-service-note,
+.reservation-payment-note {
+  border: 1px solid rgba(155, 62, 39, 0.35);
+  background: rgba(210, 180, 87, 0.18);
+}
+
+.curiosity-box {
+  transform: rotate(-0.5deg);
+}
+
+.detail-trust-row {
+  border-color: rgba(23, 63, 82, 0.28);
+  color: var(--museum-blue);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+
+.availability-calendar,
+.rental-calculator,
+.selected-products-panel,
+.contact-form,
+.user-profile-card,
+.user-favorites,
+.reservation-history {
+  border-radius: 2px;
+}
+
+.calendar-month-bar button,
+.calendar-day,
+.selected-item-card,
+.admin-upload {
+  border-color: rgba(23, 63, 82, 0.28);
+  border-radius: 2px;
+  background: #fff9ec;
+}
+
+.calendar-day.is-selected,
+.calendar-day.is-start,
+.calendar-day.is-end {
+  background: var(--museum-blue);
+  color: #fff9ec;
+}
+
+.calendar-key.is-selected,
+.reservation-status-track span.is-done {
+  background: var(--museum-blue);
+}
+
+.selected-item-card {
+  border: 1px solid rgba(23, 63, 82, 0.3);
+  background: rgba(248, 242, 228, 0.94);
+  box-shadow: 5px 6px 0 rgba(23, 63, 82, 0.11);
+}
+
+.selected-item-pricing {
+  border-color: rgba(23, 63, 82, 0.22);
+  background: rgba(210, 180, 87, 0.13);
+}
+
+.simple-page-hero,
+.user-hero {
+  position: relative;
+  min-height: 390px;
+  overflow: hidden;
+  border: 0;
+  border-top: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  border-radius: 2px;
+  background-color: var(--accent);
+  background-image: url("../assets/brand/brand-texture.jpg");
+  background-position: center;
+  background-size: cover;
+  background-blend-mode: multiply;
+  box-shadow: 0 0 0 100vmax var(--accent);
+  clip-path: inset(0 -100vmax);
+  color: #fff9ec;
+  isolation: isolate;
+}
+
+.simple-page-hero::after,
+.user-hero::after {
+  position: absolute;
+  right: clamp(-4rem, 1vw, 2rem);
+  bottom: -42%;
+  z-index: -1;
+  width: clamp(280px, 34vw, 520px);
+  aspect-ratio: 1;
+  background-image: url("../assets/brand/totem-isologotipo.webp");
+  background-position: center;
+  background-size: cover;
+  content: "";
+  opacity: 0.32;
+  transform: rotate(5deg);
+}
+
+.simple-page-hero .eyebrow,
+.user-hero .eyebrow {
+  color: var(--mustard);
+}
+
+.simple-page-hero h1,
+.user-hero h1 {
+  max-width: 900px !important;
+  color: #fff9ec !important;
+  font-family: var(--font-display);
+  font-size: clamp(3.8rem, 7vw, 7rem) !important;
+  font-weight: 700 !important;
+  line-height: 0.86 !important;
+}
+
+.simple-page-hero p:not(.eyebrow),
+.user-hero p:not(.eyebrow) {
+  color: rgba(255, 249, 236, 0.82) !important;
+}
+
+.minimal-process-grid {
+  gap: 1.2rem;
+}
+
+.minimal-process-card {
+  border: 2px solid var(--museum-blue);
+  background: #f8f2e4;
+  box-shadow: 6px 7px 0 var(--mustard);
+}
+
+.minimal-process-card:nth-child(even) {
+  background: #e5dfce;
+  transform: translateY(1rem);
+}
+
+.minimal-process-card > span {
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 2.8rem;
+}
+
+.minimal-process-card h2,
+.self-service-card h2,
+.user-profile-card h2,
+.user-favorites h2,
+.reservation-history h2 {
+  color: var(--museum-blue);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.process-note {
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+  background: var(--mustard);
+  color: var(--ink);
+  box-shadow: 6px 7px 0 var(--accent);
+}
+
+.collections-page-mobile > section:last-child {
+  gap: 1.4rem;
+}
+
+.collections-page-mobile > section:last-child > a {
+  border-radius: 2px !important;
+}
+
+.collections-page-mobile > section:last-child > a:nth-child(even) {
+  transform: translateY(1rem) rotate(0.5deg);
+}
+
+.collections-page-mobile > section:last-child > a > div:last-child {
+  background: #f8f2e4;
+}
+
+.user-quick-actions a,
+.user-quick-actions button {
+  border-radius: 2px;
+}
+
+/* Compact archive admin */
+
+.admin-page {
+  width: min(1500px, calc(100% - clamp(2rem, 5vw, 4rem)));
+  padding: 1.4rem 0 4rem;
+}
+
+.admin-head {
+  min-height: 116px;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  border: 2px solid var(--museum-blue);
+  border-radius: 2px;
+  background: var(--museum-blue);
+  padding: 1.1rem 1.25rem;
+  box-shadow: 7px 8px 0 var(--mustard);
+}
+
+.admin-head .eyebrow {
+  color: var(--mustard);
+}
+
+.admin-head h1 {
+  margin-top: 0.2rem;
+  color: #fff9ec;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  font-weight: 700;
+  line-height: 0.95;
+}
+
+.admin-head p:not(.eyebrow) {
+  max-width: 64ch;
+  margin-top: 0.45rem;
+  color: rgba(255, 249, 236, 0.72);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+}
+
+.admin-online-status {
+  color: rgba(255, 249, 236, 0.75);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+
+.admin-head .gabinete-button-secondary {
+  border-color: rgba(255, 249, 236, 0.6);
+  background: transparent;
+  color: #fff9ec;
+}
+
+.admin-head .gabinete-button-secondary:hover {
+  border-color: var(--mustard);
+  background: var(--mustard);
+  color: var(--ink);
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+  overflow-x: auto;
+  border: 1px solid var(--museum-blue);
+  border-radius: 2px;
+  background: #f8f2e4;
+  padding: 0.25rem;
+}
+
+.admin-tabs button {
+  min-height: 40px;
+  flex: 0 0 auto;
+  border: 1px solid transparent;
+  border-radius: 1px;
+  padding: 0.55rem 0.8rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.69rem;
+  text-transform: uppercase;
+}
+
+.admin-tabs button:hover {
+  border-color: rgba(23, 63, 82, 0.24);
+  background: rgba(210, 180, 87, 0.13);
+  color: var(--museum-blue);
+}
+
+.admin-tabs button.is-active {
+  border-color: var(--museum-blue);
+  background: var(--mustard);
+  color: var(--ink);
+}
+
+.admin-overview,
+.admin-bookings-section,
+.admin-customers {
+  gap: 0.75rem;
+}
+
+.admin-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 2px solid var(--museum-blue);
+  border-radius: 2px;
+  background: #f8f2e4;
+  box-shadow: 6px 7px 0 rgba(155, 62, 39, 0.65);
+}
+
+.admin-metrics article {
+  min-height: 112px;
+  border: 0;
+  border-left: 1px solid rgba(23, 63, 82, 0.25);
+  border-radius: 0;
+  background: transparent;
+  padding: 1rem 1.1rem;
+}
+
+.admin-metrics article:first-child {
+  border-left: 0;
+}
+
+.admin-metrics span {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+}
+
+.admin-metrics strong {
+  margin-top: 0.45rem;
+  color: var(--museum-blue);
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.admin-metrics .admin-metric-word {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+}
+
+.admin-metrics p {
+  color: var(--muted);
+}
+
+.admin-focus-card,
+.admin-bookings-section,
+.admin-customers,
+.admin-reservations {
+  border: 1px solid rgba(23, 63, 82, 0.34);
+  border-radius: 2px;
+  background: rgba(248, 242, 228, 0.94);
+  padding: 1rem;
+  box-shadow: 5px 6px 0 rgba(23, 63, 82, 0.1);
+}
+
+.admin-section-heading h2,
+.admin-reservations-head h2,
+.admin-editor-title h2 {
+  color: var(--museum-blue);
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.admin-upcoming-list {
+  border-top-color: rgba(23, 63, 82, 0.22);
+}
+
+.admin-upcoming-list button {
+  min-height: 52px;
+  border-bottom-color: rgba(23, 63, 82, 0.16);
+  padding: 0.65rem 0.4rem;
+}
+
+.admin-upcoming-list button:hover {
+  background: rgba(210, 180, 87, 0.13);
+  color: var(--accent);
+}
+
+.admin-filter-bar label,
+.admin-filter-bar select,
+.admin-booking-card,
+.admin-empty-reservations,
+.admin-reservation-row,
+.admin-calendar-day {
+  border-color: rgba(23, 63, 82, 0.25);
+  border-radius: 2px;
+  background: #fff9ec;
+}
+
+.admin-booking-card {
+  box-shadow: 4px 5px 0 rgba(23, 63, 82, 0.08);
+}
+
+.admin-booking-items > div,
+.admin-booking-finance {
+  border-radius: 1px;
+  background: rgba(210, 180, 87, 0.13);
+}
+
+.admin-customer-summary a,
+.admin-customer-actions a,
+.admin-customer-avatar {
+  border-color: rgba(23, 63, 82, 0.3);
+  border-radius: 2px;
+  color: var(--museum-blue);
+}
+
+.admin-customer-avatar {
+  background: var(--mustard);
+}
+
+.admin-calendar-day.has-reservations {
+  border-color: var(--accent);
+  background: rgba(210, 180, 87, 0.17);
+}
+
+.admin-calendar-number {
+  color: var(--museum-blue);
+  font-family: var(--font-display);
+}
+
+.admin-calendar-chip,
+.admin-calendar-more {
+  border-radius: 1px;
+}
+
+.admin-layout {
+  grid-template-columns: minmax(220px, 270px) minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.admin-list,
+.admin-editor {
+  border: 1px solid rgba(23, 63, 82, 0.34);
+  border-radius: 2px;
+  background: rgba(248, 242, 228, 0.95);
+}
+
+.admin-list {
+  padding: 0.55rem;
+}
+
+.admin-list button,
+.admin-new-button,
+.admin-upload,
+.admin-editor .gabinete-input {
+  border-radius: 2px;
+}
+
+.admin-list button:hover {
+  background: rgba(210, 180, 87, 0.12);
+}
+
+.admin-list button.is-active {
+  border-color: var(--museum-blue);
+  background: var(--mustard);
+  color: var(--ink);
+}
+
+.admin-new-button {
+  border-color: var(--museum-blue) !important;
+  color: var(--museum-blue);
+}
+
+.admin-login {
+  margin-top: clamp(2rem, 8vw, 6rem);
+}
+
+.admin-login h1 {
+  color: var(--museum-blue);
+  font-size: clamp(2.5rem, 5vw, 4rem);
+}
+
+/* Footer as closing poster */
+
+.site-footer {
+  position: relative;
+  overflow: hidden;
+  border-top: 8px solid var(--mustard);
+  background: var(--museum-blue);
+  color: #fff9ec;
+}
+
+.footer-main {
+  align-items: start;
+}
+
+.footer-brand {
+  position: relative;
+}
+
+.footer-isologotipo {
+  display: block;
+  width: clamp(150px, 15vw, 210px);
+  margin-bottom: 1.8rem;
+  border: 1px solid rgba(255, 249, 236, 0.35);
+  box-shadow: 7px 8px 0 var(--accent);
+  transform: rotate(-2deg);
+}
+
+.footer-logo-image {
+  width: clamp(126px, 12vw, 170px);
+}
+
+.footer-brand > p:nth-of-type(1) {
+  color: rgba(255, 249, 236, 0.72);
+}
+
+.footer-cta,
+.footer-column > p {
+  color: var(--mustard);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+
+.footer-column a,
+.footer-column span {
+  color: rgba(255, 249, 236, 0.72);
+}
+
+.footer-column a:hover {
+  color: var(--mustard);
+}
+
+.footer-bottom {
+  border-top-color: rgba(255, 249, 236, 0.18);
+  color: rgba(255, 249, 236, 0.5);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-isologo-collage {
+    animation: archive-float 7s ease-in-out infinite;
+  }
+
+  @keyframes archive-float {
+    0%,
+    100% {
+      transform: translateY(-50%) rotate(2deg);
+    }
+
+    50% {
+      transform: translateY(calc(-50% - 7px)) rotate(1.2deg);
+    }
+  }
+}
+
+@media (max-width: 1180px) {
+  .hero-content {
+    width: min(700px, 65vw);
+  }
+
+  .hero-isologo-collage {
+    right: 2rem;
+    width: clamp(250px, 30vw, 390px);
+  }
+
+  .hero-content h1 {
+    font-size: clamp(3.6rem, 6.8vw, 6.3rem);
+  }
+}
+
+@media (max-width: 900px) {
+  body:not(.force-desktop-view) .site-nav {
+    border-left: 2px solid var(--museum-blue);
+    background: var(--paper);
+    box-shadow: -9px 0 0 rgba(155, 62, 39, 0.28);
+  }
+
+  body:not(.force-desktop-view) .site-nav-link {
+    color: var(--museum-blue);
+    font-family: var(--font-display);
+    font-size: 1.65rem;
+    font-weight: 700;
+  }
+
+  .mobile-nav-extras a,
+  .mobile-nav-extras button {
+    border-color: rgba(23, 63, 82, 0.3);
+    border-radius: 2px;
+    background: #fff9ec;
+  }
+
+  .hero-scene {
+    min-height: min(600px, calc(100svh - 130px));
+    align-items: flex-end;
+    padding-bottom: 3rem;
+  }
+
+  .hero-content {
+    width: min(720px, 88vw);
+  }
+
+  .hero-isologo-collage {
+    top: 9%;
+    right: 3%;
+    width: 235px;
+    transform: rotate(3deg);
+    opacity: 0.46;
+  }
+
+  .hero-isologo-collage img {
+    box-shadow: 7px 8px 0 var(--museum-blue);
+  }
+
+  .hero-collage-note {
+    display: none;
+  }
+
+  .hero-content h1 {
+    font-size: clamp(3.7rem, 10vw, 6rem);
+  }
+
+  .home-use-card:nth-child(2) {
+    transform: rotate(0.5deg);
+  }
+
+  .product-summary {
+    position: static;
+  }
+
+  .admin-head {
+    display: grid;
+  }
+
+  .admin-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-metrics article:nth-child(3) {
+    border-left: 0;
+  }
+
+  .admin-metrics article:nth-child(n + 3) {
+    border-top: 1px solid rgba(23, 63, 82, 0.25);
+  }
+
+  .admin-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .site-header-inner {
+    width: calc(100% - 1rem);
+  }
+
+  .brand-wordmark-image {
+    width: 102px;
+  }
+
+  .hero-scene {
+    min-height: min(660px, calc(100svh - 130px));
+    padding: 7.25rem 0.8rem 1.5rem;
+  }
+
+  .hero-media {
+    right: -70%;
+    bottom: 0;
+    width: 150%;
+    height: 100%;
+    opacity: 0.14;
+  }
+
+  .hero-isologo-collage {
+    top: 1.2rem;
+    right: 1rem;
+    width: 116px;
+    opacity: 0.62;
+  }
+
+  .hero-collage-tape {
+    top: -7px;
+    width: 54px;
+    height: 17px;
+  }
+
+  .hero-content {
+    width: 100%;
+  }
+
+  .hero-archive-line {
+    display: none;
+  }
+
+  .hero-content h1 {
+    font-size: clamp(3.1rem, 13.5vw, 3.8rem);
+    line-height: 0.86;
+  }
+
+  .hero-lead {
+    max-width: 90% !important;
+    font-size: 0.9rem !important;
+  }
+
+  .hero-search {
+    min-height: 56px;
+    box-shadow: 5px 6px 0 var(--mustard);
+  }
+
+  .hero-search button {
+    width: 45px;
+    padding: 0;
+  }
+
+  .hero-categories {
+    display: none;
+  }
+
+  .home-flow-section,
+  .home-featured-section,
+  .home-benefit-strip {
+    width: calc(100% - 1.4rem);
+  }
+
+  .home-section-heading h2 {
+    font-size: clamp(3rem, 14vw, 4.6rem);
+  }
+
+  .home-use-card {
+    min-height: 290px;
+  }
+
+  .catalog-title-block-v3 h1,
+  .simple-page-hero h1,
+  .user-hero h1,
+  .product-detail-title-row h1 {
+    font-size: clamp(3.2rem, 14vw, 4.8rem) !important;
+  }
+
+  .simple-page-hero,
+  .user-hero {
+    min-height: 350px;
+    padding: 1.2rem;
+  }
+
+  .simple-page-hero::after,
+  .user-hero::after {
+    right: -7rem;
+    bottom: -18%;
+    width: 300px;
+  }
+
+  .product-visual-column > .object-plate {
+    box-shadow: 6px 7px 0 var(--mustard);
+  }
+
+  .admin-page {
+    width: calc(100% - 1rem);
+    padding-top: 0.7rem;
+  }
+
+  .admin-head {
+    padding: 0.9rem;
+  }
+
+  .admin-head h1 {
+    font-size: 2rem;
+  }
+
+  .admin-head p:not(.eyebrow) {
+    display: none;
+  }
+
+  .admin-tabs {
+    flex-wrap: nowrap;
+  }
+
+  .admin-metrics article {
+    min-height: 96px;
+    padding: 0.8rem;
+  }
+
+  .admin-focus-card,
+  .admin-bookings-section,
+  .admin-customers,
+  .admin-reservations {
+    padding: 0.8rem;
+  }
+
+  .footer-isologotipo {
+    width: 150px;
+  }
+}
