@@ -26,15 +26,14 @@ export function Hero() {
     <section className="hero-scene">
       <img
         className="hero-media"
-        src={`${import.meta.env.BASE_URL}og.png`}
+        src={`${import.meta.env.BASE_URL}hero-studio-clean.png`}
         alt=""
         aria-hidden="true"
       />
       <div className="hero-content">
-        <p className="hero-kicker">Rental de utilería para producción</p>
         <h1>
           <span>Objetos con pasado.</span>
-          Historias por venir.
+          <span>Historias por venir.</span>
         </h1>
         <p className="hero-lead">
           Un archivo de piezas curiosas, domésticas y extraordinarias. Buscá, revisá fechas y armá
