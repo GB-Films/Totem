@@ -599,6 +599,99 @@ body::before,
   border-radius: 4px;
 }
 
+@media (min-width: 901px) {
+  .catalog-body-v3 {
+    grid-template-columns: 270px minmax(0, 1fr);
+    gap: clamp(1.75rem, 3vw, 2.8rem);
+  }
+
+  .catalog-sidebar-v3 {
+    overflow: hidden;
+    border: 1px solid rgba(95, 41, 21, 0.2);
+    border-radius: 6px;
+    background: rgba(247, 243, 233, 0.72);
+    padding: 0;
+    box-shadow: 0 10px 28px rgba(71, 47, 41, 0.08);
+  }
+
+  .filter-summary-v3 {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.18rem 0.75rem;
+    align-items: end;
+    margin: 0;
+    border: 0;
+    border-bottom: 1px solid rgba(95, 41, 21, 0.18);
+    background: rgba(203, 179, 119, 0.12);
+    padding: 1rem 1.05rem 0.9rem;
+  }
+
+  .filter-summary-v3 span {
+    grid-column: 1 / -1;
+  }
+
+  .filter-summary-v3 strong {
+    font-size: 2.15rem;
+    line-height: 0.92;
+  }
+
+  .filter-summary-v3 em {
+    padding-bottom: 0.12rem;
+    font-size: 0.62rem;
+    text-align: right;
+  }
+
+  .category-list-v3 {
+    gap: 0.2rem;
+    border-bottom-color: rgba(95, 41, 21, 0.18);
+    padding: 0.65rem;
+  }
+
+  .category-list-v3 button {
+    min-height: 44px;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    padding: 0.55rem 0.65rem;
+  }
+
+  .category-list-v3 button:hover {
+    border-color: rgba(95, 41, 21, 0.16);
+    background: rgba(253, 250, 241, 0.62);
+    box-shadow: none;
+  }
+
+  .category-list-v3 button.is-active {
+    border-color: rgba(95, 41, 21, 0.2);
+    background: #fdfaf1;
+    box-shadow: inset 3px 0 0 var(--accent), 0 4px 12px rgba(71, 47, 41, 0.08);
+  }
+
+  .filter-section-v3 {
+    margin-inline: 0.85rem;
+  }
+
+  .clear-filters-v3 {
+    margin: 0.8rem 0.85rem;
+  }
+}
+
+body.force-desktop-view .catalog-body-v3 {
+  grid-template-columns: 270px minmax(0, 1fr);
+}
+
+body.force-desktop-view .catalog-sidebar-v3 {
+  overflow: hidden;
+  border: 1px solid rgba(95, 41, 21, 0.2);
+  border-radius: 6px;
+  background: rgba(247, 243, 233, 0.72);
+  padding: 0;
+  box-shadow: 0 10px 28px rgba(71, 47, 41, 0.08);
+}
+
+body.force-desktop-view .filter-summary-v3 {
+  margin: 0;
+}
+
 .product-visual-column > .object-plate,
 .product-summary .parchment-panel,
 .curiosity-box,
