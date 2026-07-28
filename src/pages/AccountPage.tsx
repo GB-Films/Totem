@@ -125,7 +125,7 @@ export function AccountPage() {
   if (!user) {
     return (
       <main className="user-page mx-auto w-full max-w-[1180px] px-4 py-8 sm:px-8">
-        <section className="user-hero">
+        <section className="user-hero account-header">
           <div>
             <p className="eyebrow">Cuenta</p>
             <h1>Tus guardados</h1>
@@ -177,7 +177,7 @@ export function AccountPage() {
 
   return (
     <main className="user-page mx-auto w-full max-w-[1180px] px-4 py-8 sm:px-8">
-      <section className="user-hero">
+      <section className="user-hero account-header">
         <div>
           <p className="eyebrow">Cuenta</p>
           <h1>{profile.firstName ? `Hola, ${profile.firstName}` : "Tu cuenta"}</h1>

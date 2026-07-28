@@ -55,8 +55,10 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
       <section className="parchment-panel p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="eyebrow">Carrito</p>
-            <h2 className="mt-2 font-display text-3xl text-gabinete-darkBrown">Objetos elegidos</h2>
+            <p className="eyebrow">{showAction ? "Carrito" : "Paso 02"}</p>
+            <h2 className="mt-2 font-display text-3xl text-gabinete-darkBrown">
+              {showAction ? "Objetos elegidos" : "Revisá objetos y fechas"}
+            </h2>
           </div>
           {selection.length > 0 && (
             <button

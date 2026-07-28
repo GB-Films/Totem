@@ -1,6 +1,8 @@
 import type { ReservationStatus } from "../types";
 
-export const PAYMENT_ALIAS = "tomiboe";
+export const PAYMENT_ALIAS = "totem.rental";
+export const PAYMENT_CVU = "0000003100074005001115";
+export const PAYMENT_HOLDER = "Paula Florencia Burna Elstner";
 
 export const reservationStatusSteps: Array<{
   status: ReservationStatus;
@@ -15,7 +17,7 @@ export const reservationStatusSteps: Array<{
   {
     status: "payment_pending",
     label: "Pago de seña pendiente",
-    description: `Pagá la seña por Mercado Pago al alias ${PAYMENT_ALIAS}.`,
+    description: `Transferí la seña al alias ${PAYMENT_ALIAS}.`,
   },
   {
     status: "confirmed",

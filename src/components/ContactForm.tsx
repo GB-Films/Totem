@@ -14,7 +14,7 @@ import {
   buildWhatsappUrl,
 } from "../utils/messages";
 import { calculateSelectionPricing } from "../utils/pricing";
-import { PAYMENT_ALIAS } from "../utils/reservations";
+import { PAYMENT_ALIAS, PAYMENT_CVU, PAYMENT_HOLDER } from "../utils/reservations";
 
 interface ContactFormProps {
   selection: SelectionItem[];
@@ -166,7 +166,7 @@ export function ContactForm({ selection }: ContactFormProps) {
             projectName: projectName.trim(),
             projectType: "",
             dates: "",
-            message: `${note.trim() ? `Nota: ${note.trim()}. ` : ""}Pago de seña por Mercado Pago al alias ${PAYMENT_ALIAS}. Retiro: ${
+            message: `${note.trim() ? `Nota: ${note.trim()}. ` : ""}Pago de seña por transferencia al alias ${PAYMENT_ALIAS}, CVU ${PAYMENT_CVU}, titular ${PAYMENT_HOLDER}. Retiro: ${
               pickupOption === "previous_day_requested" ? "solicitan retirar el día previo" : "día de inicio desde las 8:00"
             }.`,
           },
@@ -211,112 +211,140 @@ export function ContactForm({ selection }: ContactFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="parchment-panel p-5">
-      <p className="eyebrow">Finalizar</p>
-      <h2 className="mt-2 font-display text-3xl text-gabinete-darkBrown">Confirmar pedido</h2>
-      <p className="mt-2 font-editorial text-sm leading-6 text-gabinete-muted">
-        Registramos el pedido y guardamos las fechas durante 24 horas. Para confirmarlas, pagá la seña
-        por Mercado Pago y enviá el comprobante por WhatsApp.
+    <form onSubmit={handleSubmit} className="parchment-panel checkout-form p-5">
+      <p className="eyebrow">Paso 01</p>
+      <h2 className="mt-2 font-display text-3xl text-gabinete-darkBrown">Completá tus datos</h2>
+      <p className="checkout-form-intro">
+        Con estos datos registramos el pedido y guardamos las fechas durante 24 horas.
       </p>
-      <div className="payment-instructions mt-3">
-        <span>Alias Mercado Pago</span>
-        <strong>{PAYMENT_ALIAS}</strong>
-        <p>Seña para confirmar: {formatCurrency(pricing.reserveDeposit)}.</p>
-      </div>
-      <ol className="booking-steps" aria-label="Pasos para confirmar">
-        <li><strong>1</strong><span>Completá tus datos</span></li>
-        <li><strong>2</strong><span>Reservamos las fechas</span></li>
-        <li><strong>3</strong><span>Transferí la seña</span></li>
-      </ol>
 
-      <fieldset className="pickup-options mt-4">
-        <legend>Retiro</legend>
-        <label>
-          <input
-            type="radio"
-            checked={pickupOption === "reservation_day"}
-            onChange={() => setPickupOption("reservation_day")}
-          />
-          <span>Retiro desde las 8:00 del primer día de reserva.</span>
-        </label>
-        <label>
-          <input
-            type="radio"
-            checked={pickupOption === "previous_day_requested"}
-            onChange={() => setPickupOption("previous_day_requested")}
-          />
-          <span>Solicitar retiro el día previo, sujeto a disponibilidad y aprobación.</span>
-        </label>
-      </fieldset>
+      <section className="checkout-form-section">
+        <header className="checkout-section-head">
+          <strong>01</strong>
+          <div>
+            <span>Datos del cliente</span>
+            <p>Información necesaria para identificar la reserva.</p>
+          </div>
+        </header>
+        <div className="reservation-customer-grid">
+          <label>
+            Nombre
+            <input
+              className="gabinete-input"
+              value={customerInfo.firstName}
+              onChange={(event) => updateCustomerInfo("firstName", event.target.value)}
+              required
+            />
+          </label>
+          <label>
+            Apellido
+            <input
+              className="gabinete-input"
+              value={customerInfo.lastName}
+              onChange={(event) => updateCustomerInfo("lastName", event.target.value)}
+              required
+            />
+          </label>
+          <label>
+            DNI
+            <input
+              className="gabinete-input"
+              inputMode="numeric"
+              autoComplete="off"
+              value={customerInfo.dni}
+              onChange={(event) => updateCustomerInfo("dni", event.target.value.replace(/\D/g, "").slice(0, 9))}
+              required
+            />
+          </label>
+          <label>
+            Celular
+            <input
+              className="gabinete-input"
+              type="tel"
+              autoComplete="tel"
+              value={customerInfo.phone}
+              onChange={(event) => updateCustomerInfo("phone", event.target.value)}
+              required
+            />
+          </label>
+        </div>
+      </section>
 
-      <div className="reservation-customer-grid mt-4">
-        <label>
-          Nombre
-          <input
-            className="gabinete-input"
-            value={customerInfo.firstName}
-            onChange={(event) => updateCustomerInfo("firstName", event.target.value)}
-            required
-          />
-        </label>
-        <label>
-          Apellido
-          <input
-            className="gabinete-input"
-            value={customerInfo.lastName}
-            onChange={(event) => updateCustomerInfo("lastName", event.target.value)}
-            required
-          />
-        </label>
-        <label>
-          DNI
-          <input
-            className="gabinete-input"
-            inputMode="numeric"
-            autoComplete="off"
-            value={customerInfo.dni}
-            onChange={(event) => updateCustomerInfo("dni", event.target.value.replace(/\D/g, "").slice(0, 9))}
-            required
-          />
-        </label>
-        <label>
-          Celular
-          <input
-            className="gabinete-input"
-            type="tel"
-            autoComplete="tel"
-            value={customerInfo.phone}
-            onChange={(event) => updateCustomerInfo("phone", event.target.value)}
-            required
-          />
-        </label>
-        <label className="reservation-customer-wide">
-          Proyecto <span>(opcional)</span>
-          <input
-            className="gabinete-input"
-            value={projectName}
-            onChange={(event) => setProjectName(event.target.value)}
-            placeholder="Ej. Campaña verano"
-          />
-        </label>
-        <label className="reservation-customer-wide">
-          Algo que debamos saber <span>(opcional)</span>
-          <textarea
-            className="gabinete-input"
-            rows={3}
-            value={note}
-            onChange={(event) => setNote(event.target.value)}
-            placeholder="Horarios, logística o indicaciones del proyecto"
-          />
-        </label>
-      </div>
+      <section className="checkout-form-section">
+        <header className="checkout-section-head">
+          <strong>02</strong>
+          <div>
+            <span>Retiro y proyecto</span>
+            <p>Definí cómo necesitás coordinar la producción.</p>
+          </div>
+        </header>
+        <fieldset className="pickup-options">
+          <legend>Retiro</legend>
+          <label>
+            <input
+              type="radio"
+              checked={pickupOption === "reservation_day"}
+              onChange={() => setPickupOption("reservation_day")}
+            />
+            <span>Retiro desde las 8:00 del primer día de reserva.</span>
+          </label>
+          <label>
+            <input
+              type="radio"
+              checked={pickupOption === "previous_day_requested"}
+              onChange={() => setPickupOption("previous_day_requested")}
+            />
+            <span>Solicitar retiro el día previo, sujeto a disponibilidad y aprobación.</span>
+          </label>
+        </fieldset>
+        <div className="reservation-customer-grid checkout-project-grid">
+          <label className="reservation-customer-wide">
+            Proyecto <span>(opcional)</span>
+            <input
+              className="gabinete-input"
+              value={projectName}
+              onChange={(event) => setProjectName(event.target.value)}
+              placeholder="Ej. Campaña verano"
+            />
+          </label>
+          <label className="reservation-customer-wide">
+            Algo que debamos saber <span>(opcional)</span>
+            <textarea
+              className="gabinete-input"
+              rows={3}
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+              placeholder="Horarios, logística o indicaciones del proyecto"
+            />
+          </label>
+        </div>
+      </section>
+
+      <section className="checkout-form-section checkout-payment-section">
+        <header className="checkout-section-head">
+          <strong>03</strong>
+          <div>
+            <span>Reserva y seña</span>
+            <p>Primero registramos el pedido; después transferís la seña.</p>
+          </div>
+        </header>
+        <div className="payment-instructions">
+          <dl>
+            <div><dt>Alias</dt><dd>{PAYMENT_ALIAS}</dd></div>
+            <div><dt>CVU</dt><dd>{PAYMENT_CVU}</dd></div>
+            <div><dt>Titular</dt><dd>{PAYMENT_HOLDER}</dd></div>
+          </dl>
+          <p>Seña para confirmar: <strong>{formatCurrency(pricing.reserveDeposit)}</strong></p>
+        </div>
+      </section>
 
       {status === "confirmed" && (
         <div className="mt-3 rounded-md border border-gabinete-available/35 bg-gabinete-available/10 px-3 py-3 font-editorial text-sm text-gabinete-available">
           <p>
             Pedido <strong>{confirmedBookingCode}</strong> registrado. Guardamos las fechas durante
-            24 horas. Pagá la seña al alias <strong>{PAYMENT_ALIAS}</strong> y enviá el comprobante
-            para dejarlo confirmado.
+            24 horas. Transferí la seña al alias <strong>{PAYMENT_ALIAS}</strong>, CVU{" "}
+            <strong>{PAYMENT_CVU}</strong>, a nombre de <strong>{PAYMENT_HOLDER}</strong>, y enviá el
+            comprobante para dejarlo confirmado.
           </p>
           {confirmedWhatsappUrl && (
             <a

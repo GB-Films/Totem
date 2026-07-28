@@ -104,7 +104,7 @@ function toBooking(id: string, data: Omit<Booking, "id">): Booking {
     customerName: data.customerName ?? "",
     customerEmail: data.customerEmail ?? "",
     createdByUid: data.createdByUid ?? "",
-    paymentAlias: data.paymentAlias ?? PAYMENT_ALIAS,
+    paymentAlias: PAYMENT_ALIAS,
     pickupOption: data.pickupOption ?? "reservation_day",
     projectName: data.projectName,
     note: data.note,

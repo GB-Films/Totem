@@ -2,11 +2,12 @@ import { ContactForm } from "../components/ContactForm";
 import { ReservationHistory } from "../components/ReservationHistory";
 import { SelectedProductsPanel } from "../components/SelectedProductsPanel";
 import { useSelection } from "../context/SelectionContext";
+import { PAYMENT_ALIAS } from "../utils/reservations";
 
 const rentalChecklist = [
   "Elegí fechas libres para cada objeto.",
   "Completá tus datos y el nombre del proyecto.",
-  "Pagá la seña por Mercado Pago al alias tomiboe.",
+  `Pagá la seña por transferencia al alias ${PAYMENT_ALIAS}.`,
   "Enviá el comprobante y coordinamos retiro, devolución y persona autorizada.",
 ];
 
@@ -18,16 +19,21 @@ export function ContactPage() {
       <section className="simple-page-hero">
         <p className="eyebrow">Carrito</p>
         <h1 className="mt-3 max-w-[680px] font-display text-[clamp(2.2rem,4vw,4rem)] font-medium uppercase leading-[0.98] tracking-[0.02em] text-gabinete-darkBrown">
-          Revisá tu selección.
+          Armá tu reserva.
         </h1>
         <p className="mt-5 max-w-[700px] font-editorial text-base leading-7 text-gabinete-muted">
-          Acá podés ajustar cantidades, días y fechas, o quitar productos. Cuando confirmás,
-          te mostramos el acceso directo para continuar por WhatsApp.
+          Seguí los cuatro pasos para registrar el pedido, guardar las fechas y confirmar la seña.
         </p>
       </section>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <SelectedProductsPanel showAction={false} />
+      <ol className="checkout-progress" aria-label="Proceso de reserva">
+        <li><strong>01</strong><span>Completá tus datos</span></li>
+        <li><strong>02</strong><span>Revisá objetos y fechas</span></li>
+        <li><strong>03</strong><span>Reservá por 24 horas</span></li>
+        <li><strong>04</strong><span>Transferí la seña</span></li>
+      </ol>
+
+      <div className="contact-checkout-layout">
         <div className="space-y-5">
           <ContactForm selection={selection} />
           <section className="self-service-card">
@@ -48,6 +54,7 @@ export function ContactPage() {
             </div>
           </section>
         </div>
+        <SelectedProductsPanel showAction={false} />
       </div>
       <div className="mt-8">
         <ReservationHistory />

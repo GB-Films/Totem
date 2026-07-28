@@ -1,15 +1,12 @@
 import { ArrowUpRight, Instagram } from "lucide-react";
 import { Link } from "react-router-dom";
-import totemLogoLight from "../assets/brand/totem-logo-light.png";
-import totemIsologotipo from "../assets/brand/totem-isologotipo.webp";
 
 export function Footer() {
   return (
     <footer className="site-footer">
       <div className="footer-main">
         <div className="footer-brand">
-          <img className="footer-isologotipo" src={totemIsologotipo} alt="" aria-hidden="true" />
-          <img className="footer-logo-image" src={totemLogoLight} alt="Totem" />
+          <strong className="footer-wordmark">TOTEM RENTAL</strong>
           <p>
             Objetos que sostienen historias. Utilería, mobiliario, vestuario y piezas especiales
             para cine, TV, publicidad, teatro y contenidos.

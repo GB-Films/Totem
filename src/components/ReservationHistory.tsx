@@ -8,6 +8,8 @@ import {
   getReservationStatusIndex,
   getReservationStatusLabel,
   PAYMENT_ALIAS,
+  PAYMENT_CVU,
+  PAYMENT_HOLDER,
   reservationStatusSteps,
 } from "../utils/reservations";
 
@@ -101,7 +103,8 @@ export function ReservationHistory() {
                     <Clock3 size={17} />
                     <p>
                       Transferí <strong>{formatCurrency(booking.reserveDeposit)}</strong> al alias{" "}
-                      <strong>{booking.paymentAlias || PAYMENT_ALIAS}</strong> y enviá el comprobante.
+                      <strong>{PAYMENT_ALIAS}</strong>. CVU <strong>{PAYMENT_CVU}</strong>, titular{" "}
+                      <strong>{PAYMENT_HOLDER}</strong>. Después enviá el comprobante.
                       {booking.holdExpiresAt && (
                         <> Guardamos las fechas hasta el {formatHoldExpiration(booking.holdExpiresAt)}.</>
                       )}

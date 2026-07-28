@@ -45,7 +45,10 @@ export function CollectionsPage() {
             >
               {group.imageProduct && <ObjectImage product={group.imageProduct} compact />}
               <div className="p-6">
-                <p className="eyebrow">{group.products.length} {group.products.length === 1 ? "pieza" : "piezas"}</p>
+                <p className="collection-count">
+                  <strong>{group.products.length}</strong>
+                  <span>{group.products.length === 1 ? "Pieza disponible" : "Piezas disponibles"}</span>
+                </p>
                 <h2 className="mt-2 font-display text-2xl font-medium uppercase tracking-[0.04em] text-gabinete-darkBrown">
                   {group.category}
                 </h2>

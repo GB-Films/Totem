@@ -3,7 +3,6 @@ import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCatalog } from "../context/CatalogContext";
 import type { Category } from "../types";
-import totemIsologotipo from "../assets/brand/totem-isologotipo.webp";
 
 const categoryIcons: Partial<Record<Category, typeof Armchair>> = {
   "Utilería": Armchair,
@@ -25,24 +24,14 @@ export function Hero() {
 
   return (
     <section className="hero-scene">
-      <img
-        className="hero-media"
-        src={`${import.meta.env.BASE_URL}og.png`}
-        alt=""
-        aria-hidden="true"
-      />
-
-      <div className="hero-isologo-collage" aria-hidden="true">
-        <span className="hero-collage-tape" />
-        <img src={totemIsologotipo} alt="" />
-        <span className="hero-collage-note">Objetos con pasado</span>
-      </div>
-
       <div className="hero-content">
         <div className="hero-archive-line">
           <span>Archivo 01</span>
           <span>Buenos Aires</span>
-          <span>{products.length || "—"} piezas</span>
+          <span className="hero-piece-count">
+            <strong>{products.length || "—"}</strong>
+            Piezas disponibles
+          </span>
         </div>
         <p className="hero-kicker">Rental de utilería para producción</p>
         <h1>

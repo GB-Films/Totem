@@ -718,7 +718,7 @@ body.force-desktop-view .filter-summary-v3 {
   border: 0;
   border-radius: 6px;
   background-color: var(--accent);
-  background-image: url("../assets/brand/brand-texture.jpg");
+  background-image: none;
   background-position: center;
   background-size: cover;
   background-blend-mode: multiply;
@@ -967,7 +967,7 @@ body.force-desktop-view .filter-summary-v3 {
   --faint: #80736a;
   --accent: #9b3e27;
   --terracotta: #9b3e27;
-  --museum-blue: #173f52;
+  --museum-blue: #2c211c;
   --mustard: #d2b457;
   --sage: #708a83;
   --gold: #d2b457;
@@ -994,7 +994,7 @@ body::before {
   inset: 0;
   z-index: 10000;
   display: block;
-  background-image: url("../assets/brand/brand-texture.jpg");
+  background-image: none;
   background-position: center;
   background-size: cover;
   content: "";
@@ -1180,7 +1180,7 @@ body::before {
   inset: 0;
   z-index: -1;
   background-color: rgba(239, 231, 214, 0.78);
-  background-image: url("../assets/brand/brand-texture.jpg");
+  background-image: none;
   background-position: center;
   background-size: cover;
   content: "";
@@ -1884,7 +1884,7 @@ body.force-desktop-view .catalog-sidebar-v3 {
   border-bottom: 2px solid var(--ink);
   border-radius: 2px;
   background-color: var(--accent);
-  background-image: url("../assets/brand/brand-texture.jpg");
+  background-image: none;
   background-position: center;
   background-size: cover;
   background-blend-mode: multiply;
@@ -1902,7 +1902,7 @@ body.force-desktop-view .catalog-sidebar-v3 {
   z-index: -1;
   width: clamp(280px, 34vw, 520px);
   aspect-ratio: 1;
-  background-image: url("../assets/brand/totem-isologotipo.webp");
+  background-image: none;
   background-position: center;
   background-size: cover;
   content: "";
