@@ -2,7 +2,6 @@ export type Category =
   | "Utilería"
   | "Mobiliario"
   | "Vestuario"
-  | "Decoración"
   | "Arte"
   | "Exterior"
   | "Oficina";

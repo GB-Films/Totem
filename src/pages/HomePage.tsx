@@ -39,7 +39,7 @@ export function HomePage() {
       <section className="home-flow-section">
         <div className="home-section-heading">
           <p className="eyebrow">Encontrá más rápido</p>
-          <h2>Una entrada para cada etapa del proyecto.</h2>
+          <h2>Elegí como buscar tu utilería ideal</h2>
           <p>
             Desde una lista cerrada hasta una primera búsqueda visual: empezá por donde te resulte más útil.
           </p>

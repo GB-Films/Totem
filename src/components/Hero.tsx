@@ -8,7 +8,6 @@ const categoryIcons: Partial<Record<Category, typeof Armchair>> = {
   "Utilería": Armchair,
   "Mobiliario": Sofa,
   "Vestuario": Shirt,
-  "Decoración": Palette,
   "Arte": Palette,
 };
 
@@ -45,7 +44,7 @@ export function Hero() {
         <p className="hero-kicker">Archivo de utilería · Buenos Aires</p>
         <h1>Objetos con carácter para historias que se ven.</h1>
         <p className="hero-lead">
-          Utilería, mobiliario, decoración y vestuario listos para cine, TV, publicidad, teatro y contenido.
+          Utilería, mobiliario y vestuario listos para cine, TV, publicidad, teatro y contenido.
         </p>
 
         <form className="hero-search" onSubmit={submitSearch}>

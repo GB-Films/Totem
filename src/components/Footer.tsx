@@ -32,7 +32,7 @@ export function Footer() {
             <span>Alquiler por día o período</span>
             <span>Selección por proyecto</span>
             <span>Entrega y retiro coordinado</span>
-            <span>Asesoría para arte</span>
+            <span>Asesoría para utilería</span>
           </div>
         </div>
 
@@ -40,7 +40,7 @@ export function Footer() {
           <p>Contacto</p>
           <div>
             <span>Buenos Aires, Argentina</span>
-            <a href="mailto:hola@totemrental.com">hola@totemrental.com</a>
+            <a href="mailto:totem.props@gmail.com">totem.props@gmail.com</a>
             <a href="https://instagram.com" target="_blank" rel="noreferrer" className="footer-social">
               <Instagram size={15} /> Instagram
             </a>

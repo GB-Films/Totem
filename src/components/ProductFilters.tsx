@@ -1,4 +1,4 @@
-import { Armchair, BadgeCheck, Brush, Clapperboard, Minus, Palette, Shirt, Sun, Truck, X } from "lucide-react";
+import { Armchair, BadgeCheck, Brush, Clapperboard, Minus, Shirt, Sun, Truck, X } from "lucide-react";
 import type { Availability, Category, Product } from "../types";
 
 export interface CatalogFilters {
@@ -24,7 +24,6 @@ const categoryIcons: Record<Category, typeof Armchair> = {
   "Utilería": Clapperboard,
   "Mobiliario": Armchair,
   "Vestuario": Shirt,
-  "Decoración": Palette,
   "Arte": Brush,
   "Exterior": Sun,
   "Oficina": BadgeCheck,

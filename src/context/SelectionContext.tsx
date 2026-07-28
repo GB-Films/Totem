@@ -22,7 +22,7 @@ interface SelectionContextValue {
   isSelected: (productId: string) => boolean;
 }
 
-const STORAGE_KEY = "el-gabinete-selection";
+const STORAGE_KEY = "totem-selection";
 const SelectionContext = createContext<SelectionContextValue | undefined>(undefined);
 
 function normalizeSelectionItem(item: SelectionItem): SelectionItem {

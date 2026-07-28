@@ -71,7 +71,7 @@ export function buildContactMessage(
 export function buildMailtoUrl(message: string) {
   const subject = encodeURIComponent("Consulta de reserva - TOTEM RENTAL");
   const body = encodeURIComponent(message);
-  return `mailto:hola@totemrental.com?subject=${subject}&body=${body}`;
+  return `mailto:totem.props@gmail.com?subject=${subject}&body=${body}`;
 }
 
 export function buildWhatsappUrl(message: string) {

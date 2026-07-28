@@ -8,7 +8,7 @@ interface FavoritesContextValue {
   removeFavorite: (productId: string) => void;
 }
 
-const STORAGE_KEY = "el-gabinete-favorites";
+const STORAGE_KEY = "totem-favorites";
 const FavoritesContext = createContext<FavoritesContextValue | undefined>(undefined);
 
 function getStorageKey(uid?: string) {
