@@ -1,10 +1,10 @@
 /* Totem brand restyle - visual language from the 2026 identity guide. */
 
 :root {
-  --font-display: "Arial Rounded MT Bold", "Arial", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Arial Rounded MT Bold", "Arial", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Helvetica Neue", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Cascadia Mono", "Courier New", ui-monospace, monospace;
+  --font-display: "BlurWeb-Bold W03", sans-serif;
+  --font-serif: "Ballinger Mono", monospace;
+  --font-body: "Ballinger Mono", monospace;
+  --font-mono: "Ballinger Mono", monospace;
   --ink: #472f29;
   --paper: #e8e6d8;
   --panel: #f7f3e9;
@@ -954,10 +954,10 @@ body.force-desktop-view .filter-summary-v3 {
 /* Totem archive collage - museum editorial system */
 
 :root {
-  --font-display: "Bodoni MT", Didot, Georgia, ui-serif, serif;
-  --font-serif: "Bodoni MT", Didot, Georgia, ui-serif, serif;
-  --font-body: "Helvetica Neue", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Arial Narrow", "Franklin Gothic Medium", "Segoe UI", sans-serif;
+  --font-display: "BlurWeb-Bold W03", sans-serif;
+  --font-serif: "Ballinger Mono", monospace;
+  --font-body: "Ballinger Mono", monospace;
+  --font-mono: "Ballinger Mono", monospace;
   --ink: #292522;
   --paper: #efe7d6;
   --panel: #f8f2e4;

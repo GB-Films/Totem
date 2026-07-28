@@ -1,4 +1,4 @@
-import { Heart, Lock, LogOut, Save, ShoppingCart, UserRound } from "lucide-react";
+import { CalendarDays, Heart, Lock, LogOut, Save, ShoppingCart, UserRound } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
@@ -11,6 +11,7 @@ import { getFirebaseDb } from "../services/firebase";
 import type { UserProfile } from "../types";
 
 type ProfileForm = Pick<UserProfile, "firstName" | "lastName" | "dni" | "phone">;
+type AccountSection = "reservations" | "profile" | "favorites";
 
 const emptyProfile: ProfileForm = {
   firstName: "",
@@ -27,6 +28,7 @@ export function AccountPage() {
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(false);
+  const [activeSection, setActiveSection] = useState<AccountSection>("reservations");
   const favoriteProducts = useMemo(
     () => favoriteIds
       .map((id) => products.find((product) => product.id === id))
@@ -189,7 +191,37 @@ export function AccountPage() {
         </button>
       </section>
 
-      <section className="user-dashboard">
+      <nav className="account-tabs" aria-label="Secciones de la cuenta">
+        <button
+          type="button"
+          className={activeSection === "reservations" ? "is-active" : ""}
+          aria-pressed={activeSection === "reservations"}
+          onClick={() => setActiveSection("reservations")}
+        >
+          <CalendarDays size={18} />
+          Mis reservas
+        </button>
+        <button
+          type="button"
+          className={activeSection === "profile" ? "is-active" : ""}
+          aria-pressed={activeSection === "profile"}
+          onClick={() => setActiveSection("profile")}
+        >
+          <UserRound size={18} />
+          Datos personales
+        </button>
+        <button
+          type="button"
+          className={activeSection === "favorites" ? "is-active" : ""}
+          aria-pressed={activeSection === "favorites"}
+          onClick={() => setActiveSection("favorites")}
+        >
+          <Heart size={18} />
+          Favoritos
+        </button>
+      </nav>
+
+      {activeSection === "profile" && (
         <form className="user-profile-card parchment-panel p-5" onSubmit={saveProfile}>
           <p className="eyebrow flex items-center gap-2">
             <UserRound size={15} />
@@ -220,11 +252,16 @@ export function AccountPage() {
             {loadingProfile ? "Cargando…" : saving ? "Guardando…" : "Guardar datos"}
           </button>
         </form>
+      )}
 
+      {activeSection === "reservations" && (
+        <section className="account-section-shell">
         <ReservationHistory />
-      </section>
+        </section>
+      )}
 
-      <section className="user-favorites parchment-panel p-5">
+      {activeSection === "favorites" && (
+        <section className="user-favorites parchment-panel p-5">
         <p className="eyebrow flex items-center gap-2">
           <Heart size={15} />
           Favoritos
@@ -258,7 +295,8 @@ export function AccountPage() {
             ))}
           </div>
         )}
-      </section>
+        </section>
+      )}
 
       <section className="user-quick-actions">
         <Link to="/catalogo" className="gabinete-button-secondary px-5 py-3">Catálogo</Link>

@@ -1,4 +1,4 @@
-import { Armchair, BadgeCheck, Brush, Clapperboard, Minus, Shirt, Sun, Truck, X } from "lucide-react";
+import { Truck, X } from "lucide-react";
 import type { Availability, Category, Product } from "../types";
 
 export interface CatalogFilters {
@@ -20,15 +20,6 @@ interface ProductFiltersProps {
   availableTags: string[];
 }
 
-const categoryIcons: Record<Category, typeof Armchair> = {
-  "Utilería": Clapperboard,
-  "Mobiliario": Armchair,
-  "Vestuario": Shirt,
-  "Arte": Brush,
-  "Exterior": Sun,
-  "Oficina": BadgeCheck,
-};
-
 export function ProductFilters({
   filters,
   maxCatalogPrice,
@@ -38,8 +29,7 @@ export function ProductFilters({
   categories,
   availableTags,
 }: ProductFiltersProps) {
-  const primaryTags = availableTags.slice(0, 7);
-  const secondaryTags = availableTags.slice(7, 14);
+  const visibleTags = availableTags.slice(0, 12);
   const clearFilters = () => {
     onChange({
       search: "",
@@ -64,9 +54,8 @@ export function ProductFilters({
   return (
     <aside className="catalog-sidebar-v3">
       <div className="filter-summary-v3">
-        <span>Archivo</span>
-        <strong>{resultCount}</strong>
-        <em>resultados activos</em>
+        <span>Filtrar catálogo</span>
+        <em>{resultCount} resultados</em>
       </div>
 
       <div className="category-list-v3">
@@ -75,35 +64,30 @@ export function ProductFilters({
           onClick={() => onChange({ ...filters, category: "Todas" })}
           className={filters.category === "Todas" ? "is-active" : ""}
         >
-          <span className="category-dot-v3">✶</span>
           <span>Todos</span>
-          <em>({products.length})</em>
+          <em>{products.length}</em>
         </button>
 
-        {categories.map((category) => {
-          const Icon = categoryIcons[category];
-          return (
-            <button
-              key={category}
-              type="button"
-              onClick={() => onChange({ ...filters, category })}
-              className={filters.category === category ? "is-active" : ""}
-            >
-              <Icon size={18} strokeWidth={1.75} />
-              <span>{category}</span>
-              <em>({countByCategory(category)})</em>
-            </button>
-          );
-        })}
+        {categories.map((category) => (
+          <button
+            key={category}
+            type="button"
+            onClick={() => onChange({ ...filters, category })}
+            className={filters.category === category ? "is-active" : ""}
+          >
+            <span>{category}</span>
+            <em>{countByCategory(category)}</em>
+          </button>
+        ))}
       </div>
 
-      <div className="filter-section-v3">
-        <div className="filter-section-title-v3">
+      <details className="filter-section-v3" open>
+        <summary className="filter-section-title-v3">
           <strong>Etiquetas</strong>
-          <Minus size={15} />
-        </div>
+          <span>{filters.tags.length || "+"}</span>
+        </summary>
         <div className="checkbox-list-v3">
-          {primaryTags.map((tag) => (
+          {visibleTags.map((tag) => (
             <label key={tag}>
               <input
                 type="checkbox"
@@ -115,25 +99,7 @@ export function ProductFilters({
             </label>
           ))}
         </div>
-      </div>
-
-      {secondaryTags.length > 0 && (
-        <div className="filter-section-v3">
-          <div className="filter-section-title-v3">
-            <strong>Más etiquetas</strong>
-            <span>+</span>
-          </div>
-          <div className="checkbox-list-v3">
-            {secondaryTags.map((tag) => (
-              <label key={tag}>
-                <input type="checkbox" checked={filters.tags.includes(tag)} onChange={() => toggleTag(tag)} />
-                <span>{tag}</span>
-                <em>({countByTag(tag)})</em>
-              </label>
-            ))}
-          </div>
-        </div>
-      )}
+      </details>
 
       <div className="filter-section-v3">
         <div className="filter-section-title-v3">

@@ -32,10 +32,10 @@ export default {
         },
       },
       fontFamily: {
-        display: ["Fredoka", "Arial Rounded MT Bold", "Arial", "ui-sans-serif", "sans-serif"],
-        serifDisplay: ["Fredoka", "Arial Rounded MT Bold", "Arial", "ui-sans-serif", "sans-serif"],
-        editorial: ["Nunito Sans", "Segoe UI", "Arial", "ui-sans-serif", "system-ui", "sans-serif"],
-        body: ["Nunito Sans", "Segoe UI", "Arial", "ui-sans-serif", "system-ui", "sans-serif"],
+        display: ["BlurWeb-Bold W03", "sans-serif"],
+        serifDisplay: ["BlurWeb-Bold W03", "sans-serif"],
+        editorial: ["Ballinger Mono", "monospace"],
+        body: ["Ballinger Mono", "monospace"],
       },
       boxShadow: {
         cabinet: "0 28px 70px rgba(71, 47, 41, .12)",

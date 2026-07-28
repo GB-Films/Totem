@@ -1,9 +1,9 @@
 /* Totem Rental — unified editorial interface */
 
 :root {
-  --font-display: "Iowan Old Style", "Baskerville", "Georgia", ui-serif, serif;
-  --font-serif: "Iowan Old Style", "Baskerville", "Georgia", ui-serif, serif;
-  --font-body: "Inter", "Avenir Next", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "BlurWeb-Bold W03", sans-serif;
+  --font-serif: "Ballinger Mono", monospace;
+  --font-body: "Ballinger Mono", monospace;
   --ink: #1c2924;
   --paper: #f1eee6;
   --panel: #fbf9f4;

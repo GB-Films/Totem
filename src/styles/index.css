@@ -4,11 +4,11 @@
 
 :root {
   color-scheme: light;
-  font-family: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+  font-family: "Ballinger Mono", monospace;
   background: #e8e6d8;
-  --font-display: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+  --font-display: "BlurWeb-Bold W03", sans-serif;
+  --font-serif: "Ballinger Mono", monospace;
+  --font-body: "Ballinger Mono", monospace;
   --ink: #472f29;
   --paper: #e8e6d8;
   --panel: #f4f0e3;
@@ -2752,7 +2752,7 @@ footer {
 .admin-card p,
 .admin-head p {
   color: var(--muted);
-  font-family: Lora, Georgia, serif;
+  font-family: var(--font-body);
 }
 .admin-login { display: grid; gap: 1rem; }
 .admin-login label,

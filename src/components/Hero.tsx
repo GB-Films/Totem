@@ -24,15 +24,13 @@ export function Hero() {
 
   return (
     <section className="hero-scene">
+      <img
+        className="hero-media"
+        src={`${import.meta.env.BASE_URL}og.png`}
+        alt=""
+        aria-hidden="true"
+      />
       <div className="hero-content">
-        <div className="hero-archive-line">
-          <span>Archivo 01</span>
-          <span>Buenos Aires</span>
-          <span className="hero-piece-count">
-            <strong>{products.length || "—"}</strong>
-            Piezas disponibles
-          </span>
-        </div>
         <p className="hero-kicker">Rental de utilería para producción</p>
         <h1>
           <span>Objetos con pasado.</span>
@@ -41,6 +39,10 @@ export function Hero() {
         <p className="hero-lead">
           Un archivo de piezas curiosas, domésticas y extraordinarias. Buscá, revisá fechas y armá
           una selección lista para entrar en cuadro.
+        </p>
+        <p className="hero-piece-count">
+          <strong>{products.length || "—"}</strong>
+          <span>Piezas disponibles</span>
         </p>
 
         <form className="hero-search" onSubmit={submitSearch}>
