@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build --configLoader runner",
+    "postbuild": "node scripts/prepare-github-pages.mjs",
     "test": "vitest run",
     "preview": "vite preview",
     "predeploy": "npm run build",
