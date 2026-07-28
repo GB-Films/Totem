@@ -9,7 +9,8 @@
       var isProjectPage = parts.length > 1;
       var base = isProjectPage ? "/" + parts[0] + "/" : "/";
       var route = isProjectPage ? "/" + parts.slice(1).join("/") : path;
-      window.location.replace(base + "?redirect=" + encodeURIComponent(route + window.location.search + window.location.hash));
+      var redirect = encodeURIComponent(route + window.location.search + window.location.hash);
+      window.location.replace(base + "?redirect=" + redirect + "&v=" + Date.now());
     </script>
   </head>
   <body></body>
