@@ -1,4 +1,4 @@
-import { ArrowUpRight, Heart } from "lucide-react";
+import { Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useFavorites } from "../context/FavoritesContext";
 import { useSelection } from "../context/SelectionContext";
@@ -21,7 +21,6 @@ export function ProductCard({ product }: ProductCardProps) {
       <div className="product-media">
         <Link to={`/producto/${product.id}`} aria-label={`Ver ficha de ${product.name}`}>
           <ObjectImage product={product} compact showLabel={false} />
-          {product.featuredScore >= 90 && <span className="product-badge">Destacado</span>}
         </Link>
         <button
           type="button"
@@ -48,9 +47,6 @@ export function ProductCard({ product }: ProductCardProps) {
           <span className={`product-status status-${product.availability.toLowerCase()}`}>
             {product.availability}
           </span>
-          <Link to={`/producto/${product.id}`} className="detail-btn">
-            Ver ficha <ArrowUpRight size={14} />
-          </Link>
         </div>
       </div>
     </article>

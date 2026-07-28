@@ -1,6 +1,6 @@
-import { ArrowRight, Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { ProductFilters, type CatalogFilters } from "../components/ProductFilters";
 import { ProductGrid } from "../components/ProductGrid";
 import { useCatalog } from "../context/CatalogContext";
@@ -20,8 +20,6 @@ export function CatalogPage() {
   const initialCategory = searchParams.get("categoria");
   const initialSearch = searchParams.get("q") ?? "";
   const maxCatalogPrice = Math.max(0, ...products.map((product) => product.rentalPricePerWeek));
-  const quickFilterChips = availableTags.slice(0, 6);
-
   const [filters, setFilters] = useState<CatalogFilters>({
     search: initialSearch,
     category:
@@ -96,31 +94,12 @@ export function CatalogPage() {
 
   const visibleProducts = filteredProducts.slice(0, visibleCount);
 
-  const toggleChip = (tag: string) => {
-    setFilters((current) => ({
-      ...current,
-      tags: current.tags.includes(tag)
-        ? current.tags.filter((candidate) => candidate !== tag)
-        : [...current.tags, tag],
-    }));
-  };
-
-  const clearQuickFilters = () => {
-    setFilters((current) => ({ ...current, tags: [] }));
-  };
-
   const setCategory = (category: CatalogFilters["category"]) => {
     setFilters((current) => ({ ...current, category }));
   };
 
   return (
     <div className="catalog-page-v3">
-      <div className="catalog-breadcrumb-v3">
-        <Link to="/">Inicio</Link>
-        <ArrowRight size={12} />
-        <span>Catálogo</span>
-      </div>
-
       <section className="catalog-intro-v3">
         <div className="catalog-title-block-v3">
           <p className="eyebrow">Archivo disponible</p>
@@ -170,24 +149,6 @@ export function CatalogPage() {
               <SlidersHorizontal size={16} />
               Filtros
             </button>
-
-            {quickFilterChips.map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => toggleChip(tag)}
-                className={`catalog-chip-v3 ${filters.tags.includes(tag) ? "is-active" : ""}`}
-              >
-                {tag}
-                {filters.tags.includes(tag) && <X size={13} />}
-              </button>
-            ))}
-
-            {filters.tags.length > 0 && (
-              <button type="button" onClick={clearQuickFilters} className="catalog-clear-v3">
-                Limpiar
-              </button>
-            )}
           </div>
         </div>
       </section>

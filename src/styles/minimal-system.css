@@ -1680,3 +1680,128 @@ body.force-desktop-view .product-grid {
     grid-template-columns: 1fr;
   }
 }
+
+/* Catalog card cleanup */
+
+.catalog-toolbar-v3 {
+  display: none;
+}
+
+.product-bottom,
+body:not(.force-desktop-view) .product-bottom {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+  border-top: 1px solid var(--soft-line);
+  padding-top: 0.75rem;
+}
+
+.product-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  font-size: 1rem;
+  white-space: normal;
+}
+
+.product-price strong,
+body:not(.force-desktop-view) .product-price strong {
+  color: var(--ink);
+  font-family: var(--font-display) !important;
+  font-size: 1.55rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.product-price span,
+body:not(.force-desktop-view) .product-price span {
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.product-status {
+  display: inline-flex;
+  width: max-content;
+  align-items: center;
+  gap: 0.38rem;
+  color: var(--available);
+  font-size: 0.64rem;
+  font-weight: 700;
+}
+
+.product-status::before {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+}
+
+.favorite-btn,
+.favorite-btn:hover,
+.favorite-btn.is-favorite {
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 36px;
+  height: 36px;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #c52828 !important;
+  backdrop-filter: none;
+}
+
+.favorite-btn:hover {
+  transform: scale(1.12);
+}
+
+.favorite-btn svg {
+  width: 26px;
+  height: 26px;
+  stroke-width: 2.2;
+}
+
+.catalog-results-head-v3 label,
+body:not(.force-desktop-view) .catalog-results-head-v3 label {
+  display: inline-grid;
+  min-width: 250px;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.65rem;
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+  padding: 0.45rem 0;
+}
+
+.catalog-results-head-v3 label > span {
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.catalog-results-head-v3 select,
+body:not(.force-desktop-view) .catalog-results-head-v3 select {
+  width: 100%;
+  min-height: 32px;
+  border: 0;
+  background: transparent;
+  padding: 0 1.5rem 0 0.25rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  body:not(.force-desktop-view) .catalog-toolbar-v3 {
+    display: flex;
+    margin-top: 0.75rem;
+  }
+
+  body:not(.force-desktop-view) .catalog-results-head-v3 label {
+    min-width: 0;
+  }
+}
