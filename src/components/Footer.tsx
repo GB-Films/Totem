@@ -42,8 +42,13 @@ export function Footer() {
           <div>
             <span>Buenos Aires, Argentina</span>
             <a href="mailto:totem.props@gmail.com">totem.props@gmail.com</a>
-            <a href="https://instagram.com" target="_blank" rel="noreferrer" className="footer-social">
-              <Instagram size={15} /> Instagram
+            <a
+              href="https://www.instagram.com/totem.rental?igsh=eGs3aGowZGdkY3F6"
+              target="_blank"
+              rel="noreferrer"
+              className="footer-social"
+            >
+              <Instagram size={15} /> @totem.rental
             </a>
           </div>
         </div>
