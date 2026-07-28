@@ -30,7 +30,7 @@ export function Footer() {
         <div className="footer-column">
           <p>Servicios</p>
           <div>
-            <span>Alquiler por día o período</span>
+            <span>Alquiler semanal o por período</span>
             <span>Selección por proyecto</span>
             <span>Entrega y retiro coordinado</span>
             <span>Asesoría para utilería</span>

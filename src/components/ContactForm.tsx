@@ -98,7 +98,7 @@ export function ContactForm({ selection }: ContactFormProps) {
     return !hasOperationalEndpoints(startDate, endDate);
   });
   const hasUnavailableProducts = selectedProducts.some(({ product }) => product.availability !== "Disponible");
-  const hasUnpricedProducts = selectedProducts.some(({ product }) => product.rentalPricePerDay <= 0);
+  const hasUnpricedProducts = selectedProducts.some(({ product }) => product.rentalPricePerWeek <= 0);
   const missingCustomerInfo = !customerInfo.firstName.trim()
     || !customerInfo.lastName.trim()
     || !customerInfo.dni.trim()

@@ -42,7 +42,7 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
     return !hasOperationalEndpoints(startDate, endDate);
   });
   const hasUnavailableProducts = selectedProducts.some(
-    ({ product }) => product.availability !== "Disponible" || product.rentalPricePerDay <= 0,
+    ({ product }) => product.availability !== "Disponible" || product.rentalPricePerWeek <= 0,
   );
   const canPrepareRental = selectedProducts.length > 0
     && !hasAnyConflict
@@ -98,7 +98,7 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
                             {product.name}
                           </Link>
                           <p className="selected-item-meta">
-                            {product.id} · {formatCurrency(product.rentalPricePerDay)} / día
+                            {product.id} · {formatCurrency(product.rentalPricePerWeek)} / semana
                           </p>
                         </div>
                         <button
@@ -142,7 +142,7 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
                           </div>
                         </label>
                         <label>
-                          <span>Días</span>
+                          <span>Días de uso</span>
                           <input
                             type="number"
                             min={1}

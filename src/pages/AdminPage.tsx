@@ -578,7 +578,6 @@ type ProductForm = {
   name: string;
   category: Product["category"];
   tags: string;
-  rentalPricePerDay: string;
   rentalPricePerWeek: string;
   description: string;
   curiosities: string;
@@ -604,7 +603,6 @@ const emptyForm: ProductForm = {
   name: "",
   category: "Utilería",
   tags: "",
-  rentalPricePerDay: "",
   rentalPricePerWeek: "",
   description: "",
   curiosities: "",
@@ -636,8 +634,7 @@ function toForm(product: Product): ProductForm {
     name: product.name,
     category: product.category,
     tags: product.tags.join(", "),
-    rentalPricePerDay: String(product.rentalPricePerDay),
-    rentalPricePerWeek: product.rentalPricePerWeek ? String(product.rentalPricePerWeek) : "",
+    rentalPricePerWeek: String(product.rentalPricePerWeek),
     description: product.description,
     curiosities: product.curiosities,
     status: product.status,
@@ -664,7 +661,7 @@ function toProduct(form: ProductForm): Product {
     name: form.name.trim(),
     category: form.category,
     tags: form.tags.split(",").map((tag) => tag.trim()).filter(Boolean),
-    rentalPricePerDay: Math.max(0, toNumber(form.rentalPricePerDay)),
+    rentalPricePerWeek: Math.max(0, toNumber(form.rentalPricePerWeek)),
     description: form.description.trim(),
     curiosities: form.curiosities.trim(),
     status: form.status,
@@ -681,7 +678,6 @@ function toProduct(form: ProductForm): Product {
     images: form.images.filter(isUsableImageUrl),
     visual: { tone: form.visualTone, sigil: form.visualSigil.trim() || "✶" },
   };
-  if (form.rentalPricePerWeek.trim()) product.rentalPricePerWeek = Math.max(0, toNumber(form.rentalPricePerWeek));
   if (form.internalNotes.trim()) product.internalNotes = form.internalNotes.trim();
   return product;
 }
@@ -849,8 +845,7 @@ function AdminCatalog({
           <label>Estado<select className="gabinete-input" value={form.status} onChange={(event) => updateField("status", event.target.value as ProductStatus)}>{productStatusOptions.map((status) => <option key={status}>{status}</option>)}</select></label>
           <label>Disponibilidad<select className="gabinete-input" value={form.availability} onChange={(event) => updateField("availability", event.target.value as Availability)}>{availabilityOptions.map((availability) => <option key={availability}>{availability}</option>)}</select></label>
           <label>Unidades disponibles<input className="gabinete-input" type="number" min="1" value={form.stock} onChange={(event) => updateField("stock", event.target.value)} /></label>
-          <label>Precio diario<input className="gabinete-input" type="number" min="0" value={form.rentalPricePerDay} onChange={(event) => updateField("rentalPricePerDay", event.target.value)} /></label>
-          <label>Precio semanal<input className="gabinete-input" type="number" min="0" value={form.rentalPricePerWeek} onChange={(event) => updateField("rentalPricePerWeek", event.target.value)} /></label>
+          <label>Tarifa semanal mínima<input className="gabinete-input" type="number" min="0" value={form.rentalPricePerWeek} onChange={(event) => updateField("rentalPricePerWeek", event.target.value)} /></label>
           <label>Valor estimado<input className="gabinete-input" type="number" min="0" value={form.estimatedValue} onChange={(event) => updateField("estimatedValue", event.target.value)} /></label>
           <label>Garantía (%)<input className="gabinete-input" type="number" min="0" max="100" value={form.guaranteePercentage} onChange={(event) => updateField("guaranteePercentage", event.target.value)} /></label>
           <label>Depósito mínimo<input className="gabinete-input" type="number" min="0" value={form.minimumDeposit} onChange={(event) => updateField("minimumDeposit", event.target.value)} /></label>

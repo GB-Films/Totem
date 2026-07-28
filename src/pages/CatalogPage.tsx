@@ -19,7 +19,7 @@ export function CatalogPage() {
   const [visibleCount, setVisibleCount] = useState(PRODUCTS_PER_PAGE);
   const initialCategory = searchParams.get("categoria");
   const initialSearch = searchParams.get("q") ?? "";
-  const maxCatalogPrice = Math.max(0, ...products.map((product) => product.rentalPricePerDay));
+  const maxCatalogPrice = Math.max(0, ...products.map((product) => product.rentalPricePerWeek));
   const quickFilterChips = availableTags.slice(0, 6);
 
   const [filters, setFilters] = useState<CatalogFilters>({
@@ -68,7 +68,7 @@ export function CatalogPage() {
       const matchesCategory = filters.category === "Todas" || product.category === filters.category;
       const matchesTags =
         filters.tags.length === 0 || filters.tags.some((tag) => product.tags.includes(tag));
-      const matchesPrice = product.rentalPricePerDay <= filters.maxPrice;
+      const matchesPrice = product.rentalPricePerWeek <= filters.maxPrice;
       const matchesAvailability =
         filters.availability === "Todas" || product.availability === filters.availability;
 
@@ -77,8 +77,8 @@ export function CatalogPage() {
 
     return filtered.sort((a, b) => {
       if (filters.sort === "name") return a.name.localeCompare(b.name);
-      if (filters.sort === "priceAsc") return a.rentalPricePerDay - b.rentalPricePerDay;
-      if (filters.sort === "priceDesc") return b.rentalPricePerDay - a.rentalPricePerDay;
+      if (filters.sort === "priceAsc") return a.rentalPricePerWeek - b.rentalPricePerWeek;
+      if (filters.sort === "priceDesc") return b.rentalPricePerWeek - a.rentalPricePerWeek;
       return b.featuredScore - a.featuredScore;
     });
   }, [filters, products]);

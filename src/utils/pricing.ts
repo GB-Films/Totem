@@ -1,24 +1,16 @@
 import type { PricingBreakdown, Product, SelectionItem } from "../types";
 
-export const LONG_RENTAL_DAYS = 7;
-export const LONG_RENTAL_DISCOUNT = 0.15;
+export const MINIMUM_RENTAL_DAYS = 7;
 export const DELICATE_GUARANTEE_EXTRA = 0.1;
 export const RESERVATION_DEPOSIT_RATE = 0.2;
 
 export function calculateProductPricing(product: Product, item: SelectionItem): PricingBreakdown {
   const safeQuantity = Math.min(product.stock, Math.max(1, item.quantity));
   const safeDays = Math.max(1, item.rentalDays);
-  const rentalSubtotal = product.rentalPricePerDay * safeDays * safeQuantity;
-  const fullWeeks = Math.floor(safeDays / LONG_RENTAL_DAYS);
-  const remainingDays = safeDays % LONG_RENTAL_DAYS;
-  const weeklyTotal = product.rentalPricePerWeek && fullWeeks > 0
-    ? (fullWeeks * product.rentalPricePerWeek + remainingDays * product.rentalPricePerDay) * safeQuantity
-    : null;
-  const fallbackLongRentalTotal = safeDays > LONG_RENTAL_DAYS
-    ? rentalSubtotal * (1 - LONG_RENTAL_DISCOUNT)
-    : rentalSubtotal;
-  const rentalTotal = weeklyTotal === null ? fallbackLongRentalTotal : Math.min(rentalSubtotal, weeklyTotal);
-  const rentalDiscount = rentalSubtotal - rentalTotal;
+  const billableWeeks = Math.max(1, Math.ceil(safeDays / MINIMUM_RENTAL_DAYS));
+  const rentalSubtotal = product.rentalPricePerWeek * billableWeeks * safeQuantity;
+  const rentalTotal = rentalSubtotal;
+  const rentalDiscount = 0;
   const baseGuarantee = Math.max(
     product.estimatedValue * product.guaranteePercentage,
     product.minimumDeposit,

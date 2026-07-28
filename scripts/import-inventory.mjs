@@ -262,12 +262,12 @@ function roundPrice(value) {
   return Math.max(500, Math.round(value / 500) * 500);
 }
 
-function inferDailyPrice(name) {
+function inferWeeklyPrice(name) {
   const normalized = normalizeText(name);
-  if (LARGE_ITEM_WORDS.test(normalized)) return 20_000;
-  if (PREMIUM_ITEM_WORDS.test(normalized)) return 15_000;
-  if (SET_ITEM_WORDS.test(normalized)) return 10_000;
-  return 7_000;
+  if (LARGE_ITEM_WORDS.test(normalized)) return 80_000;
+  if (PREMIUM_ITEM_WORDS.test(normalized)) return 60_000;
+  if (SET_ITEM_WORDS.test(normalized)) return 40_000;
+  return 28_000;
 }
 
 function deterministicScore(value) {
@@ -277,7 +277,7 @@ function deterministicScore(value) {
 
 function createEstimatedProduct({ id, relativePath, sourceFiles }) {
   const name = cleanName(relativePath);
-  const daily = inferDailyPrice(name);
+  const weekly = inferWeeklyPrice(name);
   const category = inferCategory(relativePath);
   const collection = relativePath.replaceAll("\\", "/").split("/").slice(0, -1).join(" / ");
 
@@ -286,8 +286,7 @@ function createEstimatedProduct({ id, relativePath, sourceFiles }) {
     name,
     category,
     tags: inferTags(relativePath, name),
-    rentalPricePerDay: daily,
-    rentalPricePerWeek: roundPrice(daily * 4),
+    rentalPricePerWeek: weekly,
     description:
       `${name}. Pieza del archivo Totem disponible para cine, TV, publicidad, teatro y contenido.`,
     curiosities: collection ? `Inventariada en ${collection}.` : "Parte del archivo Totem.",
@@ -297,9 +296,9 @@ function createEstimatedProduct({ id, relativePath, sourceFiles }) {
     color: inferColor(name),
     eraStyle: inferEraStyle(name, relativePath),
     availability: "Disponible",
-    estimatedValue: roundPrice(daily * 18),
+    estimatedValue: roundPrice(weekly * 4.5),
     guaranteePercentage: 0.3,
-    minimumDeposit: roundPrice(daily * 0.5),
+    minimumDeposit: roundPrice(weekly * 0.125),
     featuredScore: deterministicScore(relativePath),
     stock: 1,
     internalNotes:
@@ -398,6 +397,7 @@ async function fetchExistingProducts() {
 }
 
 function migrateExistingProduct(existing, estimated, sourceFiles) {
+  const { rentalPricePerDay: legacyDailyPrice, ...existingWithoutDailyPrice } = existing;
   const shouldUseInferredCategory =
     existing.category === "Decoración" ||
     existing.category === "Decoracion" ||
@@ -407,21 +407,19 @@ function migrateExistingProduct(existing, estimated, sourceFiles) {
 
   return {
     ...estimated,
-    ...existing,
+    ...existingWithoutDailyPrice,
     id: estimated.id,
     category: validCategory,
     tags: Array.from(new Set([...(existing.tags ?? []), ...estimated.tags])).filter(
       (tag) => !["deco", "decoración", "decoracion"].includes(normalizeText(tag)),
     ),
     stock: Math.max(1, Number(existing.stock) || 1),
-    rentalPricePerDay:
-      Number(existing.rentalPricePerDay) > 0
-        ? Number(existing.rentalPricePerDay)
-        : estimated.rentalPricePerDay,
     rentalPricePerWeek:
       Number(existing.rentalPricePerWeek) > 0
         ? Number(existing.rentalPricePerWeek)
-        : estimated.rentalPricePerWeek,
+        : Number(legacyDailyPrice) > 0
+          ? roundPrice(Number(legacyDailyPrice) * 7)
+          : estimated.rentalPricePerWeek,
     description:
       typeof existing.description === "string" && existing.description.trim()
         ? existing.description

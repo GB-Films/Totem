@@ -42,6 +42,7 @@ function normalizeGuaranteePercentage(value: unknown) {
 }
 
 function normalizeProduct(id: string, data: Partial<Product>): Product {
+  const legacyData = data as Partial<Product> & { rentalPricePerDay?: unknown };
   const description = typeof data.description === "string" ? data.description.trim() : "";
   const describedStock = description.match(/(\d+)\s+unidades?\s+disponibles?/i);
   const category = allCategories.includes(data.category as Category)
@@ -77,10 +78,11 @@ function normalizeProduct(id: string, data: Partial<Product>): Product {
     tags: Array.isArray(data.tags)
       ? data.tags.filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0)
       : [],
-    rentalPricePerDay: Math.max(0, finiteNumber(data.rentalPricePerDay)),
-    ...(data.rentalPricePerWeek
-      ? { rentalPricePerWeek: Math.max(0, finiteNumber(data.rentalPricePerWeek)) }
-      : {}),
+    rentalPricePerWeek: Math.max(
+      0,
+      finiteNumber(data.rentalPricePerWeek)
+        || finiteNumber(legacyData.rentalPricePerDay) * 7,
+    ),
     description,
     curiosities: typeof data.curiosities === "string" ? data.curiosities.trim() : "",
     status,

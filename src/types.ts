@@ -31,8 +31,7 @@ export interface Product {
   detailImages?: string[];
   category: Category;
   tags: string[];
-  rentalPricePerDay: number;
-  rentalPricePerWeek?: number;
+  rentalPricePerWeek: number;
   description: string;
   curiosities: string;
   status: ProductStatus;

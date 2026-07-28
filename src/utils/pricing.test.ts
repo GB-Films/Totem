@@ -8,7 +8,6 @@ const product: Product = {
   images: [],
   category: "Utilería",
   tags: [],
-  rentalPricePerDay: 100,
   rentalPricePerWeek: 600,
   description: "",
   curiosities: "",
@@ -36,27 +35,27 @@ function selection(overrides: Partial<SelectionItem> = {}): SelectionItem {
 }
 
 describe("calculateProductPricing", () => {
-  it("uses the weekly price when it is cheaper than seven daily rates", () => {
-    const pricing = calculateProductPricing(product, selection({ rentalDays: 7 }));
+  it("charges one full week for rentals shorter than seven days", () => {
+    const pricing = calculateProductPricing(product, selection({ rentalDays: 2 }));
 
-    expect(pricing.rentalSubtotal).toBe(700);
-    expect(pricing.rentalDiscount).toBe(100);
+    expect(pricing.rentalSubtotal).toBe(600);
+    expect(pricing.rentalDiscount).toBe(0);
     expect(pricing.rentalTotal).toBe(600);
     expect(pricing.reserveDeposit).toBe(120);
   });
 
-  it("combines full weeks and remaining days", () => {
+  it("charges each started week as a complete week", () => {
     const pricing = calculateProductPricing(product, selection({ rentalDays: 9, quantity: 2 }));
 
-    expect(pricing.rentalSubtotal).toBe(1_800);
-    expect(pricing.rentalTotal).toBe(1_600);
+    expect(pricing.rentalSubtotal).toBe(2_400);
+    expect(pricing.rentalTotal).toBe(2_400);
     expect(pricing.guaranteeAmount).toBe(600);
   });
 
   it("never prices more units than the published stock", () => {
     const pricing = calculateProductPricing(product, selection({ quantity: 10 }));
 
-    expect(pricing.rentalTotal).toBe(300);
+    expect(pricing.rentalTotal).toBe(1_800);
     expect(pricing.guaranteeAmount).toBe(900);
   });
 

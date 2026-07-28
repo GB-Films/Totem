@@ -244,7 +244,7 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
         if (product.availability !== "Disponible") {
           throw new Error(`${product.name} requiere consulta antes de reservar.`);
         }
-        if (product.rentalPricePerDay <= 0) {
+        if (product.rentalPricePerWeek <= 0) {
           throw new Error(`${product.name} todavía no tiene un precio publicado.`);
         }
         if (item.quantity > product.stock) {

@@ -2,8 +2,6 @@ import type { Product, SelectionItem } from "../types";
 import { formatCurrency } from "../utils/format";
 import {
   calculateSelectionPricing,
-  LONG_RENTAL_DISCOUNT,
-  LONG_RENTAL_DAYS,
   RESERVATION_DEPOSIT_RATE,
 } from "../utils/pricing";
 
@@ -22,18 +20,14 @@ export function RentalCalculator({ products, selection }: RentalCalculatorProps)
       <h2 className="mt-2 font-display text-3xl text-gabinete-darkBrown">Resumen estimado</h2>
       <p className="mt-2 font-editorial text-sm leading-6 text-gabinete-muted">
         La garantía es reintegrable, siempre que el objeto vuelva con su historia intacta. El monto
-        final puede variar según disponibilidad, logística y condiciones de rodaje.
+        final puede variar según disponibilidad, logística y condiciones de rodaje. La facturación
+        mínima es semanal y cada semana iniciada se cobra completa.
       </p>
 
       <div className="mt-5 space-y-3">
         {[
           ["Objetos en selección", selectedCount.toString()],
-          ["Subtotal alquiler", formatCurrency(pricing.rentalSubtotal)],
-          [
-            `Descuento por más de ${LONG_RENTAL_DAYS} días (${LONG_RENTAL_DISCOUNT * 100}%)`,
-            `-${formatCurrency(pricing.rentalDiscount)}`,
-          ],
-          ["Alquiler estimado", formatCurrency(pricing.rentalTotal)],
+          ["Alquiler semanal estimado", formatCurrency(pricing.rentalTotal)],
           [`Seña de reserva (${RESERVATION_DEPOSIT_RATE * 100}%)`, formatCurrency(pricing.reserveDeposit)],
           ["Garantía reintegrable", formatCurrency(pricing.guaranteeAmount)],
         ].map(([label, value]) => (

@@ -42,8 +42,8 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
         <div className="product-bottom">
           <div className="product-price">
-            <strong>{product.rentalPricePerDay > 0 ? formatCurrency(product.rentalPricePerDay) : "Consultar"}</strong>
-            {product.rentalPricePerDay > 0 && <span>/día</span>}
+            <strong>{product.rentalPricePerWeek > 0 ? formatCurrency(product.rentalPricePerWeek) : "Consultar"}</strong>
+            {product.rentalPricePerWeek > 0 && <span>/semana</span>}
           </div>
           <span className={`product-status status-${product.availability.toLowerCase()}`}>
             {product.availability}

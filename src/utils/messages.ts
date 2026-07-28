@@ -25,7 +25,8 @@ export function buildSelectionSummary(products: Product[], selection: SelectionI
       if (!product) {
         return null;
       }
-      return `- ${product.name} (${product.id}) x${item.quantity}, ${item.rentalDays} día(s), ${formatDateRange(item.startDate, item.endDate)}`;
+      const billableWeeks = Math.max(1, Math.ceil(item.rentalDays / 7));
+      return `- ${product.name} (${product.id}) x${item.quantity}, ${item.rentalDays} día(s) de uso, ${billableWeeks} semana(s) facturada(s), ${formatDateRange(item.startDate, item.endDate)}`;
     })
     .filter(Boolean)
     .join("\n");
@@ -75,6 +76,6 @@ export function buildMailtoUrl(message: string) {
 }
 
 export function buildWhatsappUrl(message: string) {
-  const configuredNumber = String(import.meta.env.VITE_WHATSAPP_NUMBER ?? "").replace(/\D/g, "");
+  const configuredNumber = String(import.meta.env.VITE_WHATSAPP_NUMBER || "5491138060642").replace(/\D/g, "");
   return `https://wa.me/${configuredNumber}?text=${encodeURIComponent(message)}`;
 }

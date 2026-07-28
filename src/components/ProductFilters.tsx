@@ -137,7 +137,7 @@ export function ProductFilters({
 
       <div className="filter-section-v3">
         <div className="filter-section-title-v3">
-          <strong>Precio máximo</strong>
+          <strong>Precio semanal máximo</strong>
           <span>${filters.maxPrice.toLocaleString("es-AR")}</span>
         </div>
         <input

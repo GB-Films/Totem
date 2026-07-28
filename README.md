@@ -17,7 +17,7 @@ La app está hecha con React, Vite, TypeScript y Firebase. El catálogo y la dis
 Copiá `.env.example` a `.env.local` y completá:
 
 - `VITE_FIREBASE_*`: configuración de la app web de Firebase.
-- `VITE_WHATSAPP_NUMBER`: número de WhatsApp con código de país, sin `+` ni espacios. Si queda vacío, WhatsApp permite elegir el contacto.
+- `VITE_WHATSAPP_NUMBER`: número de WhatsApp con código de país, sin `+` ni espacios. Por defecto usa `5491138060642`.
 
 ## Datos
 

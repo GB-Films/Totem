@@ -54,7 +54,7 @@ export function ProductDetailPage() {
     ? hasConflict(product.id, selectedDates.startDate, selectedDates.endDate)
     : false;
   const selectedDatesAreOperational = hasOperationalEndpoints(selectedDates.startDate, selectedDates.endDate);
-  const canBookProduct = product.availability === "Disponible" && product.rentalPricePerDay > 0;
+  const canBookProduct = product.availability === "Disponible" && product.rentalPricePerWeek > 0;
   const singleSelection = [
     {
       productId: product.id,
@@ -132,17 +132,14 @@ export function ProductDetailPage() {
             {product.description}
           </p>
 
-          <div className="mt-7 grid gap-3 sm:grid-cols-3">
+          <div className="mt-7 grid gap-3 sm:grid-cols-2">
             <div className="parchment-panel p-4">
-              <p className="eyebrow">Alquiler diario</p>
+              <p className="eyebrow">Tarifa semanal mínima</p>
               <p className="mt-2 font-display text-2xl font-semibold text-gabinete-darkBrown">
-                {product.rentalPricePerDay > 0 ? formatCurrency(product.rentalPricePerDay) : "Consultar"}
+                {product.rentalPricePerWeek > 0 ? formatCurrency(product.rentalPricePerWeek) : "Consultar"}
               </p>
-            </div>
-            <div className="parchment-panel p-4">
-              <p className="eyebrow">Alquiler semanal</p>
-              <p className="mt-2 font-display text-2xl font-semibold text-gabinete-darkBrown">
-                {product.rentalPricePerWeek ? formatCurrency(product.rentalPricePerWeek) : "Consultar"}
+              <p className="mt-1 font-editorial text-xs leading-5 text-gabinete-muted">
+                Cada semana iniciada se factura como semana completa.
               </p>
             </div>
             <div className="parchment-panel p-4">
