@@ -39,10 +39,14 @@ export function Hero() {
           Un archivo de piezas curiosas, domésticas y extraordinarias. Buscá, revisá fechas y armá
           una selección lista para entrar en cuadro.
         </p>
-        <p className="hero-piece-count">
+        <Link
+          className="hero-piece-count"
+          to="/catalogo"
+          aria-label="Ver todas las piezas en el catálogo"
+        >
           <strong>{products.length || "—"}</strong>
           <span>Piezas disponibles</span>
-        </p>
+        </Link>
 
         <form className="hero-search" onSubmit={submitSearch}>
           <Search size={24} strokeWidth={1.8} />

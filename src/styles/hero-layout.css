@@ -97,30 +97,39 @@
   position: absolute;
   top: 54%;
   right: auto;
-  left: calc(var(--hero-panel-width) + clamp(2rem, 4vw, 4.5rem));
+  left: calc(var(--hero-panel-width) + clamp(3.5rem, 6vw, 7rem));
   z-index: 3;
   display: flex;
-  width: clamp(180px, 18vw, 250px);
+  width: clamp(240px, 22vw, 320px);
   margin: 0;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.7rem;
-  border: 1px solid rgba(255, 250, 240, 0.85);
+  gap: 1rem;
+  border: 2px solid rgba(255, 250, 240, 0.9);
   background: rgba(44, 33, 28, 0.94);
-  box-shadow: 7px 8px 0 var(--mustard);
-  padding: clamp(1rem, 2vw, 1.4rem);
+  box-shadow: 8px 9px 0 var(--mustard);
+  padding: clamp(1.3rem, 2.5vw, 2rem);
   color: #fffaf0;
+  cursor: pointer;
+  text-decoration: none;
   text-align: left;
   transform: translateY(-50%);
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+  will-change: transform;
 }
 
 .hero-piece-count strong {
   color: var(--mustard);
   font-family: var(--font-display) !important;
-  font-size: clamp(4.6rem, 7.2vw, 6.8rem);
+  font-size: clamp(6.2rem, 8vw, 8.5rem);
   font-weight: 700 !important;
   letter-spacing: 0;
   line-height: 0.72;
+  transition: color 180ms ease;
 }
 
 .hero-piece-count span {
@@ -128,11 +137,35 @@
   max-width: none;
   padding: 0;
   color: #fffaf0 !important;
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   font-weight: 900;
   letter-spacing: 0;
   line-height: 1.2;
   text-transform: uppercase;
+  transition: color 180ms ease;
+}
+
+.hero-piece-count:hover,
+.hero-piece-count:focus-visible {
+  border-color: var(--ink);
+  background: #fff9ec;
+  box-shadow: 12px 14px 0 var(--mustard);
+  transform: translateY(calc(-50% - 7px)) rotate(-1deg);
+}
+
+.hero-piece-count:hover strong,
+.hero-piece-count:focus-visible strong {
+  color: var(--accent);
+}
+
+.hero-piece-count:hover span,
+.hero-piece-count:focus-visible span {
+  color: var(--ink) !important;
+}
+
+.hero-piece-count:active {
+  box-shadow: 5px 6px 0 var(--mustard);
+  transform: translateY(calc(-50% - 1px));
 }
 
 @media (max-width: 900px) {
@@ -170,7 +203,7 @@
     top: auto;
     right: auto;
     left: auto;
-    width: min(260px, calc(100% - 2rem));
+    width: min(300px, calc(100% - 2rem));
     margin: 1.7rem auto 0;
     align-items: center;
     text-align: center;
