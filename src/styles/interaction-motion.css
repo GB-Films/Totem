@@ -4,6 +4,14 @@
   --tile-hover-lift: -11px;
   --tile-hover-scale: 1.018;
   --tile-hover-shadow: 11px 13px 0 var(--mustard);
+  --home-section-title-size: clamp(2.5rem, 3.5vw, 3.25rem);
+}
+
+.home-flow-section .home-section-heading h2,
+.home-featured-section .home-section-heading h2 {
+  font-size: var(--home-section-title-size) !important;
+  letter-spacing: 0;
+  line-height: 0.95;
 }
 
 .app-interactive-tile {
