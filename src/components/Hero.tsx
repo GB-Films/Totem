@@ -32,8 +32,8 @@ export function Hero() {
       />
       <div className="hero-content">
         <h1>
-          <span>Objetos con pasado.</span>
-          <span>Historias por venir.</span>
+          <span>Objetos con pasado,</span>
+          <span>historias por venir.</span>
         </h1>
         <p className="hero-lead">
           Un archivo de piezas curiosas, domésticas y extraordinarias. Buscá, revisá fechas y armá

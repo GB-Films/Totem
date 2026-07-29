@@ -10,6 +10,7 @@ import "./styles/index.css";
 import "./styles/refinement.css";
 import "./styles/brand-restyle.css";
 import "./styles/minimal-system.css";
+import "./styles/hero-layout.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
