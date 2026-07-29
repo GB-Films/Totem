@@ -45,22 +45,22 @@
   position: static;
   z-index: 2;
   grid-column: 1;
-  width: min(610px, calc(100% - clamp(3rem, 9vw, 7rem)));
+  width: min(760px, calc(100% - clamp(3rem, 7vw, 6rem)));
   margin: auto;
   padding: clamp(3.5rem, 6vw, 5.5rem) 0 clamp(2.5rem, 5vw, 4rem);
   text-align: center;
 }
 
 .hero-content h1 {
-  max-width: 590px;
+  max-width: 760px;
   margin: 0 auto;
   color: #fffaf0;
   font-family: var(--font-display) !important;
-  font-size: clamp(3.1rem, 4.85vw, 4.9rem);
-  font-style: italic;
+  font-size: clamp(3rem, 3.6vw, 4.15rem);
+  font-style: normal;
   font-weight: 600 !important;
   letter-spacing: 0;
-  line-height: 0.94;
+  line-height: 0.96;
   text-transform: none;
   text-wrap: balance;
 }
@@ -69,6 +69,7 @@
   display: block;
   color: #fffaf0;
   font: inherit;
+  white-space: nowrap;
 }
 
 .hero-lead {
@@ -95,7 +96,8 @@
 .hero-piece-count {
   position: absolute;
   top: 54%;
-  right: clamp(0.9rem, 2vw, 2rem);
+  right: auto;
+  left: calc(var(--hero-panel-width) + clamp(2rem, 4vw, 4.5rem));
   z-index: 3;
   display: flex;
   width: clamp(180px, 18vw, 250px);
@@ -160,13 +162,14 @@
   }
 
   body:not(.force-desktop-view) .hero-content h1 {
-    font-size: clamp(2.9rem, 8.5vw, 4.2rem);
+    font-size: clamp(2.5rem, 6.3vw, 3.75rem);
   }
 
   body:not(.force-desktop-view) .hero-piece-count {
     position: relative;
     top: auto;
     right: auto;
+    left: auto;
     width: min(260px, calc(100% - 2rem));
     margin: 1.7rem auto 0;
     align-items: center;
@@ -190,7 +193,7 @@
   }
 
   body:not(.force-desktop-view) .hero-content h1 {
-    font-size: clamp(2.45rem, 11vw, 3.45rem);
+    font-size: clamp(1.85rem, 7.4vw, 2.65rem);
     line-height: 0.96;
   }
 
