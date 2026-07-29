@@ -47,12 +47,12 @@ export function HomePage() {
 
         <div className="home-use-grid">
           {useCases.map((item, index) => (
-            <Link key={item.title} to={item.href} className="home-use-card">
+            <Link key={item.title} to={item.href} className="home-use-card app-interactive-tile">
               <span className="home-use-star">{String(index + 1).padStart(2, "0")}</span>
               <h3>{item.title}</h3>
               <p>{item.text}</p>
               <em>
-                Explorar <ArrowRight size={15} />
+                Explorar <ArrowRight className="interactive-tile-arrow" size={15} />
               </em>
             </Link>
           ))}
@@ -78,7 +78,11 @@ export function HomePage() {
             </div>
           )}
           {featured.map((product) => (
-            <Link key={product.id} to={`/producto/${product.id}`} className="home-featured-card">
+            <Link
+              key={product.id}
+              to={`/producto/${product.id}`}
+              className="home-featured-card app-interactive-tile"
+            >
               <ObjectImage product={product} compact showLabel={false} />
               <div>
                 <span>{product.category} · Archivo {product.id}</span>

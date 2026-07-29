@@ -17,7 +17,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const favorite = isFavorite(product.id);
 
   return (
-    <article className={`product-card ${selected ? "is-selected" : ""}`}>
+    <article className={`product-card app-interactive-tile ${selected ? "is-selected" : ""}`}>
       <div className="product-media">
         <Link to={`/producto/${product.id}`} aria-label={`Ver ficha de ${product.name}`}>
           <ObjectImage product={product} compact showLabel={false} />

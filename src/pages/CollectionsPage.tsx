@@ -36,24 +36,24 @@ export function CollectionsPage() {
           <Link to="/catalogo">Ir al catálogo</Link>
         </div>
       ) : (
-        <section className="mt-8 grid gap-6 lg:grid-cols-3">
+        <section className="collection-category-grid mt-8 grid">
           {groups.map((group) => (
             <Link
               key={group.category}
               to={`/catalogo?categoria=${encodeURIComponent(group.category)}`}
-              className="overflow-hidden rounded-[18px] border border-gabinete-line bg-gabinete-panel/70 shadow-paper transition hover:-translate-y-1"
+              className="collection-category-card app-interactive-tile"
             >
               {group.imageProduct && <ObjectImage product={group.imageProduct} compact />}
-              <div className="p-6">
+              <div className="collection-category-body">
                 <p className="collection-count">
                   <strong>{group.products.length}</strong>
                   <span>{group.products.length === 1 ? "Pieza disponible" : "Piezas disponibles"}</span>
                 </p>
-                <h2 className="mt-2 font-display text-2xl font-medium uppercase tracking-[0.04em] text-gabinete-darkBrown">
+                <h2>
                   {group.category}
                 </h2>
-                <span className="mt-6 inline-flex items-center gap-2 font-editorial text-sm font-semibold uppercase tracking-[0.12em] text-gabinete-brown">
-                  Ver objetos <ArrowRight size={15} />
+                <span className="collection-category-action">
+                  Ver objetos <ArrowRight className="interactive-tile-arrow" size={15} />
                 </span>
               </div>
             </Link>

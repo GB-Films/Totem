@@ -1,0 +1,171 @@
+:root {
+  --tile-motion-duration: 280ms;
+  --tile-motion-ease: cubic-bezier(0.2, 0.75, 0.25, 1);
+  --tile-hover-lift: -11px;
+  --tile-hover-scale: 1.018;
+  --tile-hover-shadow: 11px 13px 0 var(--mustard);
+}
+
+.app-interactive-tile {
+  transform: none !important;
+  transition:
+    transform var(--tile-motion-duration) var(--tile-motion-ease),
+    box-shadow var(--tile-motion-duration) ease,
+    background-color var(--tile-motion-duration) ease,
+    border-color var(--tile-motion-duration) ease !important;
+  will-change: transform;
+}
+
+.app-interactive-tile:hover,
+.app-interactive-tile:focus-within {
+  border-color: var(--accent) !important;
+  background: #fffdf7 !important;
+  box-shadow: var(--tile-hover-shadow) !important;
+  transform: translateY(var(--tile-hover-lift)) scale(var(--tile-hover-scale)) !important;
+}
+
+.app-interactive-tile:active {
+  box-shadow: 5px 6px 0 var(--mustard) !important;
+  transform: translateY(-4px) scale(1.006) !important;
+}
+
+.app-interactive-tile .object-photo {
+  transition: transform 360ms var(--tile-motion-ease) !important;
+}
+
+.app-interactive-tile:hover .object-photo,
+.app-interactive-tile:focus-within .object-photo {
+  transform: scale(1.06) !important;
+}
+
+.interactive-tile-arrow {
+  transition: transform 220ms ease;
+}
+
+.app-interactive-tile:hover .interactive-tile-arrow,
+.app-interactive-tile:focus-within .interactive-tile-arrow {
+  transform: translateX(6px);
+}
+
+.collection-category-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: clamp(0.85rem, 1.3vw, 1.2rem) !important;
+}
+
+.collections-page-mobile .collection-category-card {
+  display: flex;
+  min-width: 0;
+  height: 100%;
+  flex-direction: column;
+  overflow: hidden !important;
+  border: 1px solid var(--ink);
+  border-radius: 2px !important;
+  background: var(--panel);
+  box-shadow: var(--shadow-sm);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.collection-category-card .object-plate {
+  min-height: 0;
+  aspect-ratio: 5 / 3;
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+  border-radius: 0;
+}
+
+.collection-category-card .collection-category-body {
+  display: flex;
+  min-height: 190px;
+  flex: 1;
+  flex-direction: column;
+  background: var(--panel);
+  padding: 1rem;
+}
+
+.collection-category-card .collection-count {
+  gap: 0.55rem;
+  padding-bottom: 0.7rem;
+}
+
+.collection-category-card .collection-count strong {
+  font-size: clamp(2.6rem, 3.4vw, 3.2rem);
+}
+
+.collections-page-mobile .collection-category-card h2 {
+  margin-top: 0.75rem;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 1.65vw, 1.5rem);
+  font-weight: 900 !important;
+  letter-spacing: 0;
+  line-height: 1;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.collection-category-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.hero-piece-count {
+  transition:
+    transform var(--tile-motion-duration) var(--tile-motion-ease),
+    background-color var(--tile-motion-duration) ease,
+    border-color var(--tile-motion-duration) ease,
+    box-shadow var(--tile-motion-duration) ease;
+}
+
+.hero-piece-count:hover,
+.hero-piece-count:focus-visible {
+  box-shadow: var(--tile-hover-shadow);
+  transform: translateY(calc(-50% + var(--tile-hover-lift))) scale(var(--tile-hover-scale));
+}
+
+@media (max-width: 1100px) {
+  body:not(.force-desktop-view) .collection-category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 680px) {
+  body:not(.force-desktop-view) .collection-category-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  body:not(.force-desktop-view) .collection-category-card .collection-category-body {
+    min-height: 170px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-interactive-tile,
+  .app-interactive-tile .object-photo,
+  .interactive-tile-arrow,
+  .hero-piece-count {
+    transition-duration: 1ms !important;
+  }
+
+  .app-interactive-tile:hover,
+  .app-interactive-tile:focus-within,
+  .app-interactive-tile:active {
+    transform: none !important;
+  }
+
+  .app-interactive-tile:hover .object-photo,
+  .app-interactive-tile:focus-within .object-photo,
+  .app-interactive-tile:hover .interactive-tile-arrow,
+  .app-interactive-tile:focus-within .interactive-tile-arrow {
+    transform: none !important;
+  }
+}
