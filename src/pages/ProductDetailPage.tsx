@@ -1,13 +1,14 @@
 import {
   ArrowLeft,
   CalendarCheck,
+  CircleCheckBig,
   Heart,
   Minus,
   Plus,
   ShieldCheck,
   ShoppingCart,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { AvailabilityCalendar } from "../components/AvailabilityCalendar";
 import { CategoryBadge } from "../components/CategoryBadge";
@@ -33,7 +34,7 @@ export function ProductDetailPage() {
   const { id } = useParams();
   const { products, loading, error } = useCatalog();
   const product = products.find((candidate) => candidate.id === id);
-  const { addProduct } = useSelection();
+  const { addProduct, selection } = useSelection();
   const { isFavorite, toggleFavorite } = useFavorites();
   const {
     getAvailableQuantity,
@@ -44,6 +45,12 @@ export function ProductDetailPage() {
   const [selectedDates, setSelectedDates] = useState<{ startDate?: string; endDate?: string }>({});
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [addedMessage, setAddedMessage] = useState(false);
+  const confirmationTimeoutRef = useRef<number | undefined>(undefined);
+  const selectedCartItem = product
+    ? selection.find((item) => item.productId === product.id)
+    : undefined;
+  const cartQuantity = selectedCartItem?.quantity ?? 0;
+  const productIsFullyInCart = product ? cartQuantity >= product.stock : false;
   const availableQuantity = product
     ? getAvailableQuantity(product.id, selectedDates.startDate, selectedDates.endDate)
     : 1;
@@ -53,6 +60,12 @@ export function ProductDetailPage() {
       Math.min(Math.max(1, current), Math.max(1, availableQuantity)),
     );
   }, [availableQuantity]);
+
+  useEffect(() => () => {
+    if (confirmationTimeoutRef.current) {
+      window.clearTimeout(confirmationTimeoutRef.current);
+    }
+  }, []);
 
   if (loading) {
     return <div className="product-detail-loading" role="status">Cargando la ficha del objeto…</div>;
@@ -193,15 +206,27 @@ export function ProductDetailPage() {
             <span><ShieldCheck size={17} /> Garantía reintegrable</span>
           </div>
 
-          <div className="detail-calendar-section mt-4">
+          <div className={`detail-calendar-section mt-4 ${productIsFullyInCart ? "is-cart-locked" : ""}`}>
+            {productIsFullyInCart && (
+              <div className="product-cart-lock-notice">
+                <CircleCheckBig size={18} />
+                <span>
+                  {product.stock === 1
+                    ? "La única unidad ya está en tu carrito."
+                    : "Todas las unidades disponibles ya están en tu carrito."}
+                </span>
+              </div>
+            )}
             <AvailabilityCalendar
               product={product}
               startDate={selectedDates.startDate}
               endDate={selectedDates.endDate}
-              onRangeChange={(startDate, endDate) => {
-                setSelectedDates({ startDate, endDate });
-                setSelectedQuantity(1);
-              }}
+              onRangeChange={productIsFullyInCart
+                ? undefined
+                : (startDate, endDate) => {
+                  setSelectedDates({ startDate, endDate });
+                  setSelectedQuantity(1);
+                }}
             />
           </div>
 
@@ -209,7 +234,9 @@ export function ProductDetailPage() {
             <div>
               <span>Cantidad</span>
               <strong>
-                {hasSelectedDates
+                {productIsFullyInCart
+                  ? "Sin unidades libres: ya está en el carrito"
+                  : hasSelectedDates
                   ? availableQuantity > 0
                     ? `${availableQuantity} ${availableQuantity === 1 ? "unidad disponible" : "unidades disponibles"}`
                     : "No disponible para estas fechas"
@@ -220,7 +247,12 @@ export function ProductDetailPage() {
               <button
                 type="button"
                 aria-label="Restar cantidad"
-                disabled={!hasSelectedDates || availableQuantity < 1 || selectedQuantity <= 1}
+                disabled={
+                  productIsFullyInCart
+                  || !hasSelectedDates
+                  || availableQuantity < 1
+                  || selectedQuantity <= 1
+                }
                 onClick={() => setSelectedQuantity((current) => Math.max(1, current - 1))}
               >
                 <Minus size={15} />
@@ -231,7 +263,7 @@ export function ProductDetailPage() {
                 min={1}
                 max={Math.max(1, availableQuantity)}
                 value={selectedQuantity}
-                disabled={!hasSelectedDates || availableQuantity < 1}
+                disabled={productIsFullyInCart || !hasSelectedDates || availableQuantity < 1}
                 onChange={(event) => setSelectedQuantity(
                   Math.min(
                     Math.max(1, Number(event.target.value) || 1),
@@ -244,6 +276,7 @@ export function ProductDetailPage() {
                 aria-label="Sumar cantidad"
                 disabled={
                   !hasSelectedDates
+                  || productIsFullyInCart
                   || availableQuantity < 1
                   || selectedQuantity >= availableQuantity
                 }
@@ -265,7 +298,11 @@ export function ProductDetailPage() {
         </div>
         <div className="product-cart-action">
           <div className="product-booking-notices">
-            {!hasSelectedDates && (
+            {productIsFullyInCart ? (
+              <p className="product-in-cart-message rounded-md border px-3 py-2 font-editorial text-sm">
+                Este objeto ya está en tu carrito. Quitalo de ahí para volver a elegir fechas.
+              </p>
+            ) : !hasSelectedDates && (
               <p className="rounded-md border border-gabinete-line/25 bg-gabinete-paperLight/24 px-3 py-2 font-editorial text-sm text-gabinete-muted">
                 Elegí los días en el calendario para poder sumar este objeto al carrito.
               </p>
@@ -294,6 +331,7 @@ export function ProductDetailPage() {
                 || Boolean(availabilityError)
                 || !canBookProduct
                 || !hasSelectedDates
+                || productIsFullyInCart
                 || availableQuantity < 1
                 || selectedDateConflict
                 || !selectedDatesAreOperational
@@ -307,19 +345,36 @@ export function ProductDetailPage() {
                     selectedQuantity,
                   );
                   setAddedMessage(true);
-                  window.setTimeout(() => setAddedMessage(false), 1800);
+                  setSelectedDates({});
+                  setSelectedQuantity(1);
+                  if (confirmationTimeoutRef.current) {
+                    window.clearTimeout(confirmationTimeoutRef.current);
+                  }
+                  confirmationTimeoutRef.current = window.setTimeout(() => {
+                    setAddedMessage(false);
+                    confirmationTimeoutRef.current = undefined;
+                  }, 1800);
                 }
               }}
-              className="product-cart-cta gabinete-button disabled:cursor-not-allowed disabled:opacity-50"
+              className={[
+                "product-cart-cta gabinete-button disabled:cursor-not-allowed",
+                addedMessage ? "is-confirmed" : "",
+                productIsFullyInCart && !addedMessage ? "is-cart-locked" : "",
+              ].filter(Boolean).join(" ")}
+              aria-live="polite"
             >
-              <span>{canBookProduct ? "Sumar al carrito" : "Disponible a consulta"}</span>
-              <ShoppingCart size={34} strokeWidth={1.8} />
+              {addedMessage ? (
+                <>
+                  <CircleCheckBig size={58} strokeWidth={1.7} />
+                  <span>¡Listo!</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingCart size={54} strokeWidth={1.65} />
+                  <span>{canBookProduct ? "Sumar al carrito" : "Disponible a consulta"}</span>
+                </>
+              )}
             </button>
-            {addedMessage && (
-              <p className="rounded-md border border-gabinete-available/35 bg-gabinete-available/10 px-3 py-2 text-center font-editorial text-sm text-gabinete-available">
-                Agregado
-              </p>
-            )}
           </div>
         </div>
       </section>
