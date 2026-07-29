@@ -100,7 +100,7 @@ export function CatalogPage() {
 
   return (
     <div className="catalog-page-v3">
-      <section className="catalog-intro-v3">
+      <section className="catalog-intro-v3 simple-page-hero">
         <div className="catalog-title-block-v3">
           <p className="eyebrow">Archivo disponible</p>
           <h1>Catálogo de props</h1>

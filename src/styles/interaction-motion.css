@@ -7,6 +7,14 @@
   --home-section-title-size: clamp(2.5rem, 3.5vw, 3.25rem);
 }
 
+.catalog-intro-v3.simple-page-hero {
+  justify-items: stretch;
+}
+
+.catalog-intro-v3.simple-page-hero .catalog-search-block-v3 {
+  width: 100%;
+}
+
 .home-flow-section .home-section-heading h2,
 .home-featured-section .home-section-heading h2 {
   font-size: var(--home-section-title-size) !important;
