@@ -141,8 +141,36 @@
 }
 
 .product-detail-page .product-detail-title-row h1 {
-  font-size: clamp(3rem, 4.6vw, 4.1rem) !important;
-  line-height: 0.9 !important;
+  font-size: clamp(2.5rem, 3.4vw, 3.1rem) !important;
+  line-height: 0.92 !important;
+}
+
+.product-detail-page .product-summary {
+  position: static !important;
+  top: auto !important;
+}
+
+.product-summary-badges {
+  gap: 0.55rem !important;
+}
+
+.product-summary .product-detail-title-row {
+  margin-top: 0.85rem;
+}
+
+.product-summary-description {
+  margin-top: 0.8rem !important;
+  font-size: 0.95rem !important;
+  line-height: 1.55 !important;
+}
+
+.product-summary .product-pricing-grid {
+  margin-top: 0.85rem !important;
+}
+
+.product-summary .detail-trust-row {
+  margin-top: 0.8rem;
+  padding-block: 0.6rem;
 }
 
 .product-pricing-card {
@@ -249,6 +277,107 @@
   align-self: start;
 }
 
+.product-spec-tags {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  border-top: 1px solid var(--line);
+  padding-top: 1rem;
+}
+
+.product-booking-footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 300px);
+  align-items: stretch;
+  gap: 1.25rem;
+}
+
+.product-inline-calculator,
+.rental-calculator-wide {
+  height: 100%;
+}
+
+.rental-calculator-wide {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.72fr) minmax(0, 1.55fr);
+  align-items: start;
+  gap: clamp(1.25rem, 2.2vw, 2rem);
+  padding: 1.35rem !important;
+}
+
+.rental-calculator-wide .rental-calculator-intro h2 {
+  font-size: clamp(1.8rem, 2.2vw, 2.35rem);
+  line-height: 0.95;
+}
+
+.rental-calculator-wide .rental-calculator-intro > p:last-child {
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+.rental-calculator-wide .rental-calculator-breakdown {
+  display: grid;
+  grid-template-columns: minmax(270px, 1.15fr) minmax(220px, 0.85fr);
+  align-items: stretch;
+  gap: clamp(1rem, 1.8vw, 1.5rem);
+  margin-top: 0 !important;
+}
+
+.rental-calculator-wide .rental-calculator-rows > div {
+  padding-bottom: 0.55rem;
+  font-size: 0.72rem;
+}
+
+.rental-calculator-wide .rental-calculator-rows strong {
+  font-size: 0.82rem;
+}
+
+.rental-calculator-wide .rental-calculator-total {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-top: 0 !important;
+}
+
+.product-cart-action {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.product-booking-notices {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.product-cart-button-wrap {
+  display: grid;
+  flex: 1;
+  gap: 0.65rem;
+}
+
+.product-cart-cta {
+  display: flex !important;
+  width: 100%;
+  min-height: 132px;
+  align-items: center;
+  justify-content: space-between !important;
+  gap: 1rem;
+  padding: 1.25rem 1.35rem !important;
+  text-align: left;
+}
+
+.product-cart-cta span {
+  max-width: 9rem;
+  font-size: 0.9rem;
+  line-height: 1.25;
+}
+
+.product-cart-cta svg {
+  flex: 0 0 auto;
+}
+
 @media (max-width: 1023px) {
   body:not(.force-desktop-view) .product-visual-column {
     display: contents;
@@ -264,6 +393,14 @@
 
   body:not(.force-desktop-view) .product-spec-sheet {
     order: 3;
+  }
+
+  body:not(.force-desktop-view) .product-booking-footer {
+    grid-template-columns: 1fr;
+  }
+
+  body:not(.force-desktop-view) .product-cart-cta {
+    min-height: 86px;
   }
 }
 
@@ -283,7 +420,7 @@
   }
 
   body:not(.force-desktop-view) .product-detail-page .product-detail-title-row h1 {
-    font-size: 2.65rem !important;
+    font-size: 2.35rem !important;
   }
 
   body:not(.force-desktop-view) .product-quantity-picker {
@@ -294,6 +431,11 @@
   body:not(.force-desktop-view) .product-quantity-stepper {
     width: 100%;
     grid-template-columns: 1fr 1.2fr 1fr;
+  }
+
+  body:not(.force-desktop-view) .rental-calculator-wide,
+  body:not(.force-desktop-view) .rental-calculator-wide .rental-calculator-breakdown {
+    grid-template-columns: 1fr;
   }
 }
 

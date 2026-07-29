@@ -2,10 +2,10 @@ import {
   ArrowLeft,
   CalendarCheck,
   Heart,
-  MessageCircle,
   Minus,
   Plus,
   ShieldCheck,
+  ShoppingCart,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -21,7 +21,6 @@ import { useSelection } from "../context/SelectionContext";
 import type { Availability } from "../types";
 import { getInclusiveDays, hasOperationalEndpoints } from "../utils/dates";
 import { formatCurrency } from "../utils/format";
-import { buildContactMessage, buildWhatsappUrl } from "../utils/messages";
 import { calculateProductPricing } from "../utils/pricing";
 
 const availabilityClass: Record<Availability, string> = {
@@ -95,20 +94,6 @@ export function ProductDetailPage() {
       endDate: selectedDates.endDate,
     },
   ];
-  const quickMessage = buildContactMessage(
-    {
-      name: "",
-      company: "",
-      email: "",
-      phone: "",
-      projectName: "",
-      projectType: "",
-      dates: "",
-      message: `Quiero consultar disponibilidad por ${product.name}.`,
-    },
-    products,
-    singleSelection,
-  );
   const productPricing = calculateProductPricing(product, singleSelection[0]);
   const favorite = isFavorite(product.id);
 
@@ -144,11 +129,21 @@ export function ProductDetailPage() {
                 </div>
               ))}
             </dl>
+            {product.tags.length > 0 && (
+              <div className="product-spec-tags">
+                <p className="eyebrow">Etiquetas</p>
+                <div className="flex flex-wrap gap-2">
+                  {product.tags.map((tag) => (
+                    <TagPill key={tag} tag={tag} />
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
         </section>
 
         <section className="product-summary lg:pt-3">
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="product-summary-badges flex flex-wrap items-center gap-3">
             <CategoryBadge category={product.category} />
             <span className={`availability-badge ${availabilityClass[product.availability]}`}>
               {product.availability}
@@ -168,7 +163,7 @@ export function ProductDetailPage() {
               <Heart size={21} fill={favorite ? "currentColor" : "none"} />
             </button>
           </div>
-          <p className="mt-5 font-editorial text-lg leading-8 text-gabinete-muted">
+          <p className="product-summary-description mt-5 font-editorial text-lg leading-8 text-gabinete-muted">
             {product.description}
           </p>
 
@@ -193,18 +188,12 @@ export function ProductDetailPage() {
             </div>
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-2">
-            {product.tags.map((tag) => (
-              <TagPill key={tag} tag={tag} />
-            ))}
-          </div>
-
           <div className="detail-trust-row">
             <span><CalendarCheck size={17} /> Fechas visibles antes de reservar</span>
             <span><ShieldCheck size={17} /> Garantía reintegrable</span>
           </div>
 
-          <div className="detail-calendar-section mt-6">
+          <div className="detail-calendar-section mt-4">
             <AvailabilityCalendar
               product={product}
               startDate={selectedDates.startDate}
@@ -267,27 +256,37 @@ export function ProductDetailPage() {
             </div>
           </div>
 
-          <div className="detail-actions mt-4 grid gap-3 sm:grid-cols-2">
+        </section>
+      </div>
+
+      <section className="product-booking-footer mt-8">
+        <div className="product-inline-calculator">
+          <RentalCalculator products={products} selection={singleSelection} wide />
+        </div>
+        <div className="product-cart-action">
+          <div className="product-booking-notices">
             {!hasSelectedDates && (
-              <p className="rounded-md border border-gabinete-line/25 bg-gabinete-paperLight/24 px-3 py-2 font-editorial text-sm text-gabinete-muted sm:col-span-2">
+              <p className="rounded-md border border-gabinete-line/25 bg-gabinete-paperLight/24 px-3 py-2 font-editorial text-sm text-gabinete-muted">
                 Elegí los días en el calendario para poder sumar este objeto al carrito.
               </p>
             )}
             {!canBookProduct && (
-              <p className="rounded-md border border-gabinete-line/35 bg-gabinete-paperLight/24 px-3 py-2 font-editorial text-sm text-gabinete-muted sm:col-span-2">
-                Esta pieza requiere consulta de precio o disponibilidad. Escribinos y la revisamos con vos.
+              <p className="rounded-md border border-gabinete-line/35 bg-gabinete-paperLight/24 px-3 py-2 font-editorial text-sm text-gabinete-muted">
+                Esta pieza requiere consulta de precio o disponibilidad.
               </p>
             )}
             {selectedDateConflict && (
-              <p className="rounded-md border border-gabinete-error/35 bg-gabinete-error/10 px-3 py-2 font-editorial text-sm text-gabinete-error sm:col-span-2">
+              <p className="rounded-md border border-gabinete-error/35 bg-gabinete-error/10 px-3 py-2 font-editorial text-sm text-gabinete-error">
                 Ese rango pisa una reserva confirmada. Probá con otras fechas.
               </p>
             )}
             {hasSelectedDates && !selectedDatesAreOperational && (
-              <p className="rounded-md border border-gabinete-error/35 bg-gabinete-error/10 px-3 py-2 font-editorial text-sm text-gabinete-error sm:col-span-2">
-                El retiro y la devolución deben caer en días hábiles. No operamos fines de semana ni feriados.
+              <p className="rounded-md border border-gabinete-error/35 bg-gabinete-error/10 px-3 py-2 font-editorial text-sm text-gabinete-error">
+                El retiro y la devolución deben caer en días hábiles.
               </p>
             )}
+          </div>
+          <div className="product-cart-button-wrap">
             <button
               type="button"
               disabled={
@@ -311,33 +310,19 @@ export function ProductDetailPage() {
                   window.setTimeout(() => setAddedMessage(false), 1800);
                 }
               }}
-              className="gabinete-button px-4 py-3 disabled:cursor-not-allowed disabled:opacity-50"
+              className="product-cart-cta gabinete-button disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <Plus size={18} />
-              {canBookProduct ? "Sumar al carrito" : "Disponible a consulta"}
+              <span>{canBookProduct ? "Sumar al carrito" : "Disponible a consulta"}</span>
+              <ShoppingCart size={34} strokeWidth={1.8} />
             </button>
-            <a
-              href={buildWhatsappUrl(quickMessage)}
-              target="_blank"
-              rel="noreferrer"
-              className="gabinete-button-secondary px-4 py-3"
-            >
-              <MessageCircle size={18} />
-              Enviar por WhatsApp
-            </a>
             {addedMessage && (
-              <p className="rounded-md border border-gabinete-available/35 bg-gabinete-available/10 px-3 py-2 text-center font-editorial text-sm text-gabinete-available sm:col-span-2">
+              <p className="rounded-md border border-gabinete-available/35 bg-gabinete-available/10 px-3 py-2 text-center font-editorial text-sm text-gabinete-available">
                 Agregado
               </p>
             )}
           </div>
-
-          <div className="product-inline-calculator mt-8">
-            <RentalCalculator products={products} selection={singleSelection} />
-          </div>
-        </section>
-      </div>
-
+        </div>
+      </section>
     </div>
   );
 }
