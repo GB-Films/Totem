@@ -13,7 +13,12 @@ import { getInclusiveDays, todayIso } from "../utils/dates";
 interface SelectionContextValue {
   selection: SelectionItem[];
   totalItems: number;
-  addProduct: (product: Product, startDate: string, endDate: string) => void;
+  addProduct: (
+    product: Product,
+    startDate: string,
+    endDate: string,
+    quantity?: number,
+  ) => void;
   removeProduct: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number, maxQuantity?: number) => void;
   updateRentalDays: (productId: string, rentalDays: number) => void;
@@ -61,7 +66,13 @@ export function SelectionProvider({ children }: PropsWithChildren) {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(selection));
   }, [selection]);
 
-  const addProduct = useCallback((product: Product, startDate: string, endDate: string) => {
+  const addProduct = useCallback((
+    product: Product,
+    startDate: string,
+    endDate: string,
+    quantity = 1,
+  ) => {
+    const quantityToAdd = Math.min(product.stock, Math.max(1, quantity));
     setSelection((current) => {
       const existing = current.find((item) => item.productId === product.id);
       if (existing) {
@@ -69,7 +80,7 @@ export function SelectionProvider({ children }: PropsWithChildren) {
           item.productId === product.id
             ? {
               ...item,
-                quantity: Math.min(product.stock, item.quantity + 1),
+                quantity: quantityToAdd,
                 startDate,
                 endDate,
                 rentalDays: getInclusiveDays(startDate, endDate),
@@ -82,7 +93,7 @@ export function SelectionProvider({ children }: PropsWithChildren) {
         ...current,
         {
           productId: product.id,
-          quantity: 1,
+          quantity: quantityToAdd,
           rentalDays: getInclusiveDays(startDate, endDate),
           startDate,
           endDate,

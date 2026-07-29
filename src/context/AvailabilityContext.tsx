@@ -50,6 +50,11 @@ interface AvailabilityContextValue {
   loadingBookings: boolean;
   availabilityError: string;
   getProductReservations: (productId: string) => ReservationRange[];
+  getAvailableQuantity: (
+    productId: string,
+    startDate?: string,
+    endDate?: string,
+  ) => number;
   hasConflict: (
     productId: string,
     startDate?: string,
@@ -232,22 +237,41 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
     [bookings, holdClock],
   );
 
+  const getAvailableQuantity = useCallback(
+    (productId: string, startDate?: string, endDate?: string) => {
+      const product = products.find((candidate) => candidate.id === productId);
+      if (!product) {
+        return 0;
+      }
+
+      if (!startDate || !endDate) {
+        return product.stock;
+      }
+
+      const reservedQuantity = getProductReservations(productId)
+        .filter((reservation) =>
+          rangesOverlap(startDate, endDate, reservation.startDate, reservation.endDate),
+        )
+        .reduce((total, reservation) => total + Math.max(1, reservation.quantity ?? 1), 0);
+
+      return Math.max(0, product.stock - reservedQuantity);
+    },
+    [getProductReservations, products],
+  );
+
   const hasConflict = useCallback(
     (productId: string, startDate?: string, endDate?: string, requestedQuantity = 1) => {
       if (!startDate || !endDate) {
         return false;
       }
 
-      const product = products.find((candidate) => candidate.id === productId);
-      const stock = product?.stock ?? 1;
-      const overlappingQuantity = getProductReservations(productId)
-        .filter((reservation) =>
-          rangesOverlap(startDate, endDate, reservation.startDate, reservation.endDate),
-        )
-        .reduce((total, reservation) => total + Math.max(1, reservation.quantity ?? 1), 0);
-      return overlappingQuantity + Math.max(1, requestedQuantity) > stock;
+      return Math.max(1, requestedQuantity) > getAvailableQuantity(
+        productId,
+        startDate,
+        endDate,
+      );
     },
-    [getProductReservations, products],
+    [getAvailableQuantity],
   );
 
   const createBooking = useCallback(
@@ -353,6 +377,7 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
       loadingBookings,
       availabilityError,
       getProductReservations,
+      getAvailableQuantity,
       hasConflict,
       createBooking,
       syncMode: "firebase" as const,
@@ -361,6 +386,7 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
       availabilityError,
       createBooking,
       effectiveBookings,
+      getAvailableQuantity,
       getProductReservations,
       hasConflict,
       loadingAvailability,

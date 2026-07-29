@@ -1,5 +1,13 @@
-import { ArrowLeft, CalendarCheck, Heart, MessageCircle, Plus, ShieldCheck, Sparkles } from "lucide-react";
-import { useState } from "react";
+import {
+  ArrowLeft,
+  CalendarCheck,
+  Heart,
+  MessageCircle,
+  Minus,
+  Plus,
+  ShieldCheck,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { AvailabilityCalendar } from "../components/AvailabilityCalendar";
 import { CategoryBadge } from "../components/CategoryBadge";
@@ -28,9 +36,24 @@ export function ProductDetailPage() {
   const product = products.find((candidate) => candidate.id === id);
   const { addProduct } = useSelection();
   const { isFavorite, toggleFavorite } = useFavorites();
-  const { hasConflict, loadingAvailability, availabilityError } = useAvailability();
+  const {
+    getAvailableQuantity,
+    hasConflict,
+    loadingAvailability,
+    availabilityError,
+  } = useAvailability();
   const [selectedDates, setSelectedDates] = useState<{ startDate?: string; endDate?: string }>({});
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [addedMessage, setAddedMessage] = useState(false);
+  const availableQuantity = product
+    ? getAvailableQuantity(product.id, selectedDates.startDate, selectedDates.endDate)
+    : 1;
+
+  useEffect(() => {
+    setSelectedQuantity((current) =>
+      Math.min(Math.max(1, current), Math.max(1, availableQuantity)),
+    );
+  }, [availableQuantity]);
 
   if (loading) {
     return <div className="product-detail-loading" role="status">Cargando la ficha del objeto…</div>;
@@ -51,14 +74,19 @@ export function ProductDetailPage() {
 
   const hasSelectedDates = Boolean(selectedDates.startDate && selectedDates.endDate);
   const selectedDateConflict = hasSelectedDates
-    ? hasConflict(product.id, selectedDates.startDate, selectedDates.endDate)
+    ? hasConflict(
+      product.id,
+      selectedDates.startDate,
+      selectedDates.endDate,
+      selectedQuantity,
+    )
     : false;
   const selectedDatesAreOperational = hasOperationalEndpoints(selectedDates.startDate, selectedDates.endDate);
   const canBookProduct = product.availability === "Disponible" && product.rentalPricePerWeek > 0;
   const singleSelection = [
     {
       productId: product.id,
-      quantity: 1,
+      quantity: selectedQuantity,
       rentalDays:
         selectedDates.startDate && selectedDates.endDate
           ? getInclusiveDays(selectedDates.startDate, selectedDates.endDate)
@@ -97,14 +125,26 @@ export function ProductDetailPage() {
       <div className="product-detail-layout mt-8 grid gap-10 lg:grid-cols-[1.05fr_.95fr]">
         <section className="product-visual-column">
           <ObjectImage product={product} />
-          <div className="mt-4">
-            <AvailabilityCalendar
-              product={product}
-              startDate={selectedDates.startDate}
-              endDate={selectedDates.endDate}
-              onRangeChange={(startDate, endDate) => setSelectedDates({ startDate, endDate })}
-            />
-          </div>
+          <section className="product-spec-sheet parchment-panel mt-6 p-6">
+            <h2 className="font-display text-3xl text-gabinete-darkBrown">Ficha del objeto</h2>
+            <dl className="mt-6 grid gap-4 sm:grid-cols-2">
+              {[
+                ["ID", product.id],
+                ["Medidas aproximadas", product.measurements],
+                ["Material", product.material],
+                ["Color", product.color],
+                ["Época / estilo", product.eraStyle],
+                ["Disponibilidad", product.availability],
+              ].filter(([, value]) => Boolean(value)).map(([label, value]) => (
+                <div key={label} className="rounded-md border border-gabinete-line/24 bg-gabinete-paperLight/18 p-4">
+                  <dt className="font-display text-xs uppercase tracking-[0.16em] text-gabinete-faint">
+                    {label}
+                  </dt>
+                  <dd className="mt-2 font-editorial text-gabinete-darkBrown">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
         </section>
 
         <section className="product-summary lg:pt-3">
@@ -132,19 +172,19 @@ export function ProductDetailPage() {
             {product.description}
           </p>
 
-          <div className="mt-7 grid gap-3 sm:grid-cols-2">
-            <div className="parchment-panel p-4">
+          <div className="product-pricing-grid mt-5 grid gap-2 sm:grid-cols-2">
+            <div className="product-pricing-card parchment-panel p-3">
               <p className="eyebrow">Tarifa semanal mínima</p>
-              <p className="mt-2 font-display text-2xl font-semibold text-gabinete-darkBrown">
+              <p className="product-price-value mt-2 font-display font-semibold text-gabinete-darkBrown">
                 {product.rentalPricePerWeek > 0 ? formatCurrency(product.rentalPricePerWeek) : "Consultar"}
               </p>
               <p className="mt-1 font-editorial text-xs leading-5 text-gabinete-muted">
                 Cada semana iniciada se factura como semana completa.
               </p>
             </div>
-            <div className="parchment-panel p-4">
+            <div className="product-pricing-card parchment-panel p-3">
               <p className="eyebrow">Garantía final</p>
-              <p className="mt-2 font-display text-2xl font-semibold text-gabinete-darkBrown">
+              <p className="product-price-value mt-2 font-display font-semibold text-gabinete-darkBrown">
                 {productPricing.guaranteeAmount > 0 ? formatCurrency(productPricing.guaranteeAmount) : "Sin depósito"}
               </p>
               <p className="mt-1 font-editorial text-xs leading-5 text-gabinete-muted">
@@ -159,22 +199,75 @@ export function ProductDetailPage() {
             ))}
           </div>
 
-          {product.curiosities && <div className="curiosity-box mt-7 p-5">
-            <p className="eyebrow flex items-center gap-2">
-              <Sparkles size={15} />
-              Curiosidades
-            </p>
-            <p className="mt-3 font-editorial text-2xl italic leading-snug text-gabinete-darkBrown">
-              {product.curiosities}
-            </p>
-          </div>}
-
           <div className="detail-trust-row">
             <span><CalendarCheck size={17} /> Fechas visibles antes de reservar</span>
             <span><ShieldCheck size={17} /> Garantía reintegrable</span>
           </div>
 
-          <div className="mt-7 grid gap-3 sm:grid-cols-2">
+          <div className="detail-calendar-section mt-6">
+            <AvailabilityCalendar
+              product={product}
+              startDate={selectedDates.startDate}
+              endDate={selectedDates.endDate}
+              onRangeChange={(startDate, endDate) => {
+                setSelectedDates({ startDate, endDate });
+                setSelectedQuantity(1);
+              }}
+            />
+          </div>
+
+          <div className="product-quantity-picker">
+            <div>
+              <span>Cantidad</span>
+              <strong>
+                {hasSelectedDates
+                  ? availableQuantity > 0
+                    ? `${availableQuantity} ${availableQuantity === 1 ? "unidad disponible" : "unidades disponibles"}`
+                    : "No disponible para estas fechas"
+                  : `${product.stock} ${product.stock === 1 ? "unidad total" : "unidades totales"}`}
+              </strong>
+            </div>
+            <div className="product-quantity-stepper">
+              <button
+                type="button"
+                aria-label="Restar cantidad"
+                disabled={!hasSelectedDates || availableQuantity < 1 || selectedQuantity <= 1}
+                onClick={() => setSelectedQuantity((current) => Math.max(1, current - 1))}
+              >
+                <Minus size={15} />
+              </button>
+              <input
+                type="number"
+                aria-label="Cantidad a agregar"
+                min={1}
+                max={Math.max(1, availableQuantity)}
+                value={selectedQuantity}
+                disabled={!hasSelectedDates || availableQuantity < 1}
+                onChange={(event) => setSelectedQuantity(
+                  Math.min(
+                    Math.max(1, Number(event.target.value) || 1),
+                    Math.max(1, availableQuantity),
+                  ),
+                )}
+              />
+              <button
+                type="button"
+                aria-label="Sumar cantidad"
+                disabled={
+                  !hasSelectedDates
+                  || availableQuantity < 1
+                  || selectedQuantity >= availableQuantity
+                }
+                onClick={() => setSelectedQuantity((current) =>
+                  Math.min(availableQuantity, current + 1),
+                )}
+              >
+                <Plus size={15} />
+              </button>
+            </div>
+          </div>
+
+          <div className="detail-actions mt-4 grid gap-3 sm:grid-cols-2">
             {!hasSelectedDates && (
               <p className="rounded-md border border-gabinete-line/25 bg-gabinete-paperLight/24 px-3 py-2 font-editorial text-sm text-gabinete-muted sm:col-span-2">
                 Elegí los días en el calendario para poder sumar este objeto al carrito.
@@ -197,10 +290,23 @@ export function ProductDetailPage() {
             )}
             <button
               type="button"
-              disabled={loadingAvailability || Boolean(availabilityError) || !canBookProduct || !hasSelectedDates || selectedDateConflict || !selectedDatesAreOperational}
+              disabled={
+                loadingAvailability
+                || Boolean(availabilityError)
+                || !canBookProduct
+                || !hasSelectedDates
+                || availableQuantity < 1
+                || selectedDateConflict
+                || !selectedDatesAreOperational
+              }
               onClick={() => {
                 if (selectedDates.startDate && selectedDates.endDate) {
-                  addProduct(product, selectedDates.startDate, selectedDates.endDate);
+                  addProduct(
+                    product,
+                    selectedDates.startDate,
+                    selectedDates.endDate,
+                    selectedQuantity,
+                  );
                   setAddedMessage(true);
                   window.setTimeout(() => setAddedMessage(false), 1800);
                 }
@@ -225,32 +331,13 @@ export function ProductDetailPage() {
               </p>
             )}
           </div>
+
+          <div className="product-inline-calculator mt-8">
+            <RentalCalculator products={products} selection={singleSelection} />
+          </div>
         </section>
       </div>
 
-      <div className="product-detail-meta mt-12 grid items-start gap-8 lg:grid-cols-[1fr_380px]">
-        <section className="parchment-panel p-6">
-          <h2 className="font-display text-3xl text-gabinete-darkBrown">Ficha del objeto</h2>
-          <dl className="mt-6 grid gap-4 sm:grid-cols-2">
-            {[
-              ["ID", product.id],
-              ["Medidas aproximadas", product.measurements],
-              ["Material", product.material],
-              ["Color", product.color],
-              ["Época / estilo", product.eraStyle],
-              ["Disponibilidad", product.availability],
-            ].filter(([, value]) => Boolean(value)).map(([label, value]) => (
-              <div key={label} className="rounded-md border border-gabinete-line/24 bg-gabinete-paperLight/18 p-4">
-                <dt className="font-display text-xs uppercase tracking-[0.16em] text-gabinete-faint">
-                  {label}
-                </dt>
-                <dd className="mt-2 font-editorial text-gabinete-darkBrown">{value}</dd>
-              </div>
-            ))}
-          </dl>
-        </section>
-        <RentalCalculator products={products} selection={singleSelection} />
-      </div>
     </div>
   );
 }

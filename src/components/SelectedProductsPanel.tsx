@@ -21,7 +21,12 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
     removeProduct,
     clearSelection,
   } = useSelection();
-  const { hasConflict, loadingAvailability, availabilityError } = useAvailability();
+  const {
+    getAvailableQuantity,
+    hasConflict,
+    loadingAvailability,
+    availabilityError,
+  } = useAvailability();
   const { products, loading } = useCatalog();
   const selectedProducts = selection
     .map((item) => ({
@@ -85,6 +90,8 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
               const pricing = calculateProductPricing(product, item);
               const startDate = item.startDate ?? todayIso();
               const endDate = item.endDate ?? addDaysIso(startDate, Math.max(1, item.rentalDays) - 1);
+              const availableQuantity = getAvailableQuantity(product.id, startDate, endDate);
+              const quantityLimit = Math.max(1, availableQuantity);
               const conflict = hasConflict(product.id, startDate, endDate, item.quantity);
               const operationalEndpoints = hasOperationalEndpoints(startDate, endDate);
               return (
@@ -122,7 +129,8 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
                             <button
                               type="button"
                               aria-label="Restar cantidad"
-                              onClick={() => updateQuantity(product.id, item.quantity - 1, product.stock)}
+                              disabled={availableQuantity < 1}
+                              onClick={() => updateQuantity(product.id, item.quantity - 1, quantityLimit)}
                             >
                               <Minus size={12} />
                             </button>
@@ -130,14 +138,15 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
                               type="number"
                               min={1}
                               value={item.quantity}
-                              max={product.stock}
-                              onChange={(event) => updateQuantity(product.id, Number(event.target.value), product.stock)}
+                              max={quantityLimit}
+                              disabled={availableQuantity < 1}
+                              onChange={(event) => updateQuantity(product.id, Number(event.target.value), quantityLimit)}
                             />
                             <button
                               type="button"
                               aria-label="Sumar cantidad"
-                              disabled={item.quantity >= product.stock}
-                              onClick={() => updateQuantity(product.id, item.quantity + 1, product.stock)}
+                              disabled={availableQuantity < 1 || item.quantity >= quantityLimit}
+                              onClick={() => updateQuantity(product.id, item.quantity + 1, quantityLimit)}
                             >
                               <Plus size={12} />
                             </button>
@@ -189,9 +198,11 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
                             ? "Retiro y devolución deben ser en días hábiles, sin fines de semana ni feriados."
                             : `Fechas libres: ${formatDateRange(startDate, endDate)}.`}
                       </p>
-                      {product.stock > 1 && (
-                        <p className="selected-stock-note">{product.stock} unidades disponibles</p>
-                      )}
+                      <p className="selected-stock-note">
+                        {availableQuantity > 0
+                          ? `${availableQuantity} ${availableQuantity === 1 ? "unidad disponible" : "unidades disponibles"} para estas fechas`
+                          : "No quedan unidades disponibles para estas fechas"}
+                      </p>
 
                       <div className="selected-item-pricing">
                         <span>Alquiler <strong>{formatCurrency(pricing.rentalTotal)}</strong></span>
