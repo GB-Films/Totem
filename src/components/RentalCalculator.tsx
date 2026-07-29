@@ -2,6 +2,7 @@ import type { Product, SelectionItem } from "../types";
 import { formatCurrency } from "../utils/format";
 import {
   calculateSelectionPricing,
+  getBillableWeeks,
   RESERVATION_DEPOSIT_RATE,
 } from "../utils/pricing";
 
@@ -13,6 +14,12 @@ interface RentalCalculatorProps {
 export function RentalCalculator({ products, selection }: RentalCalculatorProps) {
   const pricing = calculateSelectionPricing(products, selection);
   const selectedCount = selection.reduce((total, item) => total + item.quantity, 0);
+  const billableWeeks = selection.map((item) => getBillableWeeks(item.rentalDays));
+  const minimumWeeks = billableWeeks.length > 0 ? Math.min(...billableWeeks) : 1;
+  const maximumWeeks = billableWeeks.length > 0 ? Math.max(...billableWeeks) : 1;
+  const billedWeeksLabel = minimumWeeks === maximumWeeks
+    ? `${minimumWeeks} ${minimumWeeks === 1 ? "semana" : "semanas"}`
+    : `${minimumWeeks} a ${maximumWeeks} semanas, según el objeto`;
 
   return (
     <section className="parchment-panel p-5">
@@ -27,7 +34,8 @@ export function RentalCalculator({ products, selection }: RentalCalculatorProps)
       <div className="mt-5 space-y-3">
         {[
           ["Objetos en selección", selectedCount.toString()],
-          ["Alquiler semanal estimado", formatCurrency(pricing.rentalTotal)],
+          ["Semanas facturadas", billedWeeksLabel],
+          ["Alquiler del período", formatCurrency(pricing.rentalTotal)],
           [`Seña de reserva (${RESERVATION_DEPOSIT_RATE * 100}%)`, formatCurrency(pricing.reserveDeposit)],
           ["Garantía reintegrable", formatCurrency(pricing.guaranteeAmount)],
         ].map(([label, value]) => (

@@ -1,7 +1,7 @@
 import type { Product, SelectionItem } from "../types";
 import { formatDateRange } from "./dates";
 import { formatCurrency } from "./format";
-import { calculateSelectionPricing } from "./pricing";
+import { calculateSelectionPricing, getBillableWeeks } from "./pricing";
 
 export interface ContactFormValues {
   name: string;
@@ -25,7 +25,7 @@ export function buildSelectionSummary(products: Product[], selection: SelectionI
       if (!product) {
         return null;
       }
-      const billableWeeks = Math.max(1, Math.ceil(item.rentalDays / 7));
+      const billableWeeks = getBillableWeeks(item.rentalDays);
       return `- ${product.name} (${product.id}) x${item.quantity}, ${item.rentalDays} día(s) de uso, ${billableWeeks} semana(s) facturada(s), ${formatDateRange(item.startDate, item.endDate)}`;
     })
     .filter(Boolean)

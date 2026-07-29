@@ -86,6 +86,7 @@ export interface ReservationRange {
   guaranteeAmount?: number;
   totalEstimated?: number;
   holdExpiresAt?: string;
+  createdAt?: unknown;
 }
 
 export interface BookingItem {
@@ -120,6 +121,7 @@ export interface Booking {
   rentalTotal: number;
   totalEstimated: number;
   holdExpiresAt?: string;
+  holdExpired?: boolean;
   createdAt?: unknown;
   updatedAt?: unknown;
 }

@@ -26,7 +26,11 @@ import type {
 } from "../types";
 import { rangesOverlap } from "../utils/dates";
 import { calculateProductPricing, calculateSelectionPricing } from "../utils/pricing";
-import { PAYMENT_ALIAS } from "../utils/reservations";
+import {
+  isReservationHoldExpired,
+  PAYMENT_ALIAS,
+  RESERVATION_HOLD_HOURS,
+} from "../utils/reservations";
 import { useAuth } from "./AuthContext";
 import { useCatalog } from "./CatalogContext";
 
@@ -57,23 +61,19 @@ interface AvailabilityContextValue {
 }
 
 const AvailabilityContext = createContext<AvailabilityContextValue | undefined>(undefined);
-const HOLD_HOURS = 24;
+const HOLD_REFRESH_INTERVAL = 30 * 1000;
 
 function isBlockingStatus(status?: ReservationStatus) {
   return !status
     || ["request_sent", "payment_pending", "confirmed", "ready_for_pickup", "active", "pending"].includes(status);
 }
 
-function blocksAvailability(reservation: ReservationRange) {
+function blocksAvailability(reservation: ReservationRange, now: number) {
   if (!isBlockingStatus(reservation.status)) {
     return false;
   }
 
-  if (
-    reservation.status === "payment_pending"
-    && reservation.holdExpiresAt
-    && reservation.holdExpiresAt <= new Date().toISOString()
-  ) {
+  if (isReservationHoldExpired(reservation, now)) {
     return false;
   }
 
@@ -92,7 +92,9 @@ function createBookingCode() {
 }
 
 function createHoldExpiration() {
-  return new Date(Date.now() + HOLD_HOURS * 60 * 60 * 1000).toISOString();
+  return new Date(
+    Date.now() + RESERVATION_HOLD_HOURS * 60 * 60 * 1000,
+  ).toISOString();
 }
 
 function toBooking(id: string, data: Omit<Booking, "id">): Booking {
@@ -127,6 +129,15 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
   const [loadingAvailability, setLoadingAvailability] = useState(true);
   const [loadingBookings, setLoadingBookings] = useState(false);
   const [availabilityError, setAvailabilityError] = useState("");
+  const [holdClock, setHoldClock] = useState(() => Date.now());
+
+  useEffect(() => {
+    const interval = window.setInterval(
+      () => setHoldClock(Date.now()),
+      HOLD_REFRESH_INTERVAL,
+    );
+    return () => window.clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!db) {
@@ -150,6 +161,7 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
               quantity: Math.max(1, Number(data.quantity) || 1),
               status: data.status,
               holdExpiresAt: data.holdExpiresAt,
+              createdAt: data.createdAt,
               source: "firebase",
             };
           }),
@@ -204,9 +216,20 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
   const getProductReservations = useCallback(
     (productId: string) =>
       reservations
-        .filter((reservation) => reservation.productId === productId && blocksAvailability(reservation))
+        .filter((reservation) =>
+          reservation.productId === productId
+          && blocksAvailability(reservation, holdClock),
+        )
         .sort((a, b) => a.startDate.localeCompare(b.startDate)),
-    [reservations],
+    [holdClock, reservations],
+  );
+
+  const effectiveBookings = useMemo(
+    () => bookings.map((booking) => ({
+      ...booking,
+      holdExpired: isReservationHoldExpired(booking, holdClock),
+    })),
+    [bookings, holdClock],
   );
 
   const hasConflict = useCallback(
@@ -325,7 +348,7 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
   const value = useMemo(
     () => ({
       reservations,
-      bookings,
+      bookings: effectiveBookings,
       loadingAvailability,
       loadingBookings,
       availabilityError,
@@ -336,8 +359,8 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
     }),
     [
       availabilityError,
-      bookings,
       createBooking,
+      effectiveBookings,
       getProductReservations,
       hasConflict,
       loadingAvailability,

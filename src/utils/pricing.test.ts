@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { Product, SelectionItem } from "../types";
-import { calculateProductPricing, calculateSelectionPricing } from "./pricing";
+import {
+  calculateProductPricing,
+  calculateSelectionPricing,
+  getBillableWeeks,
+} from "./pricing";
 
 const product: Product = {
   id: "test-1",
@@ -66,6 +70,14 @@ describe("calculateProductPricing", () => {
     );
 
     expect(pricing.guaranteeAmount).toBeCloseTo(330);
+  });
+});
+
+describe("getBillableWeeks", () => {
+  it("reports every started week", () => {
+    expect(getBillableWeeks(7)).toBe(1);
+    expect(getBillableWeeks(8)).toBe(2);
+    expect(getBillableWeeks(15)).toBe(3);
   });
 });
 

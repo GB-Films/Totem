@@ -57,7 +57,10 @@ import {
   toIsoDate,
 } from "../utils/dates";
 import { formatCurrency } from "../utils/format";
-import { getReservationStatusLabel } from "../utils/reservations";
+import {
+  getReservationStatusLabel,
+  isReservationHoldExpired,
+} from "../utils/reservations";
 
 type AdminTab = "overview" | "bookings" | "calendar" | "customers" | "catalog";
 
@@ -83,13 +86,11 @@ const toneOptions: ProductVisual["tone"][] = ["brass", "green", "red", "blue", "
 const adminWeekdays = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
 function isActiveBooking(booking: Booking) {
-  return activeStatuses.includes(booking.status);
+  return activeStatuses.includes(booking.status) && !isExpiredHold(booking);
 }
 
 function isExpiredHold(booking: Booking) {
-  return booking.status === "payment_pending"
-    && Boolean(booking.holdExpiresAt)
-    && booking.holdExpiresAt! < new Date().toISOString();
+  return booking.holdExpired ?? isReservationHoldExpired(booking);
 }
 
 function bookingStart(booking: Booking) {
@@ -172,6 +173,7 @@ function AdminOverview({
   const nextWeek = addDaysIso(today, 7);
   const activeBookings = bookings.filter(isActiveBooking);
   const pendingPayments = activeBookings.filter((booking) => booking.status === "payment_pending");
+  const expiredHolds = bookings.filter(isExpiredHold);
   const upcomingPickups = activeBookings.filter((booking) => {
     const start = bookingStart(booking);
     return start >= today && start <= nextWeek;
@@ -187,7 +189,7 @@ function AdminOverview({
         <article>
           <span>Señas pendientes</span>
           <strong>{pendingPayments.length}</strong>
-          <p>{pendingPayments.filter(isExpiredHold).length} retenciones vencidas</p>
+          <p>{expiredHolds.length} retenciones vencidas y liberadas</p>
         </article>
         <article>
           <span>Próximos 7 días</span>

@@ -4,10 +4,13 @@ export const MINIMUM_RENTAL_DAYS = 7;
 export const DELICATE_GUARANTEE_EXTRA = 0.1;
 export const RESERVATION_DEPOSIT_RATE = 0.2;
 
+export function getBillableWeeks(rentalDays: number) {
+  return Math.max(1, Math.ceil(Math.max(1, rentalDays) / MINIMUM_RENTAL_DAYS));
+}
+
 export function calculateProductPricing(product: Product, item: SelectionItem): PricingBreakdown {
   const safeQuantity = Math.min(product.stock, Math.max(1, item.quantity));
-  const safeDays = Math.max(1, item.rentalDays);
-  const billableWeeks = Math.max(1, Math.ceil(safeDays / MINIMUM_RENTAL_DAYS));
+  const billableWeeks = getBillableWeeks(item.rentalDays);
   const rentalSubtotal = product.rentalPricePerWeek * billableWeeks * safeQuantity;
   const rentalTotal = rentalSubtotal;
   const rentalDiscount = 0;

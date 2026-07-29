@@ -35,7 +35,9 @@ export function ReservationHistory() {
   const { user, loginWithGoogle } = useAuth();
   const { bookings, loadingBookings } = useAvailability();
   const userBookings = user
-    ? bookings.filter((booking) => booking.createdByUid === user.uid)
+    ? bookings.filter(
+      (booking) => booking.createdByUid === user.uid && !booking.holdExpired,
+    )
     : [];
 
   return (

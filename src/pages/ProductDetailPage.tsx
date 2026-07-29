@@ -228,7 +228,7 @@ export function ProductDetailPage() {
         </section>
       </div>
 
-      <div className="product-detail-meta mt-12 grid gap-8 lg:grid-cols-[1fr_380px]">
+      <div className="product-detail-meta mt-12 grid items-start gap-8 lg:grid-cols-[1fr_380px]">
         <section className="parchment-panel p-6">
           <h2 className="font-display text-3xl text-gabinete-darkBrown">Ficha del objeto</h2>
           <dl className="mt-6 grid gap-4 sm:grid-cols-2">
