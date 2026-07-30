@@ -4,7 +4,7 @@ import { useAvailability } from "../context/AvailabilityContext";
 import { useCatalog } from "../context/CatalogContext";
 import { useSelection } from "../context/SelectionContext";
 import { formatCurrency } from "../utils/format";
-import { addDaysIso, formatDateRange, getInclusiveDays, hasOperationalEndpoints, todayIso } from "../utils/dates";
+import { addDaysIso, getInclusiveDays, hasOperationalEndpoints, todayIso } from "../utils/dates";
 import { calculateProductPricing } from "../utils/pricing";
 import { ObjectImage } from "./ObjectImage";
 import { RentalCalculator } from "./RentalCalculator";
@@ -128,9 +128,7 @@ export function SelectedProductsPanel({
                         </button>
                       </div>
 
-                      <p className="selected-item-range">{formatDateRange(startDate, endDate)}</p>
-
-                      <div className="selected-compact-controls">
+                      <div className="selected-item-controls">
                         <label>
                           <span>Cant.</span>
                           <div className="selected-stepper">
@@ -172,9 +170,6 @@ export function SelectedProductsPanel({
                             }}
                           />
                         </label>
-                      </div>
-
-                      <div className="selected-date-controls">
                         <label>
                           <span>Desde</span>
                           <input
@@ -199,13 +194,13 @@ export function SelectedProductsPanel({
                         </label>
                       </div>
 
-                      <p className={`selected-item-status ${conflict ? "is-conflict" : "is-free"}`}>
-                        {conflict
-                          ? "Estas fechas se pisan con una reserva confirmada."
-                          : !operationalEndpoints
-                            ? "Retiro y devolución deben ser en días hábiles, sin fines de semana ni feriados."
-                            : `Fechas libres: ${formatDateRange(startDate, endDate)}.`}
-                      </p>
+                      {(conflict || !operationalEndpoints) && (
+                        <p className="selected-item-status is-conflict">
+                          {conflict
+                            ? "Estas fechas se pisan con una reserva confirmada."
+                            : "Retiro y devolución deben ser en días hábiles, sin fines de semana ni feriados."}
+                        </p>
+                      )}
                       <p className="selected-stock-note">
                         {availableQuantity > 0
                           ? `${availableQuantity} ${availableQuantity === 1 ? "unidad disponible" : "unidades disponibles"} para estas fechas`
