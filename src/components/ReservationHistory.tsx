@@ -2,6 +2,8 @@ import { CalendarDays, ChevronDown, Clock3, Lock, MessageCircle } from "lucide-r
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useAvailability } from "../context/AvailabilityContext";
+import { useCatalog } from "../context/CatalogContext";
+import { ObjectImage } from "./ObjectImage";
 import { formatDateRange } from "../utils/dates";
 import { formatCurrency } from "../utils/format";
 import { buildWhatsappUrl } from "../utils/messages";
@@ -35,6 +37,7 @@ function formatHoldExpiration(value?: string) {
 export function ReservationHistory() {
   const { user, loginWithGoogle } = useAuth();
   const { bookings, loadingBookings } = useAvailability();
+  const { products } = useCatalog();
   const [openBookingId, setOpenBookingId] = useState<string | null>(null);
   const userBookings = user
     ? bookings.filter(
@@ -68,6 +71,8 @@ export function ReservationHistory() {
           {userBookings.map((booking) => {
             const activeIndex = getReservationStatusIndex(booking.status);
             const isOpen = openBookingId === booking.id;
+            const previewItems = booking.items.slice(0, 3);
+            const hiddenItemCount = Math.max(0, booking.items.length - previewItems.length);
             const whatsappMessage = [
               `Hola, consulto por mi pedido ${booking.code}.`,
               `Estado: ${getReservationStatusLabel(booking.status)}.`,
@@ -86,6 +91,23 @@ export function ReservationHistory() {
                   <span className="booking-accordion-main">
                     <span className="booking-code">{booking.code}</span>
                     <strong>{booking.projectName || `Pedido de ${booking.items.length} ${booking.items.length === 1 ? "objeto" : "objetos"}`}</strong>
+                  </span>
+                  <span className="booking-preview-images" aria-label={`Vista previa de ${booking.items.length} objetos`}>
+                    {previewItems.map((item) => {
+                      const product = products.find((candidate) => candidate.id === item.productId);
+                      return product ? (
+                        <span key={item.productId} className="booking-preview-image" title={item.productName}>
+                          <ObjectImage product={product} compact showLabel={false} />
+                        </span>
+                      ) : (
+                        <span key={item.productId} className="booking-preview-image is-placeholder" title={item.productName}>
+                          {item.productName.slice(0, 1)}
+                        </span>
+                      );
+                    })}
+                    {hiddenItemCount > 0 && (
+                      <span className="booking-preview-more">+{hiddenItemCount}</span>
+                    )}
                   </span>
                   <span className="booking-accordion-summary">
                     {booking.items.length} {booking.items.length === 1 ? "objeto" : "objetos"}
