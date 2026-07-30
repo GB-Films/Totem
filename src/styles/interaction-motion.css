@@ -968,9 +968,34 @@
   display: block;
   width: clamp(112px, 10vw, 150px);
   height: auto;
-  margin: 0 0 1.25rem;
+  margin: 0;
   object-fit: contain;
   object-position: left center;
+}
+
+.footer-brand {
+  display: grid;
+  grid-template-columns: clamp(112px, 10vw, 150px) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: clamp(1.25rem, 2.4vw, 2.5rem);
+  align-items: start;
+}
+
+.footer-brand-logo {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+
+.footer-brand > p {
+  grid-column: 2;
+  grid-row: 1;
+  margin-top: 0 !important;
+}
+
+.footer-brand > .footer-cta {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: start;
 }
 
 .booking-accordion-trigger {
@@ -1138,6 +1163,15 @@
 
   .account-profile-grid {
     grid-template-columns: 1fr;
+  }
+
+  .footer-brand {
+    grid-template-columns: 96px minmax(0, 1fr);
+    column-gap: 1rem;
+  }
+
+  .footer-brand-logo {
+    width: 96px;
   }
 }
 
