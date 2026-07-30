@@ -1,4 +1,4 @@
-import { CalendarDays, ChevronDown, Clock3, History, Lock, MessageCircle } from "lucide-react";
+import { CalendarDays, ChevronDown, Clock3, History, Lock, MessageCircle, XCircle } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useAvailability } from "../context/AvailabilityContext";
@@ -55,10 +55,12 @@ function getStatusGuidance(status: string) {
 
 export function ReservationHistory() {
   const { user, loginWithGoogle } = useAuth();
-  const { bookings, loadingBookings } = useAvailability();
+  const { bookings, cancelBooking, loadingBookings } = useAvailability();
   const { products } = useCatalog();
   const [openBookingId, setOpenBookingId] = useState<string | null>(null);
   const [historyView, setHistoryView] = useState<"active" | "activity">("active");
+  const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
+  const [cancelError, setCancelError] = useState("");
   const userBookings = user
     ? bookings.filter(
       (booking) => booking.createdByUid === user.uid && !booking.holdExpired,
@@ -71,6 +73,25 @@ export function ReservationHistory() {
     (booking) => booking.status === "returned" || booking.status === "cancelled",
   ).slice(0, 10);
   const visibleBookings = historyView === "active" ? activeBookings : activityBookings;
+
+  const handleCancelBooking = async (bookingId: string, bookingCode: string) => {
+    const confirmed = window.confirm(
+      `¿Cancelar la reserva ${bookingCode}? Los productos y las fechas se liberarán inmediatamente.`,
+    );
+    if (!confirmed) return;
+
+    setCancelError("");
+    setCancellingBookingId(bookingId);
+    try {
+      await cancelBooking(bookingId);
+      setHistoryView("activity");
+      setOpenBookingId(bookingId);
+    } catch (error) {
+      setCancelError(error instanceof Error ? error.message : "No pudimos cancelar la reserva.");
+    } finally {
+      setCancellingBookingId(null);
+    }
+  };
 
   return (
     <section className="parchment-panel reservation-history p-5">
@@ -206,21 +227,40 @@ export function ReservationHistory() {
                     </div>
 
                     {booking.status === "payment_pending" && (
-                      <div className="reservation-payment-note">
-                        <Clock3 size={17} />
-                        <p>
-                          Transferí <strong>{formatCurrency(booking.reserveDeposit)}</strong> al alias{" "}
-                          <strong>{PAYMENT_ALIAS}</strong>. CVU <strong>{PAYMENT_CVU}</strong>, titular{" "}
-                          <strong>{PAYMENT_HOLDER}</strong>. Después enviá el comprobante.
-                          {booking.holdExpiresAt && (
-                            <> Guardamos las fechas hasta el {formatHoldExpiration(booking.holdExpiresAt)}.</>
-                          )}
-                        </p>
-                        <a href={buildWhatsappUrl(whatsappMessage)} target="_blank" rel="noreferrer">
-                          <MessageCircle size={16} />
-                          Enviar comprobante
-                        </a>
-                      </div>
+                      <>
+                        <div className="reservation-payment-note">
+                          <Clock3 size={17} />
+                          <p>
+                            Transferí <strong>{formatCurrency(booking.reserveDeposit)}</strong> al alias{" "}
+                            <strong>{PAYMENT_ALIAS}</strong>. CVU <strong>{PAYMENT_CVU}</strong>, titular{" "}
+                            <strong>{PAYMENT_HOLDER}</strong>. Después enviá el comprobante.
+                            {booking.holdExpiresAt && (
+                              <> Guardamos las fechas hasta el {formatHoldExpiration(booking.holdExpiresAt)}.</>
+                            )}
+                          </p>
+                          <a href={buildWhatsappUrl(whatsappMessage)} target="_blank" rel="noreferrer">
+                            <MessageCircle size={16} />
+                            Enviar comprobante
+                          </a>
+                        </div>
+                        <div className="reservation-pending-actions">
+                          <p>
+                            Si te equivocaste o decidiste no continuar, cancelá ahora para liberar los objetos.
+                          </p>
+                          <button
+                            type="button"
+                            className="reservation-cancel-button"
+                            disabled={cancellingBookingId === booking.id}
+                            onClick={() => void handleCancelBooking(booking.id, booking.code)}
+                          >
+                            <XCircle size={19} />
+                            {cancellingBookingId === booking.id ? "Cancelando..." : "Cancelar reserva"}
+                          </button>
+                        </div>
+                        {cancelError && openBookingId === booking.id && (
+                          <p className="reservation-cancel-error" role="alert">{cancelError}</p>
+                        )}
+                      </>
                     )}
 
                     <div className="reservation-status-track" aria-label={`Estado: ${getReservationStatusLabel(booking.status)}`}>

@@ -1136,6 +1136,63 @@
   line-height: 1.55;
 }
 
+.reservation-pending-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  border: 1px solid rgba(161, 63, 40, .45);
+  background: rgba(161, 63, 40, .06);
+  padding: .8rem .9rem;
+}
+
+.reservation-pending-actions p {
+  max-width: 640px;
+  color: var(--muted);
+  font-family: var(--font-serif);
+  font-size: .76rem;
+  line-height: 1.5;
+}
+
+.reservation-cancel-button {
+  display: inline-flex;
+  min-height: 42px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  border: 1px solid var(--accent);
+  background: transparent;
+  padding: .65rem .85rem;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.reservation-cancel-button:hover:not(:disabled),
+.reservation-cancel-button:focus-visible {
+  background: var(--accent);
+  color: #fffdf7;
+  transform: translateY(-2px);
+}
+
+.reservation-cancel-button:disabled {
+  cursor: wait;
+  opacity: .55;
+}
+
+.reservation-cancel-error {
+  border-left: 3px solid var(--error);
+  background: rgba(163, 61, 50, .09);
+  padding: .7rem .8rem;
+  color: var(--error);
+  font-family: var(--font-serif);
+  font-size: .78rem;
+  font-weight: 700;
+}
+
 @media (max-width: 900px) {
   .selected-item-controls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1151,6 +1208,15 @@
 
   .booking-accordion-trigger {
     grid-template-columns: minmax(0, 1fr) 24px;
+  }
+
+  .reservation-pending-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .reservation-cancel-button {
+    width: 100%;
   }
 
   .booking-preview-images {

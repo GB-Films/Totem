@@ -108,7 +108,7 @@ service cloud.firestore {
         && request.resource.data.customerName is string
         && request.resource.data.customerEmail == request.auth.token.email
         && request.resource.data.createdByUid == request.auth.uid
-        && request.resource.data.paymentAlias == 'tomiboe'
+        && request.resource.data.paymentAlias == 'totem.rental'
         && request.resource.data.pickupOption in ['reservation_day', 'previous_day_requested']
         && request.resource.data.reserveDeposit is number
         && request.resource.data.guaranteeAmount is number
@@ -116,7 +116,20 @@ service cloud.firestore {
         && request.resource.data.totalEstimated is number
         && request.resource.data.holdExpiresAt is string
       );
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        isSignedIn()
+        && request.auth.token.email_verified == true
+        && resource.data.createdByUid == request.auth.uid
+        && resource.data.status == 'payment_pending'
+        && request.resource.data.status == 'cancelled'
+        && request.resource.data.createdByUid == resource.data.createdByUid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'status',
+          'updatedAt'
+        ])
+        && request.resource.data.updatedAt == request.time
+      );
+      allow delete: if isAdmin();
     }
 
     match /reservationRanges/{rangeId} {
@@ -145,7 +158,17 @@ service cloud.firestore {
         && existsAfter(/databases/$(database)/documents/bookings/$(request.resource.data.bookingId))
         && getAfter(/databases/$(database)/documents/bookings/$(request.resource.data.bookingId)).data.createdByUid == request.auth.uid
       );
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        isSignedIn()
+        && request.auth.token.email_verified == true
+        && resource.data.status == 'payment_pending'
+        && request.resource.data.status == 'cancelled'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && exists(/databases/$(database)/documents/bookings/$(resource.data.bookingId))
+        && get(/databases/$(database)/documents/bookings/$(resource.data.bookingId)).data.createdByUid == request.auth.uid
+        && getAfter(/databases/$(database)/documents/bookings/$(resource.data.bookingId)).data.status == 'cancelled'
+      );
+      allow delete: if isAdmin();
     }
 
     // Reservas de versiones anteriores: sólo quedan visibles para su dueño y el equipo.

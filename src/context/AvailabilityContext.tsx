@@ -10,6 +10,7 @@ import {
 import {
   collection,
   doc,
+  getDocs,
   onSnapshot,
   query,
   serverTimestamp,
@@ -62,6 +63,7 @@ interface AvailabilityContextValue {
     requestedQuantity?: number,
   ) => boolean;
   createBooking: (selection: SelectionItem[], meta: BookingMeta) => Promise<Booking>;
+  cancelBooking: (bookingId: string) => Promise<void>;
   syncMode: "firebase";
 }
 
@@ -369,6 +371,41 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
     [db, hasConflict, loadingAvailability, products],
   );
 
+  const cancelBooking = useCallback(
+    async (bookingId: string) => {
+      if (!db || !user) {
+        throw new Error("Ingresá con tu cuenta para cancelar la reserva.");
+      }
+
+      const booking = bookings.find((candidate) => candidate.id === bookingId);
+      if (!booking || booking.createdByUid !== user.uid) {
+        throw new Error("No encontramos esa reserva en tu cuenta.");
+      }
+      if (booking.status !== "payment_pending") {
+        throw new Error("Esta reserva ya no puede cancelarse desde esta instancia.");
+      }
+      if (isReservationHoldExpired(booking)) {
+        throw new Error("La reserva ya venció y sus productos fueron liberados.");
+      }
+
+      const rangesSnapshot = await getDocs(
+        query(collection(db, "reservationRanges"), where("bookingId", "==", bookingId)),
+      );
+      const batch = writeBatch(db);
+
+      batch.update(doc(db, "bookings", bookingId), {
+        status: "cancelled",
+        updatedAt: serverTimestamp(),
+      });
+      rangesSnapshot.docs.forEach((rangeDoc) => {
+        batch.update(rangeDoc.ref, { status: "cancelled" });
+      });
+
+      await batch.commit();
+    },
+    [bookings, db, user],
+  );
+
   const value = useMemo(
     () => ({
       reservations,
@@ -380,10 +417,12 @@ export function AvailabilityProvider({ children }: PropsWithChildren) {
       getAvailableQuantity,
       hasConflict,
       createBooking,
+      cancelBooking,
       syncMode: "firebase" as const,
     }),
     [
       availabilityError,
+      cancelBooking,
       createBooking,
       effectiveBookings,
       getAvailableQuantity,
