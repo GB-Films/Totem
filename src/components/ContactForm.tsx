@@ -332,7 +332,8 @@ export function ContactForm({ selection, activeStep, onBack, onContinue }: Conta
       </section>
 
       {status === "confirmed" && (
-        <div className="mt-3 rounded-md border border-gabinete-available/35 bg-gabinete-available/10 px-3 py-3 font-editorial text-sm text-gabinete-available">
+        <div className="app-success-message mt-3">
+          <CheckCircle2 size={52} strokeWidth={1.8} />
           <p>
             Pedido <strong>{confirmedBookingCode}</strong> registrado. Guardamos las fechas durante
             24 horas. Transferí la seña al alias <strong>{PAYMENT_ALIAS}</strong>, CVU{" "}

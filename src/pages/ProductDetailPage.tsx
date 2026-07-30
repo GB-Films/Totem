@@ -1,11 +1,9 @@
 import {
   ArrowLeft,
-  CalendarCheck,
   CircleCheckBig,
   Heart,
   Minus,
   Plus,
-  ShieldCheck,
   ShoppingCart,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -201,15 +199,10 @@ export function ProductDetailPage() {
             </div>
           </div>
 
-          <div className="detail-trust-row">
-            <span><CalendarCheck size={17} /> Fechas visibles antes de reservar</span>
-            <span><ShieldCheck size={17} /> Garantía reintegrable</span>
-          </div>
-
           <div className={`detail-calendar-section mt-4 ${productIsFullyInCart ? "is-cart-locked" : ""}`}>
             {productIsFullyInCart && (
-              <div className="product-cart-lock-notice">
-                <CircleCheckBig size={18} />
+              <div className="product-cart-lock-notice app-success-message">
+                <CircleCheckBig size={52} strokeWidth={1.8} />
                 <span>
                   {product.stock === 1
                     ? "La única unidad ya está en tu carrito."

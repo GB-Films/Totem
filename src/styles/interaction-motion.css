@@ -214,18 +214,37 @@
 }
 
 .product-cart-lock-notice {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
   margin-bottom: 0.65rem;
-  border: 1px solid var(--available);
-  background: rgba(48, 83, 57, 0.1);
-  padding: 0.7rem 0.85rem;
-  color: var(--available);
+}
+
+.app-success-message {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  border: 1px solid #31573a;
+  background: #31573a;
+  padding: 1.35rem 1.1rem;
+  color: #fffdf7;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   font-weight: 900;
+  line-height: 1.5;
+  text-align: center;
   text-transform: uppercase;
+}
+
+.app-success-message > svg {
+  color: #fffdf7;
+}
+
+.app-success-message p {
+  max-width: 72ch;
+}
+
+.app-success-message .gabinete-button {
+  border-color: #fffdf7;
+  background: #fffdf7;
+  color: #31573a;
 }
 
 .detail-calendar-section.is-cart-locked .availability-calendar-grid,
