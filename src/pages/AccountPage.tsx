@@ -10,7 +10,7 @@ import { useFavorites } from "../context/FavoritesContext";
 import { getFirebaseDb } from "../services/firebase";
 import type { UserProfile } from "../types";
 
-type ProfileForm = Pick<UserProfile, "firstName" | "lastName" | "dni" | "phone">;
+type ProfileForm = Pick<UserProfile, "firstName" | "lastName" | "dni" | "phone" | "email">;
 type AccountSection = "reservations" | "profile" | "favorites";
 
 const emptyProfile: ProfileForm = {
@@ -18,6 +18,7 @@ const emptyProfile: ProfileForm = {
   lastName: "",
   dni: "",
   phone: "",
+  email: "",
 };
 
 export function AccountPage() {
@@ -53,6 +54,7 @@ export function AccountPage() {
             lastName: user.displayName?.split(" ").slice(1).join(" ") ?? "",
             dni: "",
             phone: "",
+            email: user.email ?? "",
           });
           return;
         }
@@ -63,6 +65,7 @@ export function AccountPage() {
           lastName: data.lastName ?? "",
           dni: data.dni ?? "",
           phone: data.phone ?? "",
+          email: data.email ?? user.email ?? "",
         });
       })
       .catch((error) => {
@@ -90,8 +93,9 @@ export function AccountPage() {
       || !profile.lastName.trim()
       || !/^\d{7,9}$/.test(profile.dni.replace(/\D/g, ""))
       || profile.phone.replace(/\D/g, "").length < 8
+      || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profile.email.trim())
     ) {
-      setMessage("Revisá nombre, apellido, DNI y celular antes de guardar.");
+      setMessage("Revisá nombre, apellido, DNI, celular y mail antes de guardar.");
       return;
     }
 
@@ -102,7 +106,7 @@ export function AccountPage() {
         doc(db, "userProfiles", user.uid),
         {
           uid: user.uid,
-          email: user.email ?? "",
+          email: profile.email.trim(),
           firstName: profile.firstName.trim(),
           lastName: profile.lastName.trim(),
           dni: profile.dni.trim(),
@@ -228,7 +232,7 @@ export function AccountPage() {
             Datos
           </p>
           <h2>Datos personales</h2>
-          <div className="reservation-customer-grid mt-4">
+          <div className="reservation-customer-grid account-profile-grid mt-4">
             <label>
               Nombre
               <input className="gabinete-input" autoComplete="given-name" required value={profile.firstName} onChange={(event) => updateProfile("firstName", event.target.value)} />
@@ -244,6 +248,10 @@ export function AccountPage() {
             <label>
               Celular
               <input className="gabinete-input" type="tel" autoComplete="tel" required value={profile.phone} onChange={(event) => updateProfile("phone", event.target.value)} />
+            </label>
+            <label>
+              Mail
+              <input className="gabinete-input" type="email" autoComplete="email" required value={profile.email} onChange={(event) => updateProfile("email", event.target.value)} />
             </label>
           </div>
           {message && <p className="mt-3 text-sm text-gabinete-muted">{message}</p>}
@@ -298,14 +306,6 @@ export function AccountPage() {
         </section>
       )}
 
-      <section className="user-quick-actions">
-        <Link to="/catalogo" className="gabinete-button-secondary px-5 py-3">Catálogo</Link>
-        <Link to="/colecciones" className="gabinete-button-secondary px-5 py-3">Colecciones</Link>
-        <Link to="/contacto" className="gabinete-button px-5 py-3">
-          <ShoppingCart size={17} />
-          Carrito
-        </Link>
-      </section>
     </main>
   );
 }
