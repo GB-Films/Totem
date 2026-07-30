@@ -964,6 +964,15 @@
   font-size: .86rem;
 }
 
+.footer-brand-logo {
+  display: block;
+  width: clamp(112px, 10vw, 150px);
+  height: auto;
+  margin: 0 0 1.25rem;
+  object-fit: contain;
+  object-position: left center;
+}
+
 .booking-accordion-trigger {
   display: grid;
   width: 100%;

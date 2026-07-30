@@ -6,7 +6,11 @@ export function Footer() {
     <footer className="site-footer">
       <div className="footer-main">
         <div className="footer-brand">
-          <strong className="footer-wordmark">TOTEM RENTAL</strong>
+          <img
+            className="footer-brand-logo"
+            src={`${import.meta.env.BASE_URL}brand/totem-isologotipo-transparent.png`}
+            alt="Totem"
+          />
           <p>
             Objetos que sostienen historias. Utilería, mobiliario, vestuario y piezas especiales
             para cine, TV, publicidad, teatro y contenidos.
