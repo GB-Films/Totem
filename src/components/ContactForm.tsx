@@ -1,4 +1,4 @@
-import { CheckCircle2, MessageCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, MessageCircle } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { useAvailability } from "../context/AvailabilityContext";
@@ -18,6 +18,9 @@ import { PAYMENT_ALIAS, PAYMENT_CVU, PAYMENT_HOLDER } from "../utils/reservation
 
 interface ContactFormProps {
   selection: SelectionItem[];
+  activeStep: 3 | 4;
+  onBack: () => void;
+  onContinue: () => void;
 }
 
 type CustomerInfo = Pick<UserProfile, "firstName" | "lastName" | "dni" | "phone">;
@@ -29,7 +32,7 @@ const emptyCustomerInfo: CustomerInfo = {
   phone: "",
 };
 
-export function ContactForm({ selection }: ContactFormProps) {
+export function ContactForm({ selection, activeStep, onBack, onContinue }: ContactFormProps) {
   const { createBooking, hasConflict, loadingAvailability, availabilityError } = useAvailability();
   const { user, loginWithGoogle, authError: googleAuthError } = useAuth();
   const { products } = useCatalog();
@@ -39,7 +42,6 @@ export function ContactForm({ selection }: ContactFormProps) {
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>(emptyCustomerInfo);
   const [confirmedWhatsappUrl, setConfirmedWhatsappUrl] = useState("");
   const [confirmedBookingCode, setConfirmedBookingCode] = useState("");
-  const [pickupOption, setPickupOption] = useState<"reservation_day" | "previous_day_requested">("reservation_day");
   const [projectName, setProjectName] = useState("");
   const [note, setNote] = useState("");
 
@@ -105,6 +107,7 @@ export function ContactForm({ selection }: ContactFormProps) {
     || !customerInfo.phone.trim();
   const invalidDni = customerInfo.dni.trim().length > 0 && !/^\d{7,9}$/.test(customerInfo.dni.replace(/\D/g, ""));
   const invalidPhone = customerInfo.phone.trim().length > 0 && customerInfo.phone.replace(/\D/g, "").length < 8;
+  const customerDetailsValid = !missingCustomerInfo && !invalidDni && !invalidPhone;
   const canConfirm = selection.length > 0
     && selectedProducts.length === selection.length
     && !hasSelectionConflicts
@@ -166,9 +169,7 @@ export function ContactForm({ selection }: ContactFormProps) {
             projectName: projectName.trim(),
             projectType: "",
             dates: "",
-            message: `${note.trim() ? `Nota: ${note.trim()}. ` : ""}Pago de seña por transferencia al alias ${PAYMENT_ALIAS}, CVU ${PAYMENT_CVU}, titular ${PAYMENT_HOLDER}. Retiro: ${
-              pickupOption === "previous_day_requested" ? "solicitan retirar el día previo" : "día de inicio desde las 8:00"
-            }.`,
+            message: `${note.trim() ? `Nota: ${note.trim()}. ` : ""}Pago de seña por transferencia al alias ${PAYMENT_ALIAS}, CVU ${PAYMENT_CVU}, titular ${PAYMENT_HOLDER}. Retiro por la oficina en Mendoza 2364, CABA, de 9 a 13 hs, coordinado por WhatsApp.`,
           },
           products,
           selection,
@@ -190,7 +191,7 @@ export function ContactForm({ selection }: ContactFormProps) {
         customerName,
         customerEmail: reservationUser.email ?? "",
         createdByUid: reservationUser.uid,
-        pickupOption,
+        pickupOption: "reservation_day",
         projectName,
         note,
       });
@@ -212,12 +213,18 @@ export function ContactForm({ selection }: ContactFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="parchment-panel checkout-form p-5">
-      <p className="eyebrow">Paso 01</p>
-      <h2 className="mt-2 font-display text-3xl text-gabinete-darkBrown">Completá tus datos</h2>
+      <p className="eyebrow">Paso {String(activeStep).padStart(2, "0")}</p>
+      <h2 className="mt-2 font-display text-3xl text-gabinete-darkBrown">
+        {activeStep === 3 ? "Completá tus datos" : "Reserva y seña"}
+      </h2>
       <p className="checkout-form-intro">
-        Con estos datos registramos el pedido y guardamos las fechas durante 24 horas.
+        {activeStep === 3
+          ? "Si ya completaste tu perfil, tus datos aparecen automáticamente."
+          : "Revisá la seña y registrá el pedido para guardar las fechas durante 24 horas."}
       </p>
 
+      {activeStep === 3 && (
+        <>
       <section className="checkout-form-section">
         <header className="checkout-section-head">
           <strong>01</strong>
@@ -274,29 +281,10 @@ export function ContactForm({ selection }: ContactFormProps) {
         <header className="checkout-section-head">
           <strong>02</strong>
           <div>
-            <span>Retiro y proyecto</span>
-            <p>Definí cómo necesitás coordinar la producción.</p>
+            <span>Proyecto y notas</span>
+            <p>Sumá información útil para preparar el pedido.</p>
           </div>
         </header>
-        <fieldset className="pickup-options">
-          <legend>Retiro</legend>
-          <label>
-            <input
-              type="radio"
-              checked={pickupOption === "reservation_day"}
-              onChange={() => setPickupOption("reservation_day")}
-            />
-            <span>Retiro desde las 8:00 del primer día de reserva.</span>
-          </label>
-          <label>
-            <input
-              type="radio"
-              checked={pickupOption === "previous_day_requested"}
-              onChange={() => setPickupOption("previous_day_requested")}
-            />
-            <span>Solicitar retiro el día previo, sujeto a disponibilidad y aprobación.</span>
-          </label>
-        </fieldset>
         <div className="reservation-customer-grid checkout-project-grid">
           <label className="reservation-customer-wide">
             Proyecto <span>(opcional)</span>
@@ -320,9 +308,14 @@ export function ContactForm({ selection }: ContactFormProps) {
         </div>
       </section>
 
+        </>
+      )}
+
+      {activeStep === 4 && (
+        <>
       <section className="checkout-form-section checkout-payment-section">
         <header className="checkout-section-head">
-          <strong>03</strong>
+          <strong>01</strong>
           <div>
             <span>Reserva y seña</span>
             <p>Primero registramos el pedido; después transferís la seña.</p>
@@ -413,7 +406,40 @@ export function ContactForm({ selection }: ContactFormProps) {
               ? "Ingresar con Google y reservar por 24 h"
               : "Reservar fechas por 24 h"}
         </button>
+        <button type="button" className="checkout-back-button" onClick={onBack}>
+          <ArrowLeft size={16} />
+          Volver a tus datos
+        </button>
       </div>
+        </>
+      )}
+
+      {activeStep === 3 && (
+        <div className="checkout-form-actions">
+          {(missingCustomerInfo || invalidDni || invalidPhone) && (
+            <p className="checkout-form-validation">
+              {missingCustomerInfo
+                ? "Completá nombre, apellido, DNI y celular para continuar."
+                : "Revisá el DNI y el celular antes de continuar."}
+            </p>
+          )}
+          <div>
+            <button type="button" className="checkout-back-button" onClick={onBack}>
+              <ArrowLeft size={16} />
+              Volver al retiro
+            </button>
+            <button
+              type="button"
+              className="gabinete-button"
+              disabled={!customerDetailsValid}
+              onClick={onContinue}
+            >
+              Continuar
+              <ArrowRight size={19} />
+            </button>
+          </div>
+        </div>
+      )}
     </form>
   );
 }

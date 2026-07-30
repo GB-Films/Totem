@@ -457,6 +457,257 @@
   }
 }
 
+.checkout-hero {
+  padding-block: 2rem;
+}
+
+.checkout-hero h1 {
+  max-width: 880px !important;
+  margin-top: 0.7rem;
+}
+
+.checkout-hero > p:last-child {
+  max-width: 780px;
+  margin-top: 1rem;
+}
+
+.checkout-progress-interactive li {
+  display: block;
+  min-height: 94px;
+  padding: 0;
+}
+
+.checkout-progress-interactive li > button {
+  display: grid;
+  width: 100%;
+  min-height: 94px;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.75rem;
+  border: 0;
+  background: transparent;
+  padding: 1rem;
+  color: var(--ink);
+  text-align: left;
+}
+
+.checkout-progress-interactive li.is-active > button {
+  background: var(--ink);
+  color: #fffdf7;
+}
+
+.checkout-progress-interactive li.is-active strong {
+  color: var(--mustard);
+}
+
+.checkout-progress-interactive li.is-complete > button {
+  cursor: pointer;
+  background: rgba(211, 178, 79, 0.18);
+}
+
+.checkout-progress-interactive li.is-complete > button:hover {
+  background: rgba(211, 178, 79, 0.32);
+}
+
+.checkout-cart-layout,
+.checkout-step-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 390px);
+  align-items: start;
+  gap: 1.5rem;
+}
+
+.checkout-cart-layout > aside:first-child > .parchment-panel {
+  padding: 1.35rem !important;
+}
+
+.checkout-order-summary,
+.checkout-next-panel {
+  position: sticky;
+  top: 96px;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.checkout-order-summary .rental-calculator {
+  box-shadow: var(--shadow-sm);
+}
+
+.checkout-continue-button {
+  display: flex !important;
+  width: 100%;
+  min-height: 76px;
+  align-items: center;
+  justify-content: space-between !important;
+  padding: 1rem 1.2rem !important;
+}
+
+.checkout-continue-button > span {
+  display: grid;
+  gap: 0.15rem;
+  text-align: left;
+}
+
+.checkout-continue-button small {
+  font-size: 0.62rem;
+  opacity: 0.74;
+}
+
+.checkout-pickup-panel {
+  padding: clamp(1.35rem, 3vw, 2rem) !important;
+}
+
+.checkout-pickup-panel h2 {
+  margin-top: 0.55rem;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: clamp(2.3rem, 4vw, 3.6rem);
+  font-weight: 900;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.checkout-step-intro {
+  margin-top: 0.75rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.checkout-pickup-option {
+  display: grid;
+  grid-template-columns: 20px 52px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  border: 2px solid var(--accent);
+  background: #fffdf7;
+  padding: 1.25rem;
+  cursor: default;
+}
+
+.checkout-pickup-option > input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--accent);
+}
+
+.checkout-pickup-icon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border: 1px solid var(--ink);
+  background: rgba(211, 178, 79, 0.24);
+  color: var(--accent);
+}
+
+.checkout-pickup-option > div:nth-of-type(2) {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.checkout-pickup-option strong {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  text-transform: uppercase;
+}
+
+.checkout-pickup-option span {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.checkout-pickup-check {
+  color: var(--available);
+}
+
+.checkout-next-panel {
+  border: 1px solid var(--ink);
+  background: var(--panel);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.checkout-next-panel h3 {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.checkout-next-panel > p:not(.eyebrow) {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.checkout-next-panel .gabinete-button {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.35rem;
+  padding: 1rem;
+}
+
+.checkout-back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border: 0;
+  background: transparent;
+  padding: 0.65rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.checkout-back-button:hover {
+  color: var(--accent);
+}
+
+.checkout-page > .checkout-form {
+  width: min(100%, 1020px);
+  margin-inline: auto;
+  padding: clamp(1.35rem, 3vw, 2rem) !important;
+}
+
+.checkout-form-actions {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.4rem;
+  border-top: 1px solid var(--ink);
+  padding-top: 1rem;
+}
+
+.checkout-form-actions > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.checkout-form-actions .gabinete-button {
+  min-width: 210px;
+  justify-content: space-between;
+  padding: 0.9rem 1rem;
+}
+
+.checkout-form-validation {
+  border: 1px solid rgba(164, 59, 34, 0.3);
+  background: rgba(164, 59, 34, 0.08);
+  padding: 0.7rem 0.8rem;
+  color: var(--accent);
+  font-size: 0.78rem;
+}
+
 @media (max-width: 1023px) {
   body:not(.force-desktop-view) .product-visual-column {
     display: contents;
@@ -480,6 +731,16 @@
 
   body:not(.force-desktop-view) .product-cart-cta {
     min-height: 156px;
+  }
+
+  body:not(.force-desktop-view) .checkout-cart-layout,
+  body:not(.force-desktop-view) .checkout-step-layout {
+    grid-template-columns: 1fr;
+  }
+
+  body:not(.force-desktop-view) .checkout-order-summary,
+  body:not(.force-desktop-view) .checkout-next-panel {
+    position: static;
   }
 }
 
@@ -515,6 +776,41 @@
   body:not(.force-desktop-view) .rental-calculator-wide,
   body:not(.force-desktop-view) .rental-calculator-wide .rental-calculator-breakdown {
     grid-template-columns: 1fr;
+  }
+
+  body:not(.force-desktop-view) .checkout-progress-interactive li > button {
+    min-height: 78px;
+    grid-template-columns: 1fr;
+    align-content: center;
+    gap: 0.2rem;
+  }
+
+  body:not(.force-desktop-view) .checkout-progress-interactive span {
+    font-size: 0.62rem;
+  }
+
+  body:not(.force-desktop-view) .checkout-pickup-option {
+    grid-template-columns: 18px 42px minmax(0, 1fr);
+    gap: 0.7rem;
+    padding: 0.9rem;
+  }
+
+  body:not(.force-desktop-view) .checkout-pickup-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  body:not(.force-desktop-view) .checkout-pickup-check {
+    display: none;
+  }
+
+  body:not(.force-desktop-view) .checkout-form-actions > div {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  body:not(.force-desktop-view) .checkout-form-actions .gabinete-button {
+    width: 100%;
   }
 }
 

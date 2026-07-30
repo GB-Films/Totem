@@ -1,4 +1,4 @@
-import { Heart, LayoutDashboard, Menu, Monitor, ShoppingBag, UserRound, X } from "lucide-react";
+import { Heart, LayoutDashboard, Menu, Monitor, ShoppingCart, UserRound, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -116,7 +116,7 @@ export function Header() {
             className={`cart-action action-link ${isCartActive ? "is-active" : ""}`}
             aria-label={`Ver selección, ${totalItems} ${totalItems === 1 ? "objeto" : "objetos"}`}
           >
-            <ShoppingBag size={21} strokeWidth={1.8} />
+            <ShoppingCart size={22} strokeWidth={1.8} />
             <span>{totalItems}</span>
           </Link>
           <button

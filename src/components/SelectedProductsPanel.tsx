@@ -11,9 +11,17 @@ import { RentalCalculator } from "./RentalCalculator";
 
 interface SelectedProductsPanelProps {
   showAction?: boolean;
+  showCalculator?: boolean;
+  stepLabel?: string;
+  title?: string;
 }
 
-export function SelectedProductsPanel({ showAction = true }: SelectedProductsPanelProps) {
+export function SelectedProductsPanel({
+  showAction = true,
+  showCalculator = true,
+  stepLabel,
+  title,
+}: SelectedProductsPanelProps) {
   const {
     selection,
     updateQuantity,
@@ -60,9 +68,9 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
       <section className="parchment-panel p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="eyebrow">{showAction ? "Carrito" : "Paso 02"}</p>
+            <p className="eyebrow">{stepLabel ?? (showAction ? "Carrito" : "Paso 02")}</p>
             <h2 className="mt-2 font-display text-3xl text-gabinete-darkBrown">
-              {showAction ? "Objetos elegidos" : "Revisá objetos y fechas"}
+              {title ?? (showAction ? "Objetos elegidos" : "Revisá objetos y fechas")}
             </h2>
           </div>
           {selection.length > 0 && (
@@ -245,7 +253,7 @@ export function SelectedProductsPanel({ showAction = true }: SelectedProductsPan
           </div>
         )}
       </section>
-      <RentalCalculator products={products} selection={selection} />
+      {showCalculator && <RentalCalculator products={products} selection={selection} />}
     </aside>
   );
 }
