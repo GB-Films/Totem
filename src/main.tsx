@@ -12,6 +12,7 @@ import "./styles/brand-restyle.css";
 import "./styles/minimal-system.css";
 import "./styles/hero-layout.css";
 import "./styles/interaction-motion.css";
+import "./styles/totem-uses.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

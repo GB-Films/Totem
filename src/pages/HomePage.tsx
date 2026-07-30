@@ -2,6 +2,7 @@ import { ArrowRight, CalendarDays, CheckCircle2, Truck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Hero } from "../components/Hero";
 import { ObjectImage } from "../components/ObjectImage";
+import { WhereSeen } from "../components/WhereSeen";
 import { useCatalog } from "../context/CatalogContext";
 
 const useCases = [
@@ -93,6 +94,8 @@ export function HomePage() {
           ))}
         </div>
       </section>
+
+      <WhereSeen />
 
       <section className="home-benefit-strip">
         {benefits.map(({ title, text, icon: Icon }) => (
