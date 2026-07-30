@@ -6,6 +6,7 @@ import type { Availability, Category, Product, ProductStatus, ProductVisual } fr
 
 interface CatalogContextValue {
   products: Product[];
+  productCount: number;
   categories: Category[];
   availableTags: string[];
   loading: boolean;
@@ -14,6 +15,23 @@ interface CatalogContextValue {
 }
 
 const CatalogContext = createContext<CatalogContextValue | undefined>(undefined);
+const PRODUCT_COUNT_STORAGE_KEY = "totem-catalog-count";
+const KNOWN_PRODUCT_COUNT = 182;
+
+function getInitialProductCount() {
+  if (typeof window === "undefined") {
+    return KNOWN_PRODUCT_COUNT;
+  }
+
+  try {
+    const storedCount = Number(window.localStorage.getItem(PRODUCT_COUNT_STORAGE_KEY));
+    return Number.isInteger(storedCount) && storedCount >= 0
+      ? storedCount
+      : KNOWN_PRODUCT_COUNT;
+  } catch {
+    return KNOWN_PRODUCT_COUNT;
+  }
+}
 
 function getCategories(products: Product[]) {
   const categories = new Set<Category>();
@@ -113,6 +131,7 @@ function normalizeProduct(id: string, data: Partial<Product>): Product {
 
 export function CatalogProvider({ children }: PropsWithChildren) {
   const [firebaseProducts, setFirebaseProducts] = useState<Product[]>([]);
+  const [productCount, setProductCount] = useState(getInitialProductCount);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -127,11 +146,16 @@ export function CatalogProvider({ children }: PropsWithChildren) {
     return onSnapshot(
       collection(db, "products"),
       (snapshot) => {
-        setFirebaseProducts(
-          snapshot.docs
-            .map((productDoc) => normalizeProduct(productDoc.id, productDoc.data() as Partial<Product>))
-            .sort((a, b) => b.featuredScore - a.featuredScore || a.name.localeCompare(b.name)),
-        );
+        const nextProducts = snapshot.docs
+          .map((productDoc) => normalizeProduct(productDoc.id, productDoc.data() as Partial<Product>))
+          .sort((a, b) => b.featuredScore - a.featuredScore || a.name.localeCompare(b.name));
+        setFirebaseProducts(nextProducts);
+        setProductCount(nextProducts.length);
+        try {
+          window.localStorage.setItem(PRODUCT_COUNT_STORAGE_KEY, String(nextProducts.length));
+        } catch {
+          // El contador sigue funcionando aunque el navegador bloquee el almacenamiento local.
+        }
         setError("");
         setLoading(false);
       },
@@ -151,13 +175,14 @@ export function CatalogProvider({ children }: PropsWithChildren) {
   const value = useMemo(
     () => ({
       products,
+      productCount,
       categories,
       availableTags,
       loading,
       error,
       syncMode: "firebase" as const,
     }),
-    [availableTags, categories, error, loading, products],
+    [availableTags, categories, error, loading, productCount, products],
   );
 
   return <CatalogContext.Provider value={value}>{children}</CatalogContext.Provider>;

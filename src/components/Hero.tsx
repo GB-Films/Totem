@@ -14,7 +14,7 @@ const categoryIcons: Partial<Record<Category, typeof Armchair>> = {
 export function Hero() {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
-  const { categories, products } = useCatalog();
+  const { categories, productCount } = useCatalog();
 
   const submitSearch = (event: FormEvent) => {
     event.preventDefault();
@@ -44,7 +44,7 @@ export function Hero() {
           to="/catalogo"
           aria-label="Ver todas las piezas en el catálogo"
         >
-          <strong>{products.length || "—"}</strong>
+          <strong>{productCount}</strong>
           <span>Piezas disponibles</span>
         </Link>
 
