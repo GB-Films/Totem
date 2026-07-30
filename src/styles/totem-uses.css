@@ -21,9 +21,10 @@
   max-width: 1050px;
   margin: 0.8rem 0 0;
   font-family: var(--font-display);
-  font-size: clamp(3.1rem, 5.4vw, 5.9rem);
+  font-size: var(--home-section-title-size);
   font-weight: 900;
-  line-height: 0.92;
+  line-height: 0.95;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
@@ -216,9 +217,10 @@
 .home-uses-modal-caption h3 {
   margin: 0.8rem 0 0;
   font-family: var(--font-display);
-  font-size: clamp(2.4rem, 4vw, 4.5rem);
+  font-size: clamp(2rem, 2.7vw, 3rem);
   font-weight: 900;
-  line-height: 0.92;
+  line-height: 1;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
@@ -267,7 +269,7 @@
   }
 
   .home-uses-heading h2 {
-    font-size: clamp(2.75rem, 13vw, 4.2rem);
+    font-size: var(--home-section-title-size);
   }
 
   .home-uses-controls {
