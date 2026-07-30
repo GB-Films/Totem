@@ -915,6 +915,55 @@
   padding: 0;
 }
 
+.booking-history-view-switch {
+  display: inline-flex;
+  gap: .35rem;
+  margin-top: 1rem;
+  border: 1px solid rgba(95, 41, 21, .24);
+  padding: .3rem;
+  background: rgba(255, 253, 248, .42);
+}
+
+.booking-history-view-switch button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: .5rem;
+  border: 0;
+  background: transparent;
+  padding: .55rem .8rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.booking-history-view-switch button.is-active {
+  background: var(--ink);
+  color: #fffdf7;
+}
+
+.booking-history-view-switch button > span {
+  display: grid;
+  min-width: 20px;
+  height: 20px;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: .62rem;
+}
+
+.booking-history-empty {
+  margin-top: 1rem;
+  border: 1px solid rgba(95, 41, 21, .18);
+  background: rgba(255, 253, 248, .35);
+  padding: 1rem;
+  color: var(--muted);
+  font-family: var(--font-serif);
+  font-size: .86rem;
+}
+
 .booking-accordion-trigger {
   display: grid;
   width: 100%;

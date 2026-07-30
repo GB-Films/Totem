@@ -1,4 +1,4 @@
-import { CalendarDays, ChevronDown, Clock3, Lock, MessageCircle } from "lucide-react";
+import { CalendarDays, ChevronDown, Clock3, History, Lock, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useAvailability } from "../context/AvailabilityContext";
@@ -58,11 +58,19 @@ export function ReservationHistory() {
   const { bookings, loadingBookings } = useAvailability();
   const { products } = useCatalog();
   const [openBookingId, setOpenBookingId] = useState<string | null>(null);
+  const [historyView, setHistoryView] = useState<"active" | "activity">("active");
   const userBookings = user
     ? bookings.filter(
       (booking) => booking.createdByUid === user.uid && !booking.holdExpired,
     )
     : [];
+  const activeBookings = userBookings.filter(
+    (booking) => booking.status !== "returned" && booking.status !== "cancelled",
+  );
+  const activityBookings = userBookings.filter(
+    (booking) => booking.status === "returned" || booking.status === "cancelled",
+  ).slice(0, 10);
+  const visibleBookings = historyView === "active" ? activeBookings : activityBookings;
 
   return (
     <section className="parchment-panel reservation-history p-5">
@@ -86,8 +94,43 @@ export function ReservationHistory() {
           Todavía no registraste pedidos. Cuando reserves un objeto, vas a poder seguirlo desde acá.
         </p>
       ) : (
-        <div className="booking-history-list">
-          {userBookings.map((booking) => {
+        <>
+          <div className="booking-history-view-switch" aria-label="Filtrar pedidos">
+            <button
+              type="button"
+              className={historyView === "active" ? "is-active" : ""}
+              onClick={() => {
+                setHistoryView("active");
+                setOpenBookingId(null);
+              }}
+            >
+              <CalendarDays size={16} />
+              En curso
+              <span>{activeBookings.length}</span>
+            </button>
+            <button
+              type="button"
+              className={historyView === "activity" ? "is-active" : ""}
+              onClick={() => {
+                setHistoryView("activity");
+                setOpenBookingId(null);
+              }}
+            >
+              <History size={16} />
+              Actividad
+              <span>{activityBookings.length}</span>
+            </button>
+          </div>
+
+          {visibleBookings.length === 0 ? (
+            <p className="booking-history-empty">
+              {historyView === "active"
+                ? "No tenés pedidos en curso."
+                : "Todavía no hay pedidos finalizados en tu actividad."}
+            </p>
+          ) : (
+          <div className="booking-history-list">
+          {visibleBookings.map((booking) => {
             const activeIndex = getReservationStatusIndex(booking.status);
             const isOpen = openBookingId === booking.id;
             const previewItems = booking.items.slice(0, 3);
@@ -196,7 +239,9 @@ export function ReservationHistory() {
               </article>
             );
           })}
-        </div>
+          </div>
+          )}
+        </>
       )}
     </section>
   );
