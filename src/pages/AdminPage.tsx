@@ -272,6 +272,32 @@ function BookingAdminCard({
       rangesSnapshot.docs.forEach((rangeDoc) => {
         batch.update(rangeDoc.ref, { status });
       });
+      if (status === "confirmed" && booking.status !== "confirmed") {
+        const itemLines = booking.items
+          .map((item) => `${item.quantity}x ${item.productName} - ${formatDateRange(item.startDate, item.endDate)}`)
+          .join("\n");
+        batch.set(doc(db, "mail", `booking-confirmed-${booking.id}`), {
+          to: [booking.customerEmail],
+          message: {
+            subject: `Tu pedido ${booking.code} está confirmado`,
+            text: [
+              `Hola ${booking.customerName || ""},`,
+              "",
+              `Confirmamos el pago de la seña de tu pedido ${booking.code}.`,
+              "Tus fechas ya quedaron reservadas.",
+              "",
+              itemLines,
+              "",
+              "Te avisaremos cuando tu pedido esté listo para retirar.",
+              "Retiro: Mendoza 2364, CABA, de 9 a 13 hs, coordinado previamente por WhatsApp.",
+              "",
+              "Totem Rental",
+            ].join("\n"),
+          },
+          bookingId: booking.id,
+          createdAt: serverTimestamp(),
+        });
+      }
       await batch.commit();
       onMessage(`Pedido ${booking.code} actualizado.`);
     } catch (error) {

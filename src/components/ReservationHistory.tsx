@@ -34,6 +34,25 @@ function formatHoldExpiration(value?: string) {
   }).format(expiration);
 }
 
+function getStatusGuidance(status: string) {
+  switch (status) {
+    case "payment_pending":
+      return "Estamos esperando la seña para confirmar definitivamente tus fechas.";
+    case "confirmed":
+      return "La seña fue acreditada y tus fechas están confirmadas. Te avisaremos cuando tu pedido esté listo para retirar.";
+    case "ready_for_pickup":
+      return "Tu pedido ya está preparado. Coordiná por WhatsApp antes de acercarte a retirarlo.";
+    case "active":
+      return "El pedido está en alquiler. Recordá coordinar la devolución dentro de las fechas acordadas.";
+    case "returned":
+      return "El pedido fue devuelto y la reserva quedó finalizada.";
+    case "cancelled":
+      return "La reserva fue cancelada. Contactanos si necesitás volver a coordinar las fechas.";
+    default:
+      return "Recibimos tu solicitud y estamos revisando los objetos y las fechas.";
+  }
+}
+
 export function ReservationHistory() {
   const { user, loginWithGoogle } = useAuth();
   const { bookings, loadingBookings } = useAvailability();
@@ -124,6 +143,7 @@ export function ReservationHistory() {
                         {getReservationStatusLabel(booking.status)}
                       </strong>
                     </div>
+                    <p className="booking-status-guidance">{getStatusGuidance(booking.status)}</p>
 
                     <div className="booking-item-list">
                       {booking.items.map((item) => (

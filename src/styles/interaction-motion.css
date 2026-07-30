@@ -1023,6 +1023,18 @@
   text-transform: uppercase;
 }
 
+.booking-status-guidance {
+  margin-top: -.35rem;
+  border-left: 3px solid var(--available);
+  background: rgba(49, 87, 58, .1);
+  padding: .75rem .85rem;
+  color: #31573a;
+  font-family: var(--font-serif);
+  font-size: .82rem;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
 @media (max-width: 900px) {
   .selected-item-controls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
