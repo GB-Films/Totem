@@ -31,8 +31,7 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
-  const scrollDirection = useRef<"up" | "down" | null>(null);
-  const scrollTravel = useRef(0);
+  const downwardScrollTravel = useRef(0);
   const isCartActive = location.pathname === "/contacto";
   const isAccountActive = location.pathname === "/cuenta";
   const isAdminActive = location.pathname.startsWith("/admin");
@@ -47,8 +46,7 @@ export function Header() {
     setMenuOpen(false);
     setHeaderVisible(true);
     lastScrollY.current = window.scrollY;
-    scrollDirection.current = null;
-    scrollTravel.current = 0;
+    downwardScrollTravel.current = 0;
   }, [location.pathname]);
 
   useEffect(() => {
@@ -62,26 +60,19 @@ export function Header() {
     const updateHeader = () => {
       const currentScrollY = Math.max(window.scrollY, 0);
       const scrollDifference = currentScrollY - lastScrollY.current;
-      const nextDirection = scrollDifference > 0 ? "down" : scrollDifference < 0 ? "up" : null;
-
-      if (nextDirection && nextDirection !== scrollDirection.current) {
-        scrollDirection.current = nextDirection;
-        scrollTravel.current = 0;
-      }
-
-      if (nextDirection) {
-        scrollTravel.current += Math.abs(scrollDifference);
-      }
 
       if (menuOpen || currentScrollY < 32) {
         setHeaderVisible(true);
-        scrollTravel.current = 0;
-      } else if (nextDirection === "down" && scrollTravel.current > 24 && currentScrollY > 110) {
-        setHeaderVisible(false);
-        scrollTravel.current = 0;
-      } else if (nextDirection === "up" && scrollTravel.current > 12) {
+        downwardScrollTravel.current = 0;
+      } else if (scrollDifference < 0) {
         setHeaderVisible(true);
-        scrollTravel.current = 0;
+        downwardScrollTravel.current = 0;
+      } else if (scrollDifference > 0) {
+        downwardScrollTravel.current += scrollDifference;
+        if (downwardScrollTravel.current > 24 && currentScrollY > 110) {
+          setHeaderVisible(false);
+          downwardScrollTravel.current = 0;
+        }
       }
 
       lastScrollY.current = currentScrollY;
@@ -94,8 +85,7 @@ export function Header() {
     };
 
     lastScrollY.current = window.scrollY;
-    scrollDirection.current = null;
-    scrollTravel.current = 0;
+    downwardScrollTravel.current = 0;
     window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {

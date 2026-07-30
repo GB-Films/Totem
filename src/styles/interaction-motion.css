@@ -45,19 +45,6 @@
   transform: translateY(-4px) scale(1.006) !important;
 }
 
-.home-use-card.app-interactive-tile {
-  box-shadow: 0 4px 0 var(--mustard) !important;
-}
-
-.home-use-card.app-interactive-tile:hover,
-.home-use-card.app-interactive-tile:focus-within {
-  box-shadow: 0 11px 0 var(--mustard) !important;
-}
-
-.home-use-card.app-interactive-tile:active {
-  box-shadow: 0 5px 0 var(--mustard) !important;
-}
-
 .app-interactive-tile .object-photo {
   transition: transform 360ms var(--tile-motion-ease) !important;
 }
