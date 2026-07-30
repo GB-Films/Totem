@@ -45,8 +45,39 @@
   transform: translateY(-4px) scale(1.006) !important;
 }
 
+.home-use-card.app-interactive-tile {
+  box-shadow: 0 4px 0 var(--mustard) !important;
+}
+
+.home-use-card.app-interactive-tile:hover,
+.home-use-card.app-interactive-tile:focus-within {
+  box-shadow: 0 11px 0 var(--mustard) !important;
+}
+
+.home-use-card.app-interactive-tile:active {
+  box-shadow: 0 5px 0 var(--mustard) !important;
+}
+
 .app-interactive-tile .object-photo {
   transition: transform 360ms var(--tile-motion-ease) !important;
+}
+
+.site-header {
+  transition:
+    transform 280ms cubic-bezier(0.2, 0.75, 0.25, 1),
+    opacity 220ms ease;
+  will-change: transform, opacity;
+}
+
+.site-header.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.site-header.is-hidden {
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(calc(-100% - 2px));
 }
 
 .app-interactive-tile:hover .object-photo,
@@ -1176,6 +1207,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .site-header {
+    transition: none;
+  }
+
   .app-interactive-tile,
   .app-interactive-tile .object-photo,
   .interactive-tile-arrow,

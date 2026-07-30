@@ -1,5 +1,5 @@
 import { Heart, LayoutDashboard, Menu, Monitor, ShoppingCart, UserRound, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NavLink, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useFavorites } from "../context/FavoritesContext";
@@ -29,6 +29,8 @@ export function Header() {
   const location = useLocation();
   const [desktopView, setDesktopView] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
   const isCartActive = location.pathname === "/contacto";
   const isAccountActive = location.pathname === "/cuenta";
   const isAdminActive = location.pathname.startsWith("/admin");
@@ -41,11 +43,46 @@ export function Header() {
 
   useEffect(() => {
     setMenuOpen(false);
+    setHeaderVisible(true);
+    lastScrollY.current = window.scrollY;
   }, [location.pathname]);
 
   useEffect(() => {
     document.body.classList.toggle("menu-open", menuOpen);
     return () => document.body.classList.remove("menu-open");
+  }, [menuOpen]);
+
+  useEffect(() => {
+    let animationFrame: number | null = null;
+
+    const updateHeader = () => {
+      const currentScrollY = Math.max(window.scrollY, 0);
+      const scrollDifference = currentScrollY - lastScrollY.current;
+
+      if (menuOpen || currentScrollY < 32) {
+        setHeaderVisible(true);
+      } else if (scrollDifference > 6 && currentScrollY > 110) {
+        setHeaderVisible(false);
+      } else if (scrollDifference < -6) {
+        setHeaderVisible(true);
+      }
+
+      lastScrollY.current = currentScrollY;
+      animationFrame = null;
+    };
+
+    const handleScroll = () => {
+      if (animationFrame !== null) return;
+      animationFrame = window.requestAnimationFrame(updateHeader);
+    };
+
+    lastScrollY.current = window.scrollY;
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (animationFrame !== null) window.cancelAnimationFrame(animationFrame);
+    };
   }, [menuOpen]);
 
   const toggleDesktopView = () => {
@@ -56,7 +93,7 @@ export function Header() {
   };
 
   return (
-    <header className="site-header">
+    <header className={`site-header ${headerVisible ? "is-visible" : "is-hidden"}`}>
       <div className="site-header-inner">
         <Link to="/" className="site-logo" aria-label="Ir al inicio de Totem Rental">
           <CabinetLogo />
