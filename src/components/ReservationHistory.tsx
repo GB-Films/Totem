@@ -1,4 +1,5 @@
-import { CalendarDays, Clock3, Lock, MessageCircle } from "lucide-react";
+import { CalendarDays, ChevronDown, Clock3, Lock, MessageCircle } from "lucide-react";
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useAvailability } from "../context/AvailabilityContext";
 import { formatDateRange } from "../utils/dates";
@@ -34,6 +35,7 @@ function formatHoldExpiration(value?: string) {
 export function ReservationHistory() {
   const { user, loginWithGoogle } = useAuth();
   const { bookings, loadingBookings } = useAvailability();
+  const [openBookingId, setOpenBookingId] = useState<string | null>(null);
   const userBookings = user
     ? bookings.filter(
       (booking) => booking.createdByUid === user.uid && !booking.holdExpired,
@@ -65,6 +67,7 @@ export function ReservationHistory() {
         <div className="booking-history-list">
           {userBookings.map((booking) => {
             const activeIndex = getReservationStatusIndex(booking.status);
+            const isOpen = openBookingId === booking.id;
             const whatsappMessage = [
               `Hola, consulto por mi pedido ${booking.code}.`,
               `Estado: ${getReservationStatusLabel(booking.status)}.`,
@@ -72,63 +75,82 @@ export function ReservationHistory() {
             ].join(" ");
 
             return (
-              <article key={booking.id} className="booking-history-card">
-                <header>
-                  <div>
+              <article key={booking.id} className={`booking-history-card booking-accordion ${isOpen ? "is-open" : ""}`}>
+                <button
+                  type="button"
+                  className="booking-accordion-trigger"
+                  aria-expanded={isOpen}
+                  aria-controls={`booking-details-${booking.id}`}
+                  onClick={() => setOpenBookingId(isOpen ? null : booking.id)}
+                >
+                  <span className="booking-accordion-main">
                     <span className="booking-code">{booking.code}</span>
-                    <h3>{booking.projectName || `Pedido de ${booking.items.length} ${booking.items.length === 1 ? "objeto" : "objetos"}`}</h3>
-                  </div>
-                  <span className={`booking-status status-${booking.status}`}>
-                    {getReservationStatusLabel(booking.status)}
+                    <strong>{booking.projectName || `Pedido de ${booking.items.length} ${booking.items.length === 1 ? "objeto" : "objetos"}`}</strong>
                   </span>
-                </header>
+                  <span className="booking-accordion-summary">
+                    {booking.items.length} {booking.items.length === 1 ? "objeto" : "objetos"}
+                    {booking.items[0] && <> · {formatDateRange(booking.items[0].startDate, booking.items[0].endDate)}</>}
+                  </span>
+                  <ChevronDown size={22} />
+                </button>
 
-                <div className="booking-item-list">
-                  {booking.items.map((item) => (
-                    <div key={`${booking.id}-${item.productId}`}>
-                      <span>
-                        <strong>{item.quantity}×</strong> {item.productName}
-                      </span>
-                      <em>{formatDateRange(item.startDate, item.endDate)}</em>
+                {isOpen && (
+                  <div id={`booking-details-${booking.id}`} className="booking-accordion-details">
+                    <div className="booking-detail-status">
+                      <span>Estado del pedido</span>
+                      <strong className={`booking-status status-${booking.status}`}>
+                        {getReservationStatusLabel(booking.status)}
+                      </strong>
                     </div>
-                  ))}
-                </div>
 
-                <div className="booking-total-row">
-                  <span>Alquiler <strong>{formatCurrency(booking.rentalTotal)}</strong></span>
-                  <span>Garantía reintegrable <strong>{formatCurrency(booking.guaranteeAmount)}</strong></span>
-                  <span>Seña <strong>{formatCurrency(booking.reserveDeposit)}</strong></span>
-                </div>
+                    <div className="booking-item-list">
+                      {booking.items.map((item) => (
+                        <div key={`${booking.id}-${item.productId}`}>
+                          <span>
+                            <strong>{item.quantity}×</strong> {item.productName}
+                          </span>
+                          <em>{formatDateRange(item.startDate, item.endDate)}</em>
+                        </div>
+                      ))}
+                    </div>
 
-                {booking.status === "payment_pending" && (
-                  <div className="reservation-payment-note">
-                    <Clock3 size={17} />
-                    <p>
-                      Transferí <strong>{formatCurrency(booking.reserveDeposit)}</strong> al alias{" "}
-                      <strong>{PAYMENT_ALIAS}</strong>. CVU <strong>{PAYMENT_CVU}</strong>, titular{" "}
-                      <strong>{PAYMENT_HOLDER}</strong>. Después enviá el comprobante.
-                      {booking.holdExpiresAt && (
-                        <> Guardamos las fechas hasta el {formatHoldExpiration(booking.holdExpiresAt)}.</>
-                      )}
-                    </p>
-                    <a href={buildWhatsappUrl(whatsappMessage)} target="_blank" rel="noreferrer">
-                      <MessageCircle size={16} />
-                      Enviar comprobante
-                    </a>
+                    <div className="booking-total-row">
+                      <span>Alquiler <strong>{formatCurrency(booking.rentalTotal)}</strong></span>
+                      <span>Garantía reintegrable <strong>{formatCurrency(booking.guaranteeAmount)}</strong></span>
+                      <span>Seña <strong>{formatCurrency(booking.reserveDeposit)}</strong></span>
+                    </div>
+
+                    {booking.status === "payment_pending" && (
+                      <div className="reservation-payment-note">
+                        <Clock3 size={17} />
+                        <p>
+                          Transferí <strong>{formatCurrency(booking.reserveDeposit)}</strong> al alias{" "}
+                          <strong>{PAYMENT_ALIAS}</strong>. CVU <strong>{PAYMENT_CVU}</strong>, titular{" "}
+                          <strong>{PAYMENT_HOLDER}</strong>. Después enviá el comprobante.
+                          {booking.holdExpiresAt && (
+                            <> Guardamos las fechas hasta el {formatHoldExpiration(booking.holdExpiresAt)}.</>
+                          )}
+                        </p>
+                        <a href={buildWhatsappUrl(whatsappMessage)} target="_blank" rel="noreferrer">
+                          <MessageCircle size={16} />
+                          Enviar comprobante
+                        </a>
+                      </div>
+                    )}
+
+                    <div className="reservation-status-track" aria-label={`Estado: ${getReservationStatusLabel(booking.status)}`}>
+                      {reservationStatusSteps.map((step, index) => (
+                        <span
+                          key={step.status}
+                          className={index <= activeIndex ? "is-done" : ""}
+                          title={step.description}
+                        >
+                          {step.label}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
-
-                <div className="reservation-status-track" aria-label={`Estado: ${getReservationStatusLabel(booking.status)}`}>
-                  {reservationStatusSteps.map((step, index) => (
-                    <span
-                      key={step.status}
-                      className={index <= activeIndex ? "is-done" : ""}
-                      title={step.description}
-                    >
-                      {step.label}
-                    </span>
-                  ))}
-                </div>
               </article>
             );
           })}

@@ -910,6 +910,78 @@
   grid-column: span 2;
 }
 
+.booking-history-card.booking-accordion {
+  overflow: hidden;
+  padding: 0;
+}
+
+.booking-accordion-trigger {
+  display: grid;
+  width: 100%;
+  grid-template-columns: minmax(180px, 1fr) minmax(220px, auto) 28px;
+  align-items: center;
+  gap: 1rem;
+  border: 0;
+  background: transparent;
+  padding: 1rem 1.1rem;
+  color: var(--ink);
+  text-align: left;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.booking-accordion-trigger:hover,
+.booking-accordion-trigger:focus-visible {
+  background: rgba(179, 62, 35, .07);
+}
+
+.booking-accordion-main {
+  display: grid;
+  gap: .28rem;
+}
+
+.booking-accordion-main strong {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  line-height: 1.15;
+}
+
+.booking-accordion-summary {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  text-align: right;
+}
+
+.booking-accordion-trigger > svg {
+  transition: transform 180ms ease;
+}
+
+.booking-accordion.is-open .booking-accordion-trigger > svg {
+  transform: rotate(180deg);
+}
+
+.booking-accordion-details {
+  display: grid;
+  gap: 1rem;
+  border-top: 1px solid rgba(95, 41, 21, .2);
+  padding: 1rem 1.1rem 1.1rem;
+}
+
+.booking-detail-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.booking-detail-status > span {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
 @media (max-width: 900px) {
   .selected-item-controls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -921,6 +993,21 @@
 
   .account-profile-grid > label:nth-child(n) {
     grid-column: auto;
+  }
+
+  .booking-accordion-trigger {
+    grid-template-columns: minmax(0, 1fr) 24px;
+  }
+
+  .booking-accordion-summary {
+    grid-column: 1;
+    grid-row: 2;
+    text-align: left;
+  }
+
+  .booking-accordion-trigger > svg {
+    grid-column: 2;
+    grid-row: 1 / span 2;
   }
 }
 
