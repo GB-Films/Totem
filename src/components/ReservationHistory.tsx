@@ -1,5 +1,15 @@
-import { CalendarDays, ChevronDown, Clock3, History, Lock, MessageCircle, XCircle } from "lucide-react";
-import { useState } from "react";
+import {
+  CalendarDays,
+  CalendarX2,
+  ChevronDown,
+  Clock3,
+  History,
+  Lock,
+  MessageCircle,
+  X,
+  XCircle,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useAvailability } from "../context/AvailabilityContext";
 import { useCatalog } from "../context/CatalogContext";
@@ -61,6 +71,9 @@ export function ReservationHistory() {
   const [historyView, setHistoryView] = useState<"active" | "activity">("active");
   const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
   const [cancelError, setCancelError] = useState("");
+  const [bookingToCancel, setBookingToCancel] = useState<{ id: string; code: string } | null>(null);
+  const cancelConfirmButtonRef = useRef<HTMLButtonElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
   const userBookings = user
     ? bookings.filter(
       (booking) => booking.createdByUid === user.uid && !booking.holdExpired,
@@ -74,18 +87,44 @@ export function ReservationHistory() {
   ).slice(0, 10);
   const visibleBookings = historyView === "active" ? activeBookings : activityBookings;
 
-  const handleCancelBooking = async (bookingId: string, bookingCode: string) => {
-    const confirmed = window.confirm(
-      `¿Cancelar la reserva ${bookingCode}? Los productos y las fechas se liberarán inmediatamente.`,
-    );
-    if (!confirmed) return;
+  useEffect(() => {
+    if (!bookingToCancel) return;
+
+    previousFocusRef.current = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+    document.body.classList.add("reservation-dialog-open");
+    window.requestAnimationFrame(() => cancelConfirmButtonRef.current?.focus());
+
+    return () => {
+      document.body.classList.remove("reservation-dialog-open");
+      previousFocusRef.current?.focus();
+    };
+  }, [bookingToCancel]);
+
+  useEffect(() => {
+    if (!bookingToCancel) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !cancellingBookingId) {
+        setBookingToCancel(null);
+        setCancelError("");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [bookingToCancel, cancellingBookingId]);
+
+  const handleCancelBooking = async () => {
+    if (!bookingToCancel) return;
 
     setCancelError("");
-    setCancellingBookingId(bookingId);
+    setCancellingBookingId(bookingToCancel.id);
     try {
-      await cancelBooking(bookingId);
+      await cancelBooking(bookingToCancel.id);
       setHistoryView("activity");
-      setOpenBookingId(bookingId);
+      setOpenBookingId(bookingToCancel.id);
+      setBookingToCancel(null);
     } catch (error) {
       setCancelError(error instanceof Error ? error.message : "No pudimos cancelar la reserva.");
     } finally {
@@ -251,15 +290,15 @@ export function ReservationHistory() {
                             type="button"
                             className="reservation-cancel-button"
                             disabled={cancellingBookingId === booking.id}
-                            onClick={() => void handleCancelBooking(booking.id, booking.code)}
+                            onClick={() => {
+                              setCancelError("");
+                              setBookingToCancel({ id: booking.id, code: booking.code });
+                            }}
                           >
                             <XCircle size={19} />
                             {cancellingBookingId === booking.id ? "Cancelando..." : "Cancelar reserva"}
                           </button>
                         </div>
-                        {cancelError && openBookingId === booking.id && (
-                          <p className="reservation-cancel-error" role="alert">{cancelError}</p>
-                        )}
                       </>
                     )}
 
@@ -282,6 +321,73 @@ export function ReservationHistory() {
           </div>
           )}
         </>
+      )}
+
+      {bookingToCancel && (
+        <div
+          className="reservation-cancel-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="reservation-cancel-title"
+          aria-describedby="reservation-cancel-description"
+          onMouseDown={(event) => {
+            if (event.currentTarget === event.target && !cancellingBookingId) {
+              setBookingToCancel(null);
+              setCancelError("");
+            }
+          }}
+        >
+          <div className="reservation-cancel-dialog-card">
+            <button
+              type="button"
+              className="reservation-cancel-dialog-close"
+              aria-label="Cerrar confirmación"
+              disabled={Boolean(cancellingBookingId)}
+              onClick={() => {
+                setBookingToCancel(null);
+                setCancelError("");
+              }}
+            >
+              <X size={20} />
+            </button>
+            <div className="reservation-cancel-dialog-icon" aria-hidden="true">
+              <CalendarX2 size={30} />
+            </div>
+            <p className="eyebrow">Cancelar reserva</p>
+            <h3 id="reservation-cancel-title">¿Liberamos este pedido?</h3>
+            <span className="reservation-cancel-dialog-code">{bookingToCancel.code}</span>
+            <p id="reservation-cancel-description">
+              El pedido pasará a Actividad como cancelado. Los objetos y las fechas quedarán disponibles
+              inmediatamente para que puedas armar una nueva reserva.
+            </p>
+            {cancelError && (
+              <p className="reservation-cancel-error" role="alert">{cancelError}</p>
+            )}
+            <div className="reservation-cancel-dialog-actions">
+              <button
+                type="button"
+                className="reservation-dialog-back"
+                disabled={Boolean(cancellingBookingId)}
+                onClick={() => {
+                  setBookingToCancel(null);
+                  setCancelError("");
+                }}
+              >
+                Volver
+              </button>
+              <button
+                ref={cancelConfirmButtonRef}
+                type="button"
+                className="reservation-dialog-confirm"
+                disabled={Boolean(cancellingBookingId)}
+                onClick={() => void handleCancelBooking()}
+              >
+                <XCircle size={19} />
+                {cancellingBookingId ? "Cancelando..." : "Sí, cancelar reserva"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </section>
   );

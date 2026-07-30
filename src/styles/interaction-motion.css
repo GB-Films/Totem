@@ -1193,6 +1193,168 @@
   font-weight: 700;
 }
 
+body.reservation-dialog-open {
+  overflow: hidden;
+}
+
+.reservation-cancel-dialog {
+  position: fixed;
+  z-index: 12000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(31, 23, 19, .76);
+  backdrop-filter: blur(5px);
+  animation: reservation-dialog-fade 180ms ease both;
+}
+
+.reservation-cancel-dialog-card {
+  position: relative;
+  width: min(520px, 100%);
+  border: 1px solid var(--ink);
+  background: var(--panel);
+  padding: clamp(1.5rem, 4vw, 2.4rem);
+  box-shadow: 8px 9px 0 var(--mustard);
+  animation: reservation-dialog-rise 240ms cubic-bezier(.2, .75, .25, 1) both;
+}
+
+.reservation-cancel-dialog-close {
+  position: absolute;
+  top: .85rem;
+  right: .85rem;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+}
+
+.reservation-cancel-dialog-close:hover:not(:disabled),
+.reservation-cancel-dialog-close:focus-visible {
+  border-color: var(--accent);
+  background: rgba(161, 63, 40, .08);
+  color: var(--accent);
+}
+
+.reservation-cancel-dialog-icon {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  margin-bottom: 1.25rem;
+  place-items: center;
+  border: 1px solid var(--accent);
+  background: rgba(161, 63, 40, .08);
+  color: var(--accent);
+}
+
+.reservation-cancel-dialog .eyebrow {
+  margin: 0;
+}
+
+.reservation-cancel-dialog-card h3 {
+  max-width: 390px;
+  margin-top: .7rem;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  line-height: .96;
+  text-transform: uppercase;
+}
+
+.reservation-cancel-dialog-code {
+  display: inline-flex;
+  margin-top: 1rem;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  padding: .38rem .55rem;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  font-weight: 800;
+}
+
+.reservation-cancel-dialog-card > p:not(.eyebrow, .reservation-cancel-error) {
+  margin-top: 1rem;
+  color: var(--muted);
+  font-family: var(--font-serif);
+  font-size: .84rem;
+  line-height: 1.65;
+}
+
+.reservation-cancel-dialog .reservation-cancel-error {
+  margin-top: 1rem;
+}
+
+.reservation-cancel-dialog-actions {
+  display: grid;
+  grid-template-columns: .75fr 1.25fr;
+  gap: .65rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.reservation-dialog-back,
+.reservation-dialog-confirm {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  border: 1px solid var(--ink);
+  padding: .75rem 1rem;
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.reservation-dialog-back {
+  background: transparent;
+  color: var(--ink);
+}
+
+.reservation-dialog-confirm {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fffdf7;
+  box-shadow: 3px 4px 0 var(--mustard);
+}
+
+.reservation-dialog-back:hover:not(:disabled),
+.reservation-dialog-back:focus-visible {
+  background: var(--ink);
+  color: #fffdf7;
+}
+
+.reservation-dialog-confirm:hover:not(:disabled),
+.reservation-dialog-confirm:focus-visible {
+  box-shadow: 5px 6px 0 var(--mustard);
+  transform: translateY(-2px);
+}
+
+.reservation-cancel-dialog button:disabled {
+  cursor: wait;
+  opacity: .55;
+}
+
+@keyframes reservation-dialog-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes reservation-dialog-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @media (max-width: 900px) {
   .selected-item-controls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1217,6 +1379,10 @@
 
   .reservation-cancel-button {
     width: 100%;
+  }
+
+  .reservation-cancel-dialog-actions {
+    grid-template-columns: 1fr;
   }
 
   .booking-preview-images {
@@ -1262,6 +1428,11 @@
 @media (prefers-reduced-motion: reduce) {
   .site-header {
     transition: none;
+  }
+
+  .reservation-cancel-dialog,
+  .reservation-cancel-dialog-card {
+    animation: none;
   }
 
   .app-interactive-tile,
