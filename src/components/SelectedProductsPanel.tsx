@@ -1,4 +1,4 @@
-import { Minus, Plus, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAvailability } from "../context/AvailabilityContext";
 import { useCatalog } from "../context/CatalogContext";
@@ -131,43 +131,23 @@ export function SelectedProductsPanel({
                       <div className="selected-item-controls">
                         <label>
                           <span>Cant.</span>
-                          <div className="selected-stepper">
-                            <button
-                              type="button"
-                              aria-label="Restar cantidad"
-                              disabled={availableQuantity < 1}
-                              onClick={() => updateQuantity(product.id, item.quantity - 1, quantityLimit)}
-                            >
-                              <Minus size={12} />
-                            </button>
-                            <input
-                              type="number"
-                              min={1}
-                              value={item.quantity}
-                              max={quantityLimit}
-                              disabled={availableQuantity < 1}
-                              onChange={(event) => updateQuantity(product.id, Number(event.target.value), quantityLimit)}
-                            />
-                            <button
-                              type="button"
-                              aria-label="Sumar cantidad"
-                              disabled={availableQuantity < 1 || item.quantity >= quantityLimit}
-                              onClick={() => updateQuantity(product.id, item.quantity + 1, quantityLimit)}
-                            >
-                              <Plus size={12} />
-                            </button>
-                          </div>
+                          <input
+                            type="number"
+                            min={1}
+                            value={item.quantity}
+                            max={quantityLimit}
+                            disabled={availableQuantity < 1}
+                            onChange={(event) => updateQuantity(product.id, Number(event.target.value), quantityLimit)}
+                          />
                         </label>
                         <label>
                           <span>Días de uso</span>
                           <input
                             type="number"
-                            min={1}
                             value={getInclusiveDays(startDate, endDate)}
-                            onChange={(event) => {
-                              const nextDays = Math.max(1, Number(event.target.value) || 1);
-                              updateRentalDates(product.id, startDate, addDaysIso(startDate, nextDays - 1));
-                            }}
+                            readOnly
+                            aria-readonly="true"
+                            className="selected-days-output"
                           />
                         </label>
                         <label>
@@ -210,7 +190,7 @@ export function SelectedProductsPanel({
                       <div className="selected-item-pricing">
                         <span>Alquiler <strong>{formatCurrency(pricing.rentalTotal)}</strong></span>
                         <span>Garantía <strong>{formatCurrency(pricing.guaranteeAmount)}</strong></span>
-                        <span>Total <strong>{formatCurrency(pricing.totalEstimated)}</strong></span>
+                        <span className="selected-price-total">Total <strong>{formatCurrency(pricing.totalEstimated)}</strong></span>
                       </div>
                     </div>
                   </div>
